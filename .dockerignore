@@ -1,0 +1,14 @@
+node_modules
+dist
+coverage
+.git
+.github
+.vscode
+.idea
+*.md
+.env*
+.scannerwork
+.trivyignore
+trivy-report*.json
+sonar-project.properties
+*.tsbuildinfo
