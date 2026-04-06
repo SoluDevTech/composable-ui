@@ -1,4 +1,6 @@
 import { useEffect, useRef } from "react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import { useMessages } from "@/application/hooks/chat/useMessages";
 import { useChatStore } from "@/application/stores/useChatStore";
 import { MessageRole } from "@/domain/entities/chat/message";
@@ -77,35 +79,37 @@ export default function MessageList({ threadId, agentName }: MessageListProps) {
           />
         )}
 
-        {/* Streaming content */}
-        {isStreaming && streamingContent && (
-          <ChatMessage
-            message={{
-              role: MessageRole.AI,
-              content: streamingContent,
-              timestamp: new Date().toISOString(),
-              tool_calls: null,
-              status: null,
-              structured_response: null,
-            }}
-            agentName={agentName}
-            threadId={threadId}
-          />
-        )}
-
-        {/* Loading indicator - always visible while agent is working */}
+        {/* Streaming: single agent bubble with content + spinner */}
         {isStreaming && (
           <div className="flex gap-3 max-w-4xl">
-            <div className="w-8 h-8 rounded-lg bg-primary-container flex items-center justify-center shrink-0">
+            <div className="w-8 h-8 rounded-lg bg-primary-container flex items-center justify-center shrink-0 mt-1">
               <span className="material-symbols-outlined text-white text-sm">
                 hub
               </span>
             </div>
-            <div className="flex items-center gap-3 py-2 text-on-surface-variant text-sm">
-              <span className="material-symbols-outlined animate-spin text-secondary-brand">
-                progress_activity
-              </span>
-              <span>{streamingContent ? "Processing..." : "Thinking..."}</span>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="font-headline font-bold text-sm text-on-surface">
+                  {agentName}
+                </span>
+              </div>
+              <div className="bg-surface-container-lowest p-6 rounded-xl rounded-tl-none ambient-shadow border border-outline-variant/15">
+                {streamingContent && (
+                  <div className="prose prose-sm max-w-none break-words overflow-wrap-anywhere prose-p:text-on-surface prose-p:leading-relaxed prose-code:text-xs prose-code:bg-surface-container-low prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-pre:bg-surface-container prose-pre:rounded-xl prose-pre:overflow-x-auto mb-4">
+                    <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                      {streamingContent}
+                    </ReactMarkdown>
+                  </div>
+                )}
+                <div className="flex items-center gap-2 text-on-surface-variant text-xs">
+                  <span className="material-symbols-outlined animate-spin text-secondary-brand text-base">
+                    progress_activity
+                  </span>
+                  <span>
+                    {streamingContent ? "Processing..." : "Thinking..."}
+                  </span>
+                </div>
+              </div>
             </div>
           </div>
         )}
