@@ -19,7 +19,7 @@ export default function MessageList({ threadId, agentName }: MessageListProps) {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
-  }, [messages, streamingContent]);
+  }, [messages, streamingContent, pendingUserMessage, isStreaming]);
 
   if (isLoading) {
     return (

@@ -69,14 +69,14 @@ export default function ChatMessage({
           </div>
 
           {/* Content bubble */}
-          <div className="bg-surface-container-lowest p-6 rounded-xl rounded-tl-none ambient-shadow border border-outline-variant/15">
+          <div className="bg-surface-container-lowest p-6 rounded-xl rounded-tl-none ambient-shadow border border-outline-variant/15 overflow-hidden">
             <div
               className={cn(
-                "prose prose-sm max-w-none",
+                "prose prose-sm max-w-none break-words overflow-wrap-anywhere",
                 "prose-headings:font-headline prose-headings:text-on-surface",
                 "prose-p:text-on-surface prose-p:leading-relaxed",
-                "prose-code:text-xs prose-code:bg-surface-container-low prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded",
-                "prose-pre:bg-surface-container prose-pre:rounded-xl",
+                "prose-code:text-xs prose-code:bg-surface-container-low prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:break-all",
+                "prose-pre:bg-surface-container prose-pre:rounded-xl prose-pre:overflow-x-auto",
                 "prose-a:text-secondary-brand prose-a:no-underline hover:prose-a:underline",
               )}
             >
