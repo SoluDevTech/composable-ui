@@ -77,7 +77,7 @@ export default function MessageList({ threadId, agentName }: MessageListProps) {
           />
         )}
 
-        {/* Streaming content or loading indicator */}
+        {/* Streaming content */}
         {isStreaming && streamingContent && (
           <ChatMessage
             message={{
@@ -93,28 +93,19 @@ export default function MessageList({ threadId, agentName }: MessageListProps) {
           />
         )}
 
-        {/* Loading indicator while waiting for response */}
-        {isStreaming && !streamingContent && (
+        {/* Loading indicator - always visible while agent is working */}
+        {isStreaming && (
           <div className="flex gap-3 max-w-4xl">
-            <div className="w-8 h-8 rounded-lg bg-primary-container flex items-center justify-center shrink-0 mt-1">
+            <div className="w-8 h-8 rounded-lg bg-primary-container flex items-center justify-center shrink-0">
               <span className="material-symbols-outlined text-white text-sm">
                 hub
               </span>
             </div>
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 mb-2">
-                <span className="font-headline font-bold text-sm text-on-surface">
-                  {agentName}
-                </span>
-              </div>
-              <div className="bg-surface-container-lowest p-6 rounded-xl rounded-tl-none ambient-shadow border border-outline-variant/15">
-                <div className="flex items-center gap-3 text-on-surface-variant text-sm">
-                  <span className="material-symbols-outlined animate-spin text-secondary-brand">
-                    progress_activity
-                  </span>
-                  <span>Thinking...</span>
-                </div>
-              </div>
+            <div className="flex items-center gap-3 py-2 text-on-surface-variant text-sm">
+              <span className="material-symbols-outlined animate-spin text-secondary-brand">
+                progress_activity
+              </span>
+              <span>{streamingContent ? "Processing..." : "Thinking..."}</span>
             </div>
           </div>
         )}
