@@ -12,7 +12,7 @@ export default function TopNav() {
       <div className="flex items-center justify-between max-w-[1440px] mx-auto">
         {/* Left: Brand */}
         <div className="font-headline text-xl font-bold text-on-surface tracking-tight select-none">
-          Solu Matrix
+          Composables
         </div>
 
         {/* Center: Navigation */}
