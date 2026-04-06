@@ -1,0 +1,93 @@
+@import "tailwindcss";
+
+@theme {
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+  --color-destructive: hsl(var(--destructive));
+  --color-destructive-foreground: hsl(var(--destructive-foreground));
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+  --color-popover: hsl(var(--popover));
+  --color-popover-foreground: hsl(var(--popover-foreground));
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+
+  --color-surface: #f8f9fa;
+  --color-on-surface: #191c1d;
+  --color-on-surface-variant: #48464d;
+  --color-surface-container: #edeeef;
+  --color-surface-container-low: #f3f4f5;
+  --color-surface-container-high: #e7e8e9;
+  --color-surface-container-highest: #e1e3e4;
+  --color-surface-container-lowest: #ffffff;
+  --color-outline: #79767e;
+  --color-outline-variant: #c9c5ce;
+  --color-primary-container: #1c1835;
+  --color-on-primary-container: #8580a3;
+  --color-secondary-brand: #b3290d;
+  --color-secondary-container: #fe5e3e;
+  --color-on-secondary-container: #5c0b00;
+  --color-primary-fixed: #e5deff;
+  --color-secondary-fixed: #ffdad3;
+  --color-tertiary-fixed: #e1e0ff;
+
+  --font-headline: "Space Grotesk", sans-serif;
+  --font-body: "Inter", sans-serif;
+
+  --radius-lg: var(--radius);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-sm: calc(var(--radius) - 4px);
+}
+
+@layer base {
+  :root {
+    --background: 0 0% 98%;
+    --foreground: 200 7% 11%;
+    --card: 0 0% 100%;
+    --card-foreground: 200 7% 11%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 200 7% 11%;
+    --primary: 0 0% 0%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 10 87% 38%;
+    --secondary-foreground: 0 0% 100%;
+    --muted: 200 5% 94%;
+    --muted-foreground: 260 3% 29%;
+    --accent: 200 5% 94%;
+    --accent-foreground: 200 7% 11%;
+    --destructive: 0 84% 41%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 270 6% 79%;
+    --input: 270 6% 79%;
+    --ring: 0 0% 0%;
+    --radius: 0.5rem;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground font-body antialiased;
+  }
+}
+
+.glass-panel {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+.ambient-shadow {
+  box-shadow: 0px 40px 40px -10px rgba(25, 28, 29, 0.06);
+}
