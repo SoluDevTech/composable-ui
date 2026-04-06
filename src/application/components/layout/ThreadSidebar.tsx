@@ -21,7 +21,7 @@ function formatDate(dateStr: string): string {
   });
 }
 
-export default function ThreadSidebar({ activeThreadId }: ThreadSidebarProps) {
+export default function ThreadSidebar({ activeThreadId }: Readonly<ThreadSidebarProps>) {
   const { data: threads, isLoading } = useThreads();
   const { data: agents, isLoading: agentsLoading } = useAgents();
   const createThread = useCreateThread();
@@ -69,7 +69,7 @@ export default function ThreadSidebar({ activeThreadId }: ThreadSidebarProps) {
           className="w-full flex items-center gap-2 px-4 py-3 rounded-xl bg-primary-container text-white font-headline text-xs font-bold uppercase tracking-widest hover:opacity-90 transition-opacity"
         >
           <span className="material-symbols-outlined text-base">add</span>
-          New Conversation
+          {" "}New Conversation
         </button>
       </div>
 
@@ -129,9 +129,11 @@ export default function ThreadSidebar({ activeThreadId }: ThreadSidebarProps) {
 
       {/* Agent selection dialog */}
       {showAgentDialog && (
-        <div
-          className="fixed inset-0 z-50 bg-black/30 flex items-center justify-center"
+        <dialog
+          open
+          className="fixed inset-0 z-50 bg-black/30 flex items-center justify-center m-0 p-0 w-full h-full border-none bg-transparent"
           onClick={() => setShowAgentDialog(false)}
+          onKeyDown={(e) => { if (e.key === "Escape") setShowAgentDialog(false); }}
         >
           <div
             className="bg-white rounded-xl p-6 w-80 max-h-96 overflow-y-auto shadow-xl"
@@ -165,7 +167,7 @@ export default function ThreadSidebar({ activeThreadId }: ThreadSidebarProps) {
               </div>
             )}
           </div>
-        </div>
+        </dialog>
       )}
     </aside>
   );

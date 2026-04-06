@@ -1,4 +1,4 @@
-import { useState, useRef, type FormEvent } from "react";
+import { useState, useRef } from "react";
 import { toast } from "sonner";
 import { useCreateAgent } from "@/application/hooks/agent/useCreateAgent";
 
@@ -10,14 +10,14 @@ interface CreateAgentDialogProps {
 export default function CreateAgentDialog({
   open,
   onOpenChange,
-}: CreateAgentDialogProps) {
+}: Readonly<CreateAgentDialogProps>) {
   const [name, setName] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
   const createAgent = useCreateAgent();
 
   if (!open) return null;
 
-  function handleSubmit(e: FormEvent) {
+  function handleSubmit(e: { preventDefault: () => void }) {
     e.preventDefault();
 
     const file = fileInputRef.current?.files?.[0];
@@ -53,9 +53,11 @@ export default function CreateAgentDialog({
   }
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm"
+    <dialog
+      open
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm m-0 p-0 w-full h-full border-none bg-transparent"
       onClick={handleBackdropClick}
+      onKeyDown={(e) => { if (e.key === "Escape") onOpenChange(false); }}
     >
       <div className="bg-surface-container-lowest rounded-2xl p-8 w-full max-w-md ambient-shadow">
         {/* Header */}
@@ -127,6 +129,6 @@ export default function CreateAgentDialog({
           </div>
         </form>
       </div>
-    </div>
+    </dialog>
   );
 }

@@ -18,7 +18,7 @@ function resolveVariant(status: string): {
   return { bg: "bg-slate-100", text: "text-slate-600" };
 }
 
-export default function StatusBadge({ status }: StatusBadgeProps) {
+export default function StatusBadge({ status }: Readonly<StatusBadgeProps>) {
   const { bg, text } = resolveVariant(status);
 
   return (

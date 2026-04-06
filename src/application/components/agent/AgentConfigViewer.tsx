@@ -15,7 +15,7 @@ export default function AgentConfigViewer({
   agentName,
   open,
   onOpenChange,
-}: AgentConfigViewerProps) {
+}: Readonly<AgentConfigViewerProps>) {
   const { data: config, isLoading } = useAgentConfig(open ? agentName : null);
   const deleteAgent = useDeleteAgent();
   const [promptExpanded, setPromptExpanded] = useState(false);
@@ -49,9 +49,11 @@ export default function AgentConfigViewer({
   }
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm"
+    <dialog
+      open
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm m-0 p-0 w-full h-full border-none bg-transparent"
       onClick={handleBackdropClick}
+      onKeyDown={(e) => { if (e.key === "Escape") onOpenChange(false); }}
     >
       <div className="bg-surface-container-lowest rounded-2xl p-8 w-full max-w-2xl max-h-[80vh] overflow-y-auto ambient-shadow">
         {/* Header */}
@@ -164,11 +166,10 @@ export default function AgentConfigViewer({
                     >
                       <span className="font-mono text-on-surface">{key}</span>
                       <span className="text-on-surface-variant">
-                        {typeof value === "boolean"
-                          ? value
-                            ? "Enabled"
-                            : "Disabled"
-                          : JSON.stringify(value)}
+                        {(() => {
+                          if (typeof value === "boolean") return value ? "Enabled" : "Disabled";
+                          return JSON.stringify(value);
+                        })()}
                       </span>
                     </div>
                   ))}
@@ -246,11 +247,11 @@ export default function AgentConfigViewer({
           </button>
         </div>
       </div>
-    </div>
+    </dialog>
   );
 }
 
-function SectionLabel({ children }: { children: React.ReactNode }) {
+function SectionLabel({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <h4 className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant mb-2">
       {children}

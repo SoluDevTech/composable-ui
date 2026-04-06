@@ -27,7 +27,7 @@ export default function ChatMessage({
   message,
   agentName,
   threadId,
-}: ChatMessageProps) {
+}: Readonly<ChatMessageProps>) {
   const isHuman = message.role === MessageRole.HUMAN;
   const isAi = message.role === MessageRole.AI;
   const isAwaitingHitl = message.status === MessageStatus.AWAITING_HITL;

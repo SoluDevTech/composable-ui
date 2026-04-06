@@ -13,7 +13,7 @@ type ReviewState = "idle" | "reviewing" | "rejecting";
 export default function HITLReviewPanel({
   toolCalls,
   threadId,
-}: HITLReviewPanelProps) {
+}: Readonly<HITLReviewPanelProps>) {
   const [reviewState, setReviewState] = useState<ReviewState>("idle");
   const [rejectReason, setRejectReason] = useState("");
   const sendMessage = useSendMessage(threadId);

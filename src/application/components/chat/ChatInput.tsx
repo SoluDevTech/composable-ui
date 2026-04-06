@@ -1,4 +1,4 @@
-import { useState, type FormEvent, type KeyboardEvent } from "react";
+import { useState, type KeyboardEvent } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { cn } from "@/application/lib/utils";
 import { useStreamChat } from "@/application/hooks/chat/useStreamChat";
@@ -9,7 +9,7 @@ interface ChatInputProps {
   threadId: string;
 }
 
-export default function ChatInput({ threadId }: ChatInputProps) {
+export default function ChatInput({ threadId }: Readonly<ChatInputProps>) {
   const [input, setInput] = useState("");
   const { stream } = useStreamChat(threadId);
   const sendMessage = useSendMessage(threadId);
@@ -18,7 +18,7 @@ export default function ChatInput({ threadId }: ChatInputProps) {
   const streamingMode = useChatStore((s) => s.useStreaming);
   const toggleStreaming = useChatStore((s) => s.toggleStreaming);
 
-  function handleSubmit(e?: FormEvent) {
+  function handleSubmit(e?: { preventDefault: () => void }) {
     e?.preventDefault();
     const trimmed = input.trim();
     if (!trimmed || isStreaming) return;

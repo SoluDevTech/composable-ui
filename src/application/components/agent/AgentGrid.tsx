@@ -9,7 +9,7 @@ interface AgentGridProps {
 export default function AgentGrid({
   onCreateNew,
   onConfigure,
-}: AgentGridProps) {
+}: Readonly<AgentGridProps>) {
   const { data: agents, isLoading, error } = useAgents();
 
   if (isLoading) {

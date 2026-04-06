@@ -23,5 +23,5 @@ export interface Message {
   timestamp: string;
   tool_calls: ToolCall[] | null;
   status: MessageStatus | null;
-  structured_response: unknown | null;
+  structured_response: unknown;
 }
