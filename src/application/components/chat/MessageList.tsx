@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import { useMessages } from "@/application/hooks/chat/useMessages";
 import { useChatStore } from "@/application/stores/useChatStore";
-import { MessageRole, type Message } from "@/domain/entities/chat/message";
+import { MessageRole } from "@/domain/entities/chat/message";
 import ChatMessage from "@/application/components/chat/ChatMessage";
 
 interface MessageListProps {
@@ -11,7 +11,7 @@ interface MessageListProps {
 
 export default function MessageList({ threadId, agentName }: MessageListProps) {
   const { data: messages, isLoading } = useMessages(threadId);
-  const { streamingContent, isStreaming } = useChatStore();
+  const { streamingContent, isStreaming, pendingUserMessage } = useChatStore();
   const scrollRef = useRef<HTMLDivElement>(null);
 
   // Auto-scroll to bottom when messages change or streaming content updates
@@ -46,19 +46,6 @@ export default function MessageList({ threadId, agentName }: MessageListProps) {
     );
   }
 
-  // Build a temporary streaming message
-  const streamingMessage: Message | null =
-    isStreaming && streamingContent
-      ? {
-          role: MessageRole.AI,
-          content: streamingContent,
-          timestamp: new Date().toISOString(),
-          tool_calls: null,
-          status: null,
-          structured_response: null,
-        }
-      : null;
-
   return (
     <div
       ref={scrollRef}
@@ -74,9 +61,33 @@ export default function MessageList({ threadId, agentName }: MessageListProps) {
           />
         ))}
 
-        {streamingMessage && (
+        {/* Pending user message (optimistic) */}
+        {pendingUserMessage && (
           <ChatMessage
-            message={streamingMessage}
+            message={{
+              role: MessageRole.HUMAN,
+              content: pendingUserMessage,
+              timestamp: new Date().toISOString(),
+              tool_calls: null,
+              status: null,
+              structured_response: null,
+            }}
+            agentName={agentName}
+            threadId={threadId}
+          />
+        )}
+
+        {/* Streaming or typing indicator */}
+        {isStreaming && (
+          <ChatMessage
+            message={{
+              role: MessageRole.AI,
+              content: streamingContent || "...",
+              timestamp: new Date().toISOString(),
+              tool_calls: null,
+              status: null,
+              structured_response: null,
+            }}
             agentName={agentName}
             threadId={threadId}
           />

@@ -15,6 +15,7 @@ export function useStreamChat(threadId: string | null) {
 
       clearStream();
       setStreaming(true);
+      useChatStore.getState().setPendingUserMessage(request.message ?? null);
 
       abortRef.current = chatApi.streamMessage(
         threadId,
@@ -23,11 +24,13 @@ export function useStreamChat(threadId: string | null) {
           appendStreamChunk(chunk);
         },
         () => {
+          useChatStore.getState().setPendingUserMessage(null);
           setStreaming(false);
           queryClient.invalidateQueries({ queryKey: ["messages", threadId] });
         },
         (error) => {
           console.error("Stream error:", error);
+          useChatStore.getState().setPendingUserMessage(null);
           setStreaming(false);
         },
       );

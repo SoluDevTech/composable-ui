@@ -1,7 +1,9 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { cn } from "@/application/lib/utils";
 import { useThreads } from "@/application/hooks/chat/useThreads";
+import { useAgents } from "@/application/hooks/agent/useAgents";
+import { useCreateThread } from "@/application/hooks/chat/useCreateThread";
 import { useChatStore } from "@/application/stores/useChatStore";
 import type { Thread } from "@/domain/entities/chat/thread";
 
@@ -21,8 +23,11 @@ function formatDate(dateStr: string): string {
 
 export default function ThreadSidebar({ activeThreadId }: ThreadSidebarProps) {
   const { data: threads, isLoading } = useThreads();
+  const { data: agents, isLoading: agentsLoading } = useAgents();
+  const createThread = useCreateThread();
   const setActiveThread = useChatStore((s) => s.setActiveThread);
   const navigate = useNavigate();
+  const [showAgentDialog, setShowAgentDialog] = useState(false);
 
   const grouped = useMemo(() => {
     if (!threads) return new Map<string, Thread[]>();
@@ -41,8 +46,17 @@ export default function ThreadSidebar({ activeThreadId }: ThreadSidebarProps) {
   }
 
   function handleNewConversation() {
-    setActiveThread(null);
-    navigate("/chat");
+    setShowAgentDialog(true);
+  }
+
+  function handleSelectAgent(agentName: string) {
+    createThread.mutate(agentName, {
+      onSuccess: (thread) => {
+        setActiveThread(thread.id);
+        navigate(`/chat/${thread.id}`);
+        setShowAgentDialog(false);
+      },
+    });
   }
 
   return (
@@ -112,6 +126,47 @@ export default function ThreadSidebar({ activeThreadId }: ThreadSidebarProps) {
           </p>
         )}
       </div>
+
+      {/* Agent selection dialog */}
+      {showAgentDialog && (
+        <div
+          className="fixed inset-0 z-50 bg-black/30 flex items-center justify-center"
+          onClick={() => setShowAgentDialog(false)}
+        >
+          <div
+            className="bg-white rounded-xl p-6 w-80 max-h-96 overflow-y-auto shadow-xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 className="font-headline text-lg font-bold mb-4">
+              Choose an Agent
+            </h3>
+            {agentsLoading ? (
+              <p className="text-sm text-on-surface-variant">
+                Loading agents...
+              </p>
+            ) : (
+              <div className="space-y-2">
+                {agents?.map((agent) => (
+                  <button
+                    key={agent.name}
+                    type="button"
+                    onClick={() => handleSelectAgent(agent.name)}
+                    disabled={createThread.isPending}
+                    className="w-full text-left p-3 rounded-lg hover:bg-surface-container-low transition-colors"
+                  >
+                    <span className="block font-medium text-sm">
+                      {agent.name}
+                    </span>
+                    <span className="block text-xs text-on-surface-variant">
+                      {agent.model}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </aside>
   );
 }

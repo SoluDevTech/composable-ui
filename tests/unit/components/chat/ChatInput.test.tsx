@@ -4,7 +4,18 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { renderWithProviders } from "../../../utils/render";
 import ChatInput from "@/application/components/chat/ChatInput";
 
-const mockStream = vi.fn();
+const { mockStream, mockSendMessageMutate, mockStoreState } = vi.hoisted(() => {
+  const mockStream = vi.fn();
+  const mockSendMessageMutate = vi.fn();
+  const mockStoreState = {
+    isStreaming: false,
+    useStreaming: false,
+    toggleStreaming: vi.fn(),
+    setPendingUserMessage: vi.fn(),
+    setStreaming: vi.fn(),
+  };
+  return { mockStream, mockSendMessageMutate, mockStoreState };
+});
 
 vi.mock("@/application/hooks/chat/useStreamChat", () => ({
   useStreamChat: () => ({
@@ -13,14 +24,20 @@ vi.mock("@/application/hooks/chat/useStreamChat", () => ({
   }),
 }));
 
-vi.mock("@/application/stores/useChatStore", () => ({
-  useChatStore: (selector: (state: { isStreaming: boolean }) => unknown) => {
-    const state = {
-      isStreaming: false,
-    };
-    return selector(state);
-  },
+vi.mock("@/application/hooks/chat/useSendMessage", () => ({
+  useSendMessage: () => ({
+    mutate: mockSendMessageMutate,
+    isPending: false,
+  }),
 }));
+
+vi.mock("@/application/stores/useChatStore", () => {
+  const fn = (selector: (state: typeof mockStoreState) => unknown) => {
+    return selector(mockStoreState);
+  };
+  fn.getState = () => mockStoreState;
+  return { useChatStore: fn };
+});
 
 describe("ChatInput", () => {
   beforeEach(() => {
@@ -55,6 +72,9 @@ describe("ChatInput", () => {
     await waitFor(() => {
       expect(textarea).toHaveValue("");
     });
-    expect(mockStream).toHaveBeenCalledWith({ message: "Hello agent" });
+    expect(mockSendMessageMutate).toHaveBeenCalledWith(
+      { message: "Hello agent" },
+      expect.any(Object),
+    );
   });
 });

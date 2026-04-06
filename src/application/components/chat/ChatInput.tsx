@@ -1,6 +1,8 @@
 import { useState, type FormEvent, type KeyboardEvent } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { cn } from "@/application/lib/utils";
 import { useStreamChat } from "@/application/hooks/chat/useStreamChat";
+import { useSendMessage } from "@/application/hooks/chat/useSendMessage";
 import { useChatStore } from "@/application/stores/useChatStore";
 
 interface ChatInputProps {
@@ -10,14 +12,39 @@ interface ChatInputProps {
 export default function ChatInput({ threadId }: ChatInputProps) {
   const [input, setInput] = useState("");
   const { stream } = useStreamChat(threadId);
+  const sendMessage = useSendMessage(threadId);
+  const queryClient = useQueryClient();
   const isStreaming = useChatStore((s) => s.isStreaming);
+  const streamingMode = useChatStore((s) => s.useStreaming);
+  const toggleStreaming = useChatStore((s) => s.toggleStreaming);
 
   function handleSubmit(e?: FormEvent) {
     e?.preventDefault();
     const trimmed = input.trim();
     if (!trimmed || isStreaming) return;
 
-    stream({ message: trimmed });
+    if (streamingMode) {
+      stream({ message: trimmed });
+    } else {
+      useChatStore.getState().setPendingUserMessage(trimmed);
+      useChatStore.getState().setStreaming(true);
+      sendMessage.mutate(
+        { message: trimmed },
+        {
+          onSuccess: () => {
+            useChatStore.getState().setPendingUserMessage(null);
+            useChatStore.getState().setStreaming(false);
+            queryClient.invalidateQueries({
+              queryKey: ["messages", threadId],
+            });
+          },
+          onError: () => {
+            useChatStore.getState().setPendingUserMessage(null);
+            useChatStore.getState().setStreaming(false);
+          },
+        },
+      );
+    }
     setInput("");
   }
 
@@ -45,6 +72,21 @@ export default function ChatInput({ threadId }: ChatInputProps) {
             )}
           />
           <button
+            type="button"
+            onClick={toggleStreaming}
+            title={streamingMode ? "Streaming mode" : "Standard mode"}
+            className={cn(
+              "w-8 h-8 rounded-full flex items-center justify-center shrink-0 transition-colors text-xs",
+              streamingMode
+                ? "bg-secondary-brand/10 text-secondary-brand"
+                : "bg-surface-container text-outline",
+            )}
+          >
+            <span className="material-symbols-outlined text-base">
+              {streamingMode ? "stream" : "chat"}
+            </span>
+          </button>
+          <button
             type="submit"
             disabled={isStreaming || !input.trim()}
             className={cn(
@@ -61,7 +103,7 @@ export default function ChatInput({ threadId }: ChatInputProps) {
         </div>
       </form>
       <p className="text-center text-[11px] text-outline mt-3 font-headline tracking-wide">
-        Composable Agents v0.1
+        Composables v0.1
       </p>
     </div>
   );
