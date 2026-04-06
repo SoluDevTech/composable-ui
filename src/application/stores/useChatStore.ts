@@ -19,7 +19,7 @@ export const useChatStore = create<ChatState>((set) => ({
   streamingContent: "",
   isStreaming: false,
   pendingUserMessage: null,
-  useStreaming: false,
+  useStreaming: true,
   setActiveThread: (id) => set({ activeThreadId: id }),
   appendStreamChunk: (chunk) =>
     set((state) => ({ streamingContent: state.streamingContent + chunk })),

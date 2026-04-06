@@ -8,7 +8,7 @@ describe("useChatStore", () => {
       streamingContent: "",
       isStreaming: false,
       pendingUserMessage: null,
-      useStreaming: false,
+      useStreaming: true,
     });
   });
 
@@ -17,9 +17,9 @@ describe("useChatStore", () => {
     expect(state.pendingUserMessage).toBeNull();
   });
 
-  it("has useStreaming=false in initial state", () => {
+  it("has useStreaming=true in initial state", () => {
     const state = useChatStore.getState();
-    expect(state.useStreaming).toBe(false);
+    expect(state.useStreaming).toBe(true);
   });
 
   it("setPendingUserMessage updates state", () => {
@@ -35,20 +35,20 @@ describe("useChatStore", () => {
     expect(useChatStore.getState().pendingUserMessage).toBeNull();
   });
 
-  it("toggleStreaming toggles useStreaming from false to true", () => {
+  it("toggleStreaming toggles useStreaming from true to false", () => {
+    expect(useChatStore.getState().useStreaming).toBe(true);
+
+    useChatStore.getState().toggleStreaming();
+
     expect(useChatStore.getState().useStreaming).toBe(false);
+  });
+
+  it("toggleStreaming toggles useStreaming from false to true", () => {
+    useChatStore.setState({ useStreaming: false });
 
     useChatStore.getState().toggleStreaming();
 
     expect(useChatStore.getState().useStreaming).toBe(true);
-  });
-
-  it("toggleStreaming toggles useStreaming from true to false", () => {
-    useChatStore.setState({ useStreaming: true });
-
-    useChatStore.getState().toggleStreaming();
-
-    expect(useChatStore.getState().useStreaming).toBe(false);
   });
 
   it("clearStream also clears pendingUserMessage", () => {

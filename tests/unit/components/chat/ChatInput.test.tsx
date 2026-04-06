@@ -9,7 +9,7 @@ const { mockStream, mockSendMessageMutate, mockStoreState } = vi.hoisted(() => {
   const mockSendMessageMutate = vi.fn();
   const mockStoreState = {
     isStreaming: false,
-    useStreaming: false,
+    useStreaming: true,
     toggleStreaming: vi.fn(),
     setPendingUserMessage: vi.fn(),
     setStreaming: vi.fn(),
@@ -72,9 +72,6 @@ describe("ChatInput", () => {
     await waitFor(() => {
       expect(textarea).toHaveValue("");
     });
-    expect(mockSendMessageMutate).toHaveBeenCalledWith(
-      { message: "Hello agent" },
-      expect.any(Object),
-    );
+    expect(mockStream).toHaveBeenCalledWith({ message: "Hello agent" });
   });
 });
