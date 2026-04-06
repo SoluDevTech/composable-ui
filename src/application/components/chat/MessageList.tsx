@@ -77,12 +77,12 @@ export default function MessageList({ threadId, agentName }: MessageListProps) {
           />
         )}
 
-        {/* Streaming or typing indicator */}
-        {isStreaming && (
+        {/* Streaming content or loading indicator */}
+        {isStreaming && streamingContent && (
           <ChatMessage
             message={{
               role: MessageRole.AI,
-              content: streamingContent || "...",
+              content: streamingContent,
               timestamp: new Date().toISOString(),
               tool_calls: null,
               status: null,
@@ -91,6 +91,32 @@ export default function MessageList({ threadId, agentName }: MessageListProps) {
             agentName={agentName}
             threadId={threadId}
           />
+        )}
+
+        {/* Loading indicator while waiting for response */}
+        {isStreaming && !streamingContent && (
+          <div className="flex gap-3 max-w-4xl">
+            <div className="w-8 h-8 rounded-lg bg-primary-container flex items-center justify-center shrink-0 mt-1">
+              <span className="material-symbols-outlined text-white text-sm">
+                hub
+              </span>
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="font-headline font-bold text-sm text-on-surface">
+                  {agentName}
+                </span>
+              </div>
+              <div className="bg-surface-container-lowest p-6 rounded-xl rounded-tl-none ambient-shadow border border-outline-variant/15">
+                <div className="flex items-center gap-3 text-on-surface-variant text-sm">
+                  <span className="material-symbols-outlined animate-spin text-secondary-brand">
+                    progress_activity
+                  </span>
+                  <span>Thinking...</span>
+                </div>
+              </div>
+            </div>
+          </div>
         )}
       </div>
     </div>
