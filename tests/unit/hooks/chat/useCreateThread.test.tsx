@@ -39,7 +39,10 @@ describe("useCreateThread", () => {
   });
 
   it("calls chatApi.createThread on mutate", async () => {
-    const mockThread = createThread({ id: "new-thread", agent_name: "my-agent" });
+    const mockThread = createThread({
+      id: "new-thread",
+      agent_name: "my-agent",
+    });
     vi.mocked(chatApi.createThread).mockResolvedValue(mockThread);
     const { wrapper } = createWrapper();
 
@@ -55,7 +58,10 @@ describe("useCreateThread", () => {
   });
 
   it("invalidates threads query on success", async () => {
-    const mockThread = createThread({ id: "new-thread", agent_name: "my-agent" });
+    const mockThread = createThread({
+      id: "new-thread",
+      agent_name: "my-agent",
+    });
     vi.mocked(chatApi.createThread).mockResolvedValue(mockThread);
     const { wrapper, queryClient } = createWrapper();
     const invalidateSpy = vi.spyOn(queryClient, "invalidateQueries");

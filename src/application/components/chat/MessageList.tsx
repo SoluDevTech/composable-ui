@@ -11,7 +11,10 @@ interface MessageListProps {
   agentName: string;
 }
 
-export default function MessageList({ threadId, agentName }: Readonly<MessageListProps>) {
+export default function MessageList({
+  threadId,
+  agentName,
+}: Readonly<MessageListProps>) {
   const { data: messages, isLoading } = useMessages(threadId);
   const { streamingContent, isStreaming, pendingUserMessage } = useChatStore();
   const scrollRef = useRef<HTMLDivElement>(null);

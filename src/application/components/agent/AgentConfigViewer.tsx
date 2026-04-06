@@ -53,7 +53,9 @@ export default function AgentConfigViewer({
       open
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm m-0 p-0 w-full h-full border-none bg-transparent"
       onClick={handleBackdropClick}
-      onKeyDown={(e) => { if (e.key === "Escape") onOpenChange(false); }}
+      onKeyDown={(e) => {
+        if (e.key === "Escape") onOpenChange(false);
+      }}
     >
       <div className="bg-surface-container-lowest rounded-2xl p-8 w-full max-w-2xl max-h-[80vh] overflow-y-auto ambient-shadow">
         {/* Header */}
@@ -167,7 +169,8 @@ export default function AgentConfigViewer({
                       <span className="font-mono text-on-surface">{key}</span>
                       <span className="text-on-surface-variant">
                         {(() => {
-                          if (typeof value === "boolean") return value ? "Enabled" : "Disabled";
+                          if (typeof value === "boolean")
+                            return value ? "Enabled" : "Disabled";
                           return JSON.stringify(value);
                         })()}
                       </span>

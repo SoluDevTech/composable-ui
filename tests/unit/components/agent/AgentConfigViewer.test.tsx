@@ -4,7 +4,10 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { renderWithProviders } from "../../../utils/render";
 import AgentConfigViewer from "@/application/components/agent/AgentConfigViewer";
 import type { AgentConfig } from "@/domain/entities/agent/agentConfig";
-import { BackendType, MiddlewareType } from "@/domain/entities/agent/agentConfig";
+import {
+  BackendType,
+  MiddlewareType,
+} from "@/domain/entities/agent/agentConfig";
 
 const { mockAgentConfigData, mockDeleteMutate } = vi.hoisted(() => {
   return {
@@ -37,7 +40,8 @@ vi.mock("sonner", () => ({
 const fullConfig: AgentConfig = {
   name: "test-agent",
   model: "openai:gpt-4o",
-  system_prompt: "You are a helpful assistant that provides accurate information.",
+  system_prompt:
+    "You are a helpful assistant that provides accurate information.",
   tools: ["search", "calculator"],
   middleware: [],
   backend: { type: "state" as BackendType },
@@ -246,7 +250,13 @@ describe("AgentConfigViewer", () => {
     mockAgentConfigData.data = {
       ...fullConfig,
       mcp_servers: [
-        { name: "filesystem-server", transport: "stdio" as any, args: [], headers: {}, env: {} },
+        {
+          name: "filesystem-server",
+          transport: "stdio" as any,
+          args: [],
+          headers: {},
+          env: {},
+        },
       ],
     };
 
@@ -351,7 +361,10 @@ describe("AgentConfigViewer", () => {
 
     expect(mockDeleteMutate).toHaveBeenCalledWith(
       "test-agent",
-      expect.objectContaining({ onSuccess: expect.any(Function), onError: expect.any(Function) }),
+      expect.objectContaining({
+        onSuccess: expect.any(Function),
+        onError: expect.any(Function),
+      }),
     );
   });
 
@@ -394,9 +407,7 @@ describe("AgentConfigViewer", () => {
 
     // The footer "Close" button
     const closeButtons = screen.getAllByRole("button");
-    const footerClose = closeButtons.find(
-      (btn) => btn.textContent === "Close",
-    );
+    const footerClose = closeButtons.find((btn) => btn.textContent === "Close");
     expect(footerClose).toBeDefined();
     await user.click(footerClose!);
 

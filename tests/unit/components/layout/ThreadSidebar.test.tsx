@@ -8,21 +8,27 @@ import {
   createAgentConfigMetadata,
 } from "../../../fixtures/external";
 
-const { mockThreadsData, mockAgentsData, mockCreateThreadMutate, mockSetActiveThread } =
-  vi.hoisted(() => {
-    return {
-      mockThreadsData: {
-        data: undefined as ReturnType<typeof createThread>[] | undefined,
-        isLoading: false,
-      },
-      mockAgentsData: {
-        data: undefined as ReturnType<typeof createAgentConfigMetadata>[] | undefined,
-        isLoading: false,
-      },
-      mockCreateThreadMutate: vi.fn(),
-      mockSetActiveThread: vi.fn(),
-    };
-  });
+const {
+  mockThreadsData,
+  mockAgentsData,
+  mockCreateThreadMutate,
+  mockSetActiveThread,
+} = vi.hoisted(() => {
+  return {
+    mockThreadsData: {
+      data: undefined as ReturnType<typeof createThread>[] | undefined,
+      isLoading: false,
+    },
+    mockAgentsData: {
+      data: undefined as
+        | ReturnType<typeof createAgentConfigMetadata>[]
+        | undefined,
+      isLoading: false,
+    },
+    mockCreateThreadMutate: vi.fn(),
+    mockSetActiveThread: vi.fn(),
+  };
+});
 
 vi.mock("@/application/hooks/chat/useThreads", () => ({
   useThreads: () => mockThreadsData,
@@ -40,7 +46,11 @@ vi.mock("@/application/hooks/chat/useCreateThread", () => ({
 }));
 
 vi.mock("@/application/stores/useChatStore", () => {
-  const fn = (selector: (state: { setActiveThread: typeof mockSetActiveThread }) => unknown) => {
+  const fn = (
+    selector: (state: {
+      setActiveThread: typeof mockSetActiveThread;
+    }) => unknown,
+  ) => {
     return selector({ setActiveThread: mockSetActiveThread });
   };
   fn.getState = () => ({ setActiveThread: mockSetActiveThread });
