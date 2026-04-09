@@ -37,3 +37,6 @@ coverage
 
 # Config
 public/config.json
+
+
+trivy-report.json
