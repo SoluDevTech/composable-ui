@@ -34,12 +34,22 @@ bun install
 
 ## Configuration
 
-| Variable | Default | Description |
-|---|---|---|
-| `VITE_API_BASE_URL` | `http://localhost:8010` | composable-agents API URL |
-| `VITE_WS_BASE_URL` | `ws://localhost:8010` | WebSocket URL for streaming |
+Configuration is loaded at runtime from `public/config.json`. Copy the example file to get started:
 
-The Vite dev server proxies `/api` requests to the API automatically (see `vite.config.ts`).
+```bash
+cp public/config.example.json public/config.json
+```
+
+**`public/config.json`** - Application configuration:
+
+| Field | Type | Description |
+|---|---|---|
+| `apiBaseUrl` | `string` | composable-agents API URL (e.g., `http://localhost:8010`) |
+| `wsBaseUrl` | `string` | WebSocket URL for streaming (e.g., `ws://localhost:8010`) |
+
+The config is validated with Zod on startup. Invalid configuration will show an error toast.
+
+**Note:** `config.json` is gitignored. Use `config.example.json` as a template.
 
 ## Running
 
@@ -103,15 +113,19 @@ src/
     entities/
       agent/               # AgentConfig, AgentConfigMetadata, McpServerConfig
       chat/                # Message, Thread, ChatRequest
+      config/              # AppConfig (Zod-validated)
     ports/
       agent/agentPort.ts   # Agent repository interface
       chat/chatPort.ts     # Chat repository interface
+      config/configRepository.ts  # Config repository interface
   infrastructure/          # External adapters (API clients, config)
     api/
       agent/agentApi.ts    # Agent API adapter (axios)
       chat/chatApi.ts      # Chat API adapter (axios + SSE)
       axiosInstance.ts     # Shared axios instance
-    config/envConfig.ts    # Environment variables
+    config/
+      configRepositoryInstance.ts  # Singleton config repository
+      fileConfigRepository.ts       # File-based config implementation
   application/             # React UI layer
     components/
       agent/               # AgentCard, AgentGrid, CreateAgentDialog, AgentConfigViewer
@@ -122,11 +136,15 @@ src/
     hooks/
       agent/               # useAgents, useCreateAgent, useDeleteAgent, useUpdateAgent, useAgentConfig
       chat/                # useThreads, useCreateThread, useDeleteThread, useMessages, useSendMessage, useStreamChat
+      config/               # useConfig
     pages/
       AgentsPage.tsx       # /agents route
       ChatPage.tsx         # /chat/:threadId? route
     stores/
       useChatStore.ts      # Zustand store for chat state
+public/
+  config.example.json      # Example config (committed)
+  config.json              # Runtime config (gitignored)
 tests/
   unit/                    # Mirrors src/ structure
   fixtures/                # Test data

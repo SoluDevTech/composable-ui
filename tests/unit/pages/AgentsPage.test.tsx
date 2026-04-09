@@ -69,9 +69,7 @@ describe("AgentsPage", () => {
 
     renderWithProviders(<AgentsPage />, { initialEntries: ["/agents"] });
 
-    await user.click(
-      screen.getByRole("button", { name: /create agent/i }),
-    );
+    await user.click(screen.getByRole("button", { name: /create agent/i }));
 
     expect(screen.getByText("Create Agent")).toBeInTheDocument();
     expect(screen.getByLabelText(/agent name/i)).toBeInTheDocument();
@@ -82,12 +80,12 @@ describe("AgentsPage", () => {
 
     renderWithProviders(<AgentsPage />, { initialEntries: ["/agents"] });
 
-    await user.click(
-      screen.getByRole("button", { name: /configure/i }),
-    );
+    await user.click(screen.getByRole("button", { name: /configure/i }));
 
     // The AgentConfigViewer should be rendered with Delete button (unique to viewer)
-    expect(screen.getByRole("button", { name: /^delete$/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /^delete$/i }),
+    ).toBeInTheDocument();
     // The dialog should be present
     expect(screen.getByRole("dialog")).toBeInTheDocument();
   });

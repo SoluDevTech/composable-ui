@@ -1,17 +1,36 @@
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect, vi, beforeEach } from "vitest";
 
-vi.mock("@/infrastructure/config/envConfig", () => ({
-  envConfig: {
+const { MockFileConfigRepository } = vi.hoisted(() => {
+  const mockConfig = {
     apiBaseUrl: "http://test-api:8010",
     wsBaseUrl: "ws://test-api:8010",
-  },
+  };
+  const mockGetConfig = vi.fn().mockResolvedValue(mockConfig);
+  class MockFileConfigRepository {
+    getConfig = mockGetConfig;
+    isLoaded = vi.fn().mockReturnValue(false);
+  }
+  return { MockFileConfigRepository };
+});
+
+vi.mock("@/infrastructure/config/configRepositoryInstance", () => ({
+  configRepository: new MockFileConfigRepository(),
 }));
 
 describe("axiosInstance", () => {
-  it("apiClient has correct baseURL from envConfig", async () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("apiClient fetches config and sets baseURL", async () => {
     const { apiClient } = await import("@/infrastructure/api/axiosInstance");
 
-    expect(apiClient.defaults.baseURL).toBe("http://test-api:8010");
+    const requestConfig =
+      await apiClient.interceptors.request.handlers[0].fulfilled({
+        headers: {},
+      });
+
+    expect(requestConfig.baseURL).toBe("http://test-api:8010");
   });
 
   it("apiClient has 30 second timeout", async () => {
@@ -29,7 +48,6 @@ describe("axiosInstance", () => {
   it("error interceptor extracts detail from response", async () => {
     const { apiClient } = await import("@/infrastructure/api/axiosInstance");
 
-    // Simulate an axios error with response.data.detail
     const axiosError = {
       response: {
         status: 400,
@@ -38,7 +56,6 @@ describe("axiosInstance", () => {
       message: "Request failed with status code 400",
     };
 
-    // Get the error interceptor (second argument of the response interceptor)
     const interceptors = (apiClient.interceptors.response as any).handlers;
     const errorHandler = interceptors[0]?.rejected;
 

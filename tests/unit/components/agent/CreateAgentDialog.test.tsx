@@ -118,7 +118,10 @@ describe("CreateAgentDialog", () => {
 
     expect(mockCreateAgentMutate).toHaveBeenCalledWith(
       { name: "my-agent", yamlFile: file },
-      expect.objectContaining({ onSuccess: expect.any(Function), onError: expect.any(Function) }),
+      expect.objectContaining({
+        onSuccess: expect.any(Function),
+        onError: expect.any(Function),
+      }),
     );
   });
 
