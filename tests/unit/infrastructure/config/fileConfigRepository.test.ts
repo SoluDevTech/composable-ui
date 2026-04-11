@@ -23,6 +23,7 @@ describe("FileConfigRepository", () => {
       const mockConfig = {
         apiBaseUrl: "http://api.test.com",
         wsBaseUrl: "ws://api.test.com",
+        ragApiBaseUrl: "",
       };
 
       vi.mocked(fetch).mockResolvedValue({
@@ -107,6 +108,7 @@ describe("FileConfigRepository", () => {
       const mockConfig = {
         apiBaseUrl: "http://api.test.com",
         wsBaseUrl: "ws://api.test.com",
+        ragApiBaseUrl: "",
       };
       vi.mocked(fetch).mockResolvedValue({
         ok: true,
