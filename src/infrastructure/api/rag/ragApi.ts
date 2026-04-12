@@ -31,4 +31,12 @@ export const ragApi: IRagFilePort = {
         }),
     );
   },
+
+  async uploadFile(prefix: string, file: File) {
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("prefix", prefix);
+    const response = await ragApiClient.post("/api/v1/files/upload", formData);
+    return response.data;
+  },
 };

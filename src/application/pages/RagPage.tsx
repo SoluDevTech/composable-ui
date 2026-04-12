@@ -2,6 +2,7 @@ import { useState, useMemo } from "react";
 import MainLayout from "@/application/components/layout/MainLayout";
 import BreadcrumbBar from "@/application/components/rag/BreadcrumbBar";
 import FileList from "@/application/components/rag/FileList";
+import UploadButton from "@/application/components/rag/UploadButton";
 import { useFolders } from "@/application/hooks/rag/useFolders";
 import { useFiles } from "@/application/hooks/rag/useFiles";
 
@@ -39,6 +40,11 @@ export default function RagPage() {
     setCurrentPrefix(prefix);
   };
 
+  const handleUploadComplete = () => {
+    foldersQuery.refetch();
+    filesQuery.refetch();
+  };
+
   const isLoading = foldersQuery.isLoading || filesQuery.isLoading;
   const error = foldersQuery.error || filesQuery.error;
 
@@ -46,13 +52,19 @@ export default function RagPage() {
     <MainLayout showSidebar={false}>
       <div className="flex-1 overflow-y-auto">
         <div className="max-w-[1440px] mx-auto px-8 py-12">
-          <div className="mb-12">
-            <h1 className="font-headline text-5xl font-bold text-on-surface mb-3">
-              RAG Storage
-            </h1>
-            <p className="text-on-surface-variant text-sm max-w-md">
-              Browse and explore documents stored in MinIO object storage.
-            </p>
+          <div className="flex items-start justify-between mb-12">
+            <div>
+              <h1 className="font-headline text-5xl font-bold text-on-surface mb-3">
+                RAG Storage
+              </h1>
+              <p className="text-on-surface-variant text-sm max-w-md">
+                Browse and upload documents in MinIO object storage.
+              </p>
+            </div>
+            <UploadButton
+              prefix={currentPrefix}
+              onUploadComplete={handleUploadComplete}
+            />
           </div>
 
           <BreadcrumbBar segments={segments} onNavigate={handleNavigate} />
