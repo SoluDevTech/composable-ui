@@ -7,6 +7,10 @@ export default defineConfig(() => ({
     host: "localhost",
     port: 8030,
     proxy: {
+      "/api/v1/files": {
+        target: "http://localhost:8020",
+        changeOrigin: true,
+      },
       "/api": {
         target: "http://localhost:8010",
         changeOrigin: true,

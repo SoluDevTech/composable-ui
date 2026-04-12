@@ -161,7 +161,9 @@ export default function AgentConfigViewer({
                     <>
                       {" "}
                       &middot; Root:{" "}
-                      <span className="font-mono">{config.backend.root_dir}</span>
+                      <span className="font-mono">
+                        {config.backend.root_dir}
+                      </span>
                     </>
                   )}
                 </p>
