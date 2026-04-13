@@ -50,7 +50,7 @@ export default function AgentConfigViewer({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm"
+      className="fixed inset-0 z-50 overflow-y-auto flex items-start justify-center pt-[10vh] bg-black/30 backdrop-blur-sm"
       onClick={handleBackdropClick}
       onKeyDown={(e) => {
         if (e.key === "Escape") onOpenChange(false);
@@ -59,13 +59,12 @@ export default function AgentConfigViewer({
       aria-modal="true"
       aria-labelledby="agent-viewer-title"
     >
-      <dialog
-        open
-        role="none"
-        className="m-0 p-0 w-full max-w-2xl max-h-[80vh] border-none bg-transparent"
+      <div
+        role="document"
+        className="w-full max-w-2xl my-8"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="bg-surface-container-lowest rounded-2xl p-8 w-full overflow-y-auto ambient-shadow">
+        <div className="bg-surface-container-lowest rounded-2xl p-8 w-full max-h-[80vh] overflow-y-auto ambient-shadow">
           {/* Header */}
           <div className="flex items-center justify-between mb-8">
             <h2
@@ -263,7 +262,7 @@ export default function AgentConfigViewer({
             </button>
           </div>
         </div>
-      </dialog>
+      </div>
     </div>
   );
 }

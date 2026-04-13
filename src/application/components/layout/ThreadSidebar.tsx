@@ -132,7 +132,7 @@ export default function ThreadSidebar({
       {/* Agent selection dialog */}
       {showAgentDialog && (
         <div
-          className="fixed inset-0 z-50 bg-black/30 flex items-center justify-center"
+          className="fixed inset-0 z-50 bg-black/30 overflow-y-auto flex items-start justify-center pt-[10vh]"
           onClick={() => setShowAgentDialog(false)}
           onKeyDown={(e) => {
             if (e.key === "Escape") setShowAgentDialog(false);
@@ -141,16 +141,12 @@ export default function ThreadSidebar({
           aria-modal="true"
           aria-labelledby="agent-dialog-title"
         >
-          <dialog
-            open
-            role="none"
-            className="m-0 p-0 w-80 max-h-96 border-none bg-transparent"
+          <div
+            role="document"
+            className="w-80 max-h-[80vh] my-8"
             onClick={(e) => e.stopPropagation()}
           >
-            <div
-              className="bg-white rounded-xl p-6 w-full overflow-y-auto shadow-xl"
-              role="document"
-            >
+            <div className="bg-white rounded-xl p-6 w-full overflow-y-auto shadow-xl">
               <h3
                 id="agent-dialog-title"
                 className="font-headline text-lg font-bold mb-4"
@@ -182,7 +178,7 @@ export default function ThreadSidebar({
                 </div>
               )}
             </div>
-          </dialog>
+          </div>
         </div>
       )}
     </aside>
