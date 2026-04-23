@@ -54,7 +54,7 @@ export default function CreateAgentDialog({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm"
+      className="fixed inset-0 z-50 overflow-y-auto flex items-start justify-center pt-[10vh] bg-black/30 backdrop-blur-sm"
       onClick={handleBackdropClick}
       onKeyDown={(e) => {
         if (e.key === "Escape") onOpenChange(false);
@@ -63,10 +63,9 @@ export default function CreateAgentDialog({
       aria-modal="true"
       aria-labelledby="create-agent-title"
     >
-      <dialog
-        open
-        role="none"
-        className="m-0 p-0 w-full max-w-md border-none bg-transparent"
+      <div
+        role="document"
+        className="w-full max-w-md my-8"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="bg-surface-container-lowest rounded-2xl p-8 w-full ambient-shadow">
@@ -142,7 +141,7 @@ export default function CreateAgentDialog({
             </div>
           </form>
         </div>
-      </dialog>
+      </div>
     </div>
   );
 }

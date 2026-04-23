@@ -1,5 +1,6 @@
 import { useState, type KeyboardEvent } from "react";
 import { useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 import { cn } from "@/application/lib/utils";
 import { useStreamChat } from "@/application/hooks/chat/useStreamChat";
 import { useSendMessage } from "@/application/hooks/chat/useSendMessage";
@@ -31,16 +32,17 @@ export default function ChatInput({ threadId }: Readonly<ChatInputProps>) {
       sendMessage.mutate(
         { message: trimmed },
         {
-          onSuccess: () => {
-            useChatStore.getState().setPendingUserMessage(null);
-            useChatStore.getState().setStreaming(false);
-            queryClient.invalidateQueries({
+          onSuccess: async () => {
+            await queryClient.invalidateQueries({
               queryKey: ["messages", threadId],
             });
+            useChatStore.getState().setPendingUserMessage(null);
+            useChatStore.getState().setStreaming(false);
           },
           onError: () => {
             useChatStore.getState().setPendingUserMessage(null);
             useChatStore.getState().setStreaming(false);
+            toast.error("Failed to send message");
           },
         },
       );

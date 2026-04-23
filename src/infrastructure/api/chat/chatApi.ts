@@ -39,6 +39,7 @@ export const chatApi: IChatPort = {
     const response = await apiClient.post<Message>(
       `/api/v1/chat/${threadId}`,
       request,
+      { timeout: 300000 },
     );
     return response.data;
   },
