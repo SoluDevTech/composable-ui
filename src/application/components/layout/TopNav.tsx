@@ -4,6 +4,7 @@ import { cn } from "@/application/lib/utils";
 const NAV_LINKS = [
   { to: "/chat", label: "Orchestration" },
   { to: "/agents", label: "Agents" },
+  { to: "/rag", label: "RAG" },
 ] as const;
 
 export default function TopNav() {

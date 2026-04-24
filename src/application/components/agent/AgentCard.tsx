@@ -40,7 +40,10 @@ function getAgentIcon(name: string): string {
   return AGENT_ICONS[firstLetter] ?? "smart_toy";
 }
 
-export default function AgentCard({ agent, onConfigure }: Readonly<AgentCardProps>) {
+export default function AgentCard({
+  agent,
+  onConfigure,
+}: Readonly<AgentCardProps>) {
   return (
     <div className="bg-surface-container-lowest rounded-xl p-8 ambient-shadow hover:translate-y-[-2px] transition-transform duration-300">
       {/* Header: icon + status */}

@@ -132,7 +132,10 @@ describe("ChatInput", () => {
     });
     expect(mockSendMessageMutate).toHaveBeenCalledWith(
       { message: "Standard message" },
-      expect.objectContaining({ onSuccess: expect.any(Function), onError: expect.any(Function) }),
+      expect.objectContaining({
+        onSuccess: expect.any(Function),
+        onError: expect.any(Function),
+      }),
     );
 
     // Restore

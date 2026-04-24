@@ -34,3 +34,9 @@ coverage
 .env.local
 .env.*.local
 .scannerwork
+
+# Config
+public/config.json
+
+
+trivy-report.json

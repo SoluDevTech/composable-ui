@@ -1,12 +1,22 @@
 import axios from "axios";
-import { envConfig } from "@/infrastructure/config/envConfig";
+import { configRepository } from "@/infrastructure/config/configRepositoryInstance";
+
+let cachedBaseURL: string | null = null;
 
 export const apiClient = axios.create({
-  baseURL: envConfig.apiBaseUrl,
   timeout: 30000,
   headers: {
     "Content-Type": "application/json",
   },
+});
+
+apiClient.interceptors.request.use(async (config) => {
+  if (!cachedBaseURL) {
+    const appConfig = await configRepository.getConfig();
+    cachedBaseURL = appConfig.apiBaseUrl;
+  }
+  config.baseURL = cachedBaseURL;
+  return config;
 });
 
 apiClient.interceptors.response.use(

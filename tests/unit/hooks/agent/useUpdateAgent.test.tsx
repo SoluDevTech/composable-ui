@@ -3,7 +3,10 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { vi, describe, it, expect, beforeEach } from "vitest";
 import { useUpdateAgent } from "@/application/hooks/agent/useUpdateAgent";
 import { agentApi } from "@/infrastructure/api/agent/agentApi";
-import type { AgentConfig, BackendType } from "@/domain/entities/agent/agentConfig";
+import type {
+  AgentConfig,
+  BackendType,
+} from "@/domain/entities/agent/agentConfig";
 import type { ReactNode } from "react";
 
 vi.mock("@/infrastructure/api/agent/agentApi", () => ({

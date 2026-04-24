@@ -65,9 +65,7 @@ describe("useDeleteAgent", () => {
   });
 
   it("returns error state when deletion fails", async () => {
-    vi.mocked(agentApi.deleteAgent).mockRejectedValue(
-      new Error("Forbidden"),
-    );
+    vi.mocked(agentApi.deleteAgent).mockRejectedValue(new Error("Forbidden"));
     const { wrapper } = createWrapper();
 
     const { result } = renderHook(() => useDeleteAgent(), { wrapper });

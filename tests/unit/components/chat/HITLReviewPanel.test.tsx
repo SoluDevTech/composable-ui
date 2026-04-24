@@ -67,7 +67,9 @@ describe("HITLReviewPanel", () => {
     await user.click(screen.getByRole("button", { name: /review data/i }));
 
     // In reviewing state, Approve and Reject buttons should appear
-    expect(screen.getByRole("button", { name: /approve/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /approve/i }),
+    ).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /reject/i })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /cancel/i })).toBeInTheDocument();
   });

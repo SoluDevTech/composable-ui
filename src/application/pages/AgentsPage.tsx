@@ -30,8 +30,8 @@ export default function AgentsPage() {
             >
               <span className="material-symbols-outlined text-lg">
                 add_circle
-              </span>
-              {" "}Create Agent (YAML)
+              </span>{" "}
+              Create Agent (YAML)
             </button>
           </div>
 

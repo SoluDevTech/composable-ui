@@ -8,6 +8,7 @@ React frontend for interacting with the [composable-agents](https://github.com/s
 - **Real-time chat** -- Stream AI responses via SSE (Server-Sent Events)
 - **Human-in-the-loop** -- Review and approve/reject tool calls before execution
 - **Thread history** -- Conversation threads grouped by agent in a sidebar
+- **RAG file browser** -- Browse MinIO folders and files with breadcrumb navigation and file metadata display
 - **Material Design 3** -- Inspired design system with shadcn/ui components
 
 ## Tech Stack
@@ -25,6 +26,7 @@ React frontend for interacting with the [composable-agents](https://github.com/s
 
 - [Bun](https://bun.sh/) >= 1.0
 - [composable-agents](https://github.com/soludev/bricks/composable-agents) API running on port 8010
+- [mcp-raganything](https://github.com/soludev/bricks/mcp-raganything) API running on port 8020
 
 ## Installation
 
@@ -34,12 +36,23 @@ bun install
 
 ## Configuration
 
-| Variable | Default | Description |
-|---|---|---|
-| `VITE_API_BASE_URL` | `http://localhost:8010` | composable-agents API URL |
-| `VITE_WS_BASE_URL` | `ws://localhost:8010` | WebSocket URL for streaming |
+Configuration is loaded at runtime from `public/config.json`. Copy the example file to get started:
 
-The Vite dev server proxies `/api` requests to the API automatically (see `vite.config.ts`).
+```bash
+cp public/config.example.json public/config.json
+```
+
+**`public/config.json`** - Application configuration:
+
+| Field | Type | Description |
+|---|---|---|
+| `apiBaseUrl` | `string` | composable-agents API URL (e.g., `http://localhost:8010`) |
+| `ragApiBaseUrl` | `string` (optional) | RAG API URL for MinIO file browsing (e.g., `http://localhost:8020`). Defaults to `apiBaseUrl` if not set. |
+| `wsBaseUrl` | `string` | WebSocket URL for streaming (e.g., `ws://localhost:8010`) |
+
+The config is validated with Zod on startup. Invalid configuration will show an error toast.
+
+**Note:** `config.json` is gitignored. Use `config.example.json` as a template.
 
 ## Running
 
@@ -103,30 +116,45 @@ src/
     entities/
       agent/               # AgentConfig, AgentConfigMetadata, McpServerConfig
       chat/                # Message, Thread, ChatRequest
+      config/              # AppConfig (Zod-validated)
+      rag/                 # FileEntry, FolderEntry
     ports/
       agent/agentPort.ts   # Agent repository interface
       chat/chatPort.ts     # Chat repository interface
+      config/configRepository.ts  # Config repository interface
+      rag/ragFilePort.ts   # RAG file port interface
   infrastructure/          # External adapters (API clients, config)
     api/
       agent/agentApi.ts    # Agent API adapter (axios)
       chat/chatApi.ts      # Chat API adapter (axios + SSE)
+      rag/ragApi.ts        # RAG API adapter (axios)
       axiosInstance.ts     # Shared axios instance
-    config/envConfig.ts    # Environment variables
+      ragAxiosInstance.ts  # Separate axios client for RAG API
+    config/
+      configRepositoryInstance.ts  # Singleton config repository
+      fileConfigRepository.ts       # File-based config implementation
   application/             # React UI layer
     components/
       agent/               # AgentCard, AgentGrid, CreateAgentDialog, AgentConfigViewer
       chat/                # ChatInput, ChatMessage, HITLReviewPanel, MessageList
       layout/              # MainLayout, ThreadSidebar, TopNav
+      rag/                 # BreadcrumbBar, FileList, FileRow, FolderRow
       shared/              # StatusBadge, ToolTag
       ui/                  # shadcn/ui primitives
     hooks/
       agent/               # useAgents, useCreateAgent, useDeleteAgent, useUpdateAgent, useAgentConfig
       chat/                # useThreads, useCreateThread, useDeleteThread, useMessages, useSendMessage, useStreamChat
+      config/               # useConfig
+      rag/                 # useFolders, useFiles
     pages/
       AgentsPage.tsx       # /agents route
       ChatPage.tsx         # /chat/:threadId? route
+      RagPage.tsx          # /rag route
     stores/
       useChatStore.ts      # Zustand store for chat state
+public/
+  config.example.json      # Example config (committed)
+  config.json              # Runtime config (gitignored)
 tests/
   unit/                    # Mirrors src/ structure
   fixtures/                # Test data
@@ -140,6 +168,7 @@ tests/
 | `/` | -- | Redirects to `/chat` |
 | `/agents` | AgentsPage | List, create, view, and delete agents |
 | `/chat/:threadId?` | ChatPage | Chat with agents, streaming responses, HITL validation |
+| `/rag` | RagPage | Browse MinIO folders and files with breadcrumb navigation |
 
 ## CI/CD
 

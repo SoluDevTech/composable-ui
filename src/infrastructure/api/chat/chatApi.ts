@@ -3,8 +3,8 @@ import type { Message } from "@/domain/entities/chat/message";
 import type { Thread } from "@/domain/entities/chat/thread";
 import type { IChatPort } from "@/domain/ports/chat/chatPort";
 import { apiClient } from "@/infrastructure/api/axiosInstance";
+import { configRepository } from "@/infrastructure/config/configRepositoryInstance";
 import { fetchEventSource } from "@microsoft/fetch-event-source";
-import { envConfig } from "@/infrastructure/config/envConfig";
 
 export const chatApi: IChatPort = {
   async createThread(agentName: string): Promise<Thread> {
@@ -39,6 +39,7 @@ export const chatApi: IChatPort = {
     const response = await apiClient.post<Message>(
       `/api/v1/chat/${threadId}`,
       request,
+      { timeout: 300000 },
     );
     return response.data;
   },
@@ -52,23 +53,30 @@ export const chatApi: IChatPort = {
   ): AbortController {
     const ctrl = new AbortController();
 
-    fetchEventSource(`${envConfig.apiBaseUrl}/api/v1/chat/${threadId}/stream`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(request),
-      signal: ctrl.signal,
-      onmessage(ev) {
-        if (ev.data) {
-          onChunk(ev.data);
-        }
-      },
-      onclose() {
-        onComplete();
-      },
-      onerror(err) {
-        onError(err instanceof Error ? err : new Error(String(err)));
-        throw err;
-      },
+    const streamUrl = async () => {
+      const config = await configRepository.getConfig();
+      return `${config.apiBaseUrl}/api/v1/chat/${threadId}/stream`;
+    };
+
+    streamUrl().then((url) => {
+      fetchEventSource(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(request),
+        signal: ctrl.signal,
+        onmessage(ev) {
+          if (ev.data) {
+            onChunk(ev.data);
+          }
+        },
+        onclose() {
+          onComplete();
+        },
+        onerror(err) {
+          onError(err instanceof Error ? err : new Error(String(err)));
+          throw err;
+        },
+      });
     });
 
     return ctrl;
