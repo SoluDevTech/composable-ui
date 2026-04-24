@@ -32,6 +32,14 @@ globalThis.ResizeObserver = class ResizeObserver {
   disconnect() {}
 };
 
+// Mock pointer capture (needed for Radix Select/Dialog)
+HTMLElement.prototype.hasPointerCapture = vi.fn();
+HTMLElement.prototype.setPointerCapture = vi.fn();
+HTMLElement.prototype.releasePointerCapture = vi.fn();
+
+// Mock scrollIntoView (needed for Radix)
+HTMLElement.prototype.scrollIntoView = vi.fn();
+
 // Mock window.matchMedia
 Object.defineProperty(window, "matchMedia", {
   writable: true,
