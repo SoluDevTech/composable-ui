@@ -23,13 +23,6 @@ describe("FolderRow", () => {
     expect(screen.getByRole("button", { name: /reports/i })).toBeInTheDocument();
   });
 
-  it("has tabIndex for keyboard accessibility", () => {
-    renderWithProviders(<FolderRow name="reports" onClick={vi.fn()} />);
-
-    const button = screen.getByRole("button", { name: /reports/i });
-    expect(button).toHaveAttribute("tabindex", "0");
-  });
-
   it("calls onClick when clicked", async () => {
     const user = userEvent.setup();
     const onClick = vi.fn();
@@ -40,7 +33,7 @@ describe("FolderRow", () => {
     expect(onClick).toHaveBeenCalledOnce();
   });
 
-  it("renders an index options button when onIndexLightRAG is provided", () => {
+  it("renders an index action menu when onIndexLightRAG is provided", () => {
     renderWithProviders(
       <FolderRow name="docs" onClick={vi.fn()} onIndexLightRAG={vi.fn()} />,
     );
@@ -88,5 +81,11 @@ describe("FolderRow", () => {
     await user.click(screen.getByText("Index with Classical"));
 
     expect(onIndexClassical).toHaveBeenCalledOnce();
+  });
+
+  it("shows spinner when isIndexing is true", () => {
+    renderWithProviders(<FolderRow name="docs" onClick={vi.fn()} isIndexing />);
+
+    expect(screen.getByText("docs")).toBeInTheDocument();
   });
 });

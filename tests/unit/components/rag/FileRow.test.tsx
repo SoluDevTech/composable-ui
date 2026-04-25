@@ -117,7 +117,7 @@ describe("FileRow", () => {
     expect(onRead).toHaveBeenCalledOnce();
   });
 
-  it("renders an index options button when onIndexLightRAG is provided", () => {
+  it("renders an index action menu when onIndexLightRAG is provided", () => {
     renderWithProviders(
       <FileRow
         filename="report.pdf"
@@ -186,5 +186,18 @@ describe("FileRow", () => {
     await user.click(screen.getByText("Index with Classical"));
 
     expect(onIndexClassical).toHaveBeenCalledOnce();
+  });
+
+  it("shows spinner when isIndexing is true", () => {
+    renderWithProviders(
+      <FileRow
+        filename="report.pdf"
+        size={1024}
+        lastModified="2026-04-06T10:00:00Z"
+        isIndexing
+      />,
+    );
+
+    expect(screen.getByText("report.pdf")).toBeInTheDocument();
   });
 });

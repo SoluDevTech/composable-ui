@@ -15,6 +15,9 @@ import { useClassicalIndexFile } from "@/application/hooks/rag/useClassicalIndex
 import { useClassicalIndexFolder } from "@/application/hooks/rag/useClassicalIndexFolder";
 import { useReadFile } from "@/application/hooks/rag/useReadFile";
 
+const DEFAULT_CHUNK_SIZE = 1000;
+const DEFAULT_CHUNK_OVERLAP = 200;
+
 function prefixToSegments(prefix: string): string[] {
   const trimmed = prefix.replace(/\/+$/, "");
   if (!trimmed) return [];
@@ -80,7 +83,7 @@ export default function RagPage() {
   const handleFileIndexClassical = (objectName: string) => {
     const dir = workingDir || currentPrefix;
     if (!dir) return;
-    classicalIndexFile.mutate({ fileName: objectName, workingDir: dir, chunkSize: 1000, chunkOverlap: 200 });
+    classicalIndexFile.mutate({ fileName: objectName, workingDir: dir, chunkSize: DEFAULT_CHUNK_SIZE, chunkOverlap: DEFAULT_CHUNK_OVERLAP });
   };
 
   const handleFolderIndexLightRAG = (prefix: string) => {
@@ -92,7 +95,7 @@ export default function RagPage() {
   const handleFolderIndexClassical = (prefix: string) => {
     const dir = workingDir || prefix;
     if (!dir) return;
-    classicalIndexFolder.mutate({ workingDir: dir, recursive: true, chunkSize: 1000, chunkOverlap: 200 });
+    classicalIndexFolder.mutate({ workingDir: dir, recursive: true, chunkSize: DEFAULT_CHUNK_SIZE, chunkOverlap: DEFAULT_CHUNK_OVERLAP });
   };
 
   const isLoading = foldersQuery.isLoading || filesQuery.isLoading;

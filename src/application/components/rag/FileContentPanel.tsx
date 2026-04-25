@@ -38,7 +38,7 @@ export default function FileContentPanel({
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto px-6 py-4">
+      <div className="flex-1 overflow-y-auto px-6 py-4 max-h-[calc(100vh-8rem)]">
         <pre className="font-body text-sm text-on-surface whitespace-pre-wrap overflow-wrap-anywhere">
           {content}
         </pre>
