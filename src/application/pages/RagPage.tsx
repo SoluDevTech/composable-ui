@@ -3,8 +3,20 @@ import MainLayout from "@/application/components/layout/MainLayout";
 import BreadcrumbBar from "@/application/components/rag/BreadcrumbBar";
 import FileList from "@/application/components/rag/FileList";
 import UploadButton from "@/application/components/rag/UploadButton";
+import RagTabBar from "@/application/components/rag/RagTabBar";
+import QueryPanel from "@/application/components/rag/QueryPanel";
+import WorkspaceSelector from "@/application/components/rag/WorkspaceSelector";
+import FileContentPanel from "@/application/components/rag/FileContentPanel";
 import { useFolders } from "@/application/hooks/rag/useFolders";
 import { useFiles } from "@/application/hooks/rag/useFiles";
+import { useIndexFile } from "@/application/hooks/rag/useIndexFile";
+import { useIndexFolder } from "@/application/hooks/rag/useIndexFolder";
+import { useClassicalIndexFile } from "@/application/hooks/rag/useClassicalIndexFile";
+import { useClassicalIndexFolder } from "@/application/hooks/rag/useClassicalIndexFolder";
+import { useReadFile } from "@/application/hooks/rag/useReadFile";
+
+const DEFAULT_CHUNK_SIZE = 1000;
+const DEFAULT_CHUNK_OVERLAP = 200;
 
 function prefixToSegments(prefix: string): string[] {
   const trimmed = prefix.replace(/\/+$/, "");
@@ -18,7 +30,17 @@ function segmentsToPrefix(segments: string[], upToIndex: number): string {
 }
 
 export default function RagPage() {
+  const [activeTab, setActiveTab] = useState<"browse" | "query">("browse");
   const [currentPrefix, setCurrentPrefix] = useState("");
+  const [workingDir, setWorkingDir] = useState("");
+
+  const [fileContentOpen, setFileContentOpen] = useState(false);
+
+  const indexFile = useIndexFile();
+  const indexFolder = useIndexFolder();
+  const classicalIndexFile = useClassicalIndexFile();
+  const classicalIndexFolder = useClassicalIndexFolder();
+  const readFile = useReadFile();
 
   const segments = useMemo(
     () => prefixToSegments(currentPrefix),
@@ -27,6 +49,8 @@ export default function RagPage() {
 
   const foldersQuery = useFolders(currentPrefix);
   const filesQuery = useFiles(currentPrefix, false);
+
+  const workspaceFoldersQuery = useFolders("");
 
   const handleNavigate = (index: number) => {
     if (index < 0) {
@@ -45,8 +69,41 @@ export default function RagPage() {
     filesQuery.refetch();
   };
 
+  const handleFileRead = (objectName: string) => {
+    readFile.mutate(objectName);
+    setFileContentOpen(true);
+  };
+
+  const handleFileIndexLightRAG = (objectName: string) => {
+    const dir = workingDir || currentPrefix;
+    if (!dir) return;
+    indexFile.mutate({ fileName: objectName, workingDir: dir });
+  };
+
+  const handleFileIndexClassical = (objectName: string) => {
+    const dir = workingDir || currentPrefix;
+    if (!dir) return;
+    classicalIndexFile.mutate({ fileName: objectName, workingDir: dir, chunkSize: DEFAULT_CHUNK_SIZE, chunkOverlap: DEFAULT_CHUNK_OVERLAP });
+  };
+
+  const handleFolderIndexLightRAG = (prefix: string) => {
+    const dir = workingDir || prefix;
+    if (!dir) return;
+    indexFolder.mutate({ workingDir: dir, recursive: true });
+  };
+
+  const handleFolderIndexClassical = (prefix: string) => {
+    const dir = workingDir || prefix;
+    if (!dir) return;
+    classicalIndexFolder.mutate({ workingDir: dir, recursive: true, chunkSize: DEFAULT_CHUNK_SIZE, chunkOverlap: DEFAULT_CHUNK_OVERLAP });
+  };
+
   const isLoading = foldersQuery.isLoading || filesQuery.isLoading;
   const error = foldersQuery.error || filesQuery.error;
+
+  const folderSuggestions = (workspaceFoldersQuery.data ?? []).map(
+    (f) => f.prefix,
+  );
 
   return (
     <MainLayout showSidebar={false}>
@@ -58,28 +115,69 @@ export default function RagPage() {
                 RAG Storage
               </h1>
               <p className="text-on-surface-variant text-sm max-w-md">
-                Browse and upload documents in MinIO object storage.
+                Browse and manage your RAG knowledge base.
               </p>
             </div>
-            <UploadButton
-              prefix={currentPrefix}
-              onUploadComplete={handleUploadComplete}
-            />
+            {activeTab === "browse" && (
+              <UploadButton
+                prefix={currentPrefix}
+                onUploadComplete={handleUploadComplete}
+              />
+            )}
           </div>
 
-          <BreadcrumbBar segments={segments} onNavigate={handleNavigate} />
+          <div className="flex items-center justify-between mb-6">
+            <RagTabBar activeTab={activeTab} onTabChange={setActiveTab} />
+          </div>
 
-          <FileList
-            folders={foldersQuery.data ?? []}
-            files={filesQuery.data ?? []}
-            isLoading={isLoading}
-            error={error}
-            onFolderClick={handleFolderClick}
-            onRetry={() => {
-              foldersQuery.refetch();
-              filesQuery.refetch();
-            }}
-          />
+          {activeTab === "browse" && (
+            <>
+              <BreadcrumbBar segments={segments} onNavigate={handleNavigate} />
+
+              <div className="relative">
+                <h2 className="font-headline text-lg font-semibold text-on-surface mb-4">Files</h2>
+
+                <FileList
+                  folders={foldersQuery.data ?? []}
+                  files={filesQuery.data ?? []}
+                  isLoading={isLoading}
+                  error={error}
+                  onFolderClick={handleFolderClick}
+                  onRetry={() => {
+                    foldersQuery.refetch();
+                    filesQuery.refetch();
+                  }}
+                  onFileRead={handleFileRead}
+                  onFileIndexLightRAG={handleFileIndexLightRAG}
+                  onFileIndexClassical={handleFileIndexClassical}
+                  onFolderIndexLightRAG={handleFolderIndexLightRAG}
+                  onFolderIndexClassical={handleFolderIndexClassical}
+                />
+
+                {fileContentOpen && readFile.data && (
+                  <FileContentPanel
+                    content={readFile.data.content}
+                    metadata={readFile.data.metadata}
+                    tables={readFile.data.tables}
+                    onClose={() => setFileContentOpen(false)}
+                  />
+                )}
+              </div>
+            </>
+          )}
+
+          {activeTab === "query" && (
+            <>
+              <WorkspaceSelector
+                value={workingDir}
+                onChange={setWorkingDir}
+                folders={folderSuggestions}
+              />
+              <QueryPanel
+                workingDir={workingDir}
+              />
+            </>
+          )}
         </div>
       </div>
     </MainLayout>

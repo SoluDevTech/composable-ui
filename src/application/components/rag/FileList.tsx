@@ -1,7 +1,6 @@
 import FolderRow from "@/application/components/rag/FolderRow";
 import FileRow from "@/application/components/rag/FileRow";
-import type { FolderEntry } from "@/domain/entities/rag/fileEntry";
-import type { FileEntry } from "@/domain/entities/rag/fileEntry";
+import type { FolderEntry, FileEntry } from "@/domain/entities/rag/fileEntry";
 
 interface FileListProps {
   folders: FolderEntry[];
@@ -10,6 +9,11 @@ interface FileListProps {
   error: Error | null;
   onFolderClick: (prefix: string) => void;
   onRetry: () => void;
+  onFileRead?: (objectName: string) => void;
+  onFileIndexLightRAG?: (objectName: string) => void;
+  onFileIndexClassical?: (objectName: string) => void;
+  onFolderIndexLightRAG?: (prefix: string) => void;
+  onFolderIndexClassical?: (prefix: string) => void;
 }
 
 export default function FileList({
@@ -19,6 +23,11 @@ export default function FileList({
   error,
   onFolderClick,
   onRetry,
+  onFileRead,
+  onFileIndexLightRAG,
+  onFileIndexClassical,
+  onFolderIndexLightRAG,
+  onFolderIndexClassical,
 }: Readonly<FileListProps>) {
   if (isLoading) {
     return (
@@ -47,13 +56,10 @@ export default function FileList({
           onClick={onRetry}
           className="flex items-center gap-2 text-secondary-brand font-headline text-xs font-bold uppercase tracking-widest hover:opacity-80 transition-opacity"
         >
-          <span
-            className="material-symbols-outlined text-base"
-            aria-hidden="true"
-          >
+          <span className="material-symbols-outlined text-base" aria-hidden="true">
             refresh
           </span>
-          Retry
+          {"Retry"}
         </button>
       </div>
     );
@@ -82,6 +88,8 @@ export default function FileList({
           key={folder.prefix}
           name={folder.name}
           onClick={() => onFolderClick(folder.prefix)}
+          onIndexLightRAG={onFolderIndexLightRAG ? () => onFolderIndexLightRAG(folder.prefix) : undefined}
+          onIndexClassical={onFolderIndexClassical ? () => onFolderIndexClassical(folder.prefix) : undefined}
         />
       ))}
       {files.map((file) => (
@@ -90,6 +98,9 @@ export default function FileList({
           filename={file.filename}
           size={file.size}
           lastModified={file.lastModified}
+          onRead={onFileRead ? () => onFileRead(file.objectName) : undefined}
+          onIndexLightRAG={onFileIndexLightRAG ? () => onFileIndexLightRAG(file.objectName) : undefined}
+          onIndexClassical={onFileIndexClassical ? () => onFileIndexClassical(file.objectName) : undefined}
         />
       ))}
     </div>

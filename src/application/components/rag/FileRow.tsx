@@ -1,15 +1,20 @@
 import { formatFileSize } from "@/application/lib/formatFileSize";
+import IndexActionMenu from "@/application/components/rag/IndexActionMenu";
 
 interface FileRowProps {
   filename: string;
   size: number;
   lastModified: string | null;
+  isIndexing?: boolean;
+  onRead?: () => void;
+  onIndexLightRAG?: () => void;
+  onIndexClassical?: () => void;
 }
 
 function formatDate(dateStr: string | null): string {
   if (!dateStr) return "\u2014";
   const date = new Date(dateStr);
-  if (isNaN(date.getTime())) return "\u2014";
+  if (Number.isNaN(date.getTime())) return "\u2014";
   return date.toLocaleDateString(undefined, {
     year: "numeric",
     month: "short",
@@ -45,27 +50,58 @@ export default function FileRow({
   filename,
   size,
   lastModified,
+  isIndexing,
+  onRead,
+  onIndexLightRAG,
+  onIndexClassical,
 }: Readonly<FileRowProps>) {
+  const hasIndexOptions = onIndexLightRAG || onIndexClassical;
+
   return (
     <div
-      role="row"
-      className="w-full flex items-center gap-4 px-6 py-4 rounded-xl text-left"
+      className={`w-full flex items-center gap-4 px-6 py-4 rounded-xl text-left ${isIndexing ? "opacity-60" : ""}`}
     >
       <span
         className="material-symbols-outlined text-2xl text-on-surface-variant"
         aria-hidden="true"
       >
-        {getFileIcon(filename)}
+        {isIndexing ? "progress_activity" : getFileIcon(filename)}
       </span>
       <span className="font-body text-sm text-on-surface flex-1">
         {filename}
       </span>
+      {isIndexing && (
+        <span className="material-symbols-outlined text-lg animate-spin text-secondary-brand" aria-hidden="true">
+          progress_activity
+        </span>
+      )}
       <span className="font-body text-sm text-on-surface-variant w-24 text-right">
         {formatFileSize(size)}
       </span>
       <span className="font-body text-sm text-on-surface-variant w-32 text-right">
         {formatDate(lastModified)}
       </span>
+      <div className="flex items-center gap-1">
+        {onRead && (
+          <button
+            type="button"
+            onClick={onRead}
+            disabled={isIndexing}
+            className="flex items-center justify-center w-8 h-8 rounded-lg hover:bg-surface-container transition-colors disabled:opacity-50"
+            aria-label={`Read ${filename}`}
+          >
+            <span className="material-symbols-outlined text-lg text-on-surface-variant">
+              visibility
+            </span>
+          </button>
+        )}
+        {hasIndexOptions && (
+          <IndexActionMenu
+            onIndexLightRAG={onIndexLightRAG!}
+            onIndexClassical={onIndexClassical!}
+          />
+        )}
+      </div>
     </div>
   );
 }
