@@ -39,4 +39,26 @@ describe("FolderRow", () => {
     await user.click(screen.getByRole("button", { name: /docs/i }));
     expect(onClick).toHaveBeenCalledOnce();
   });
+
+  it("renders an index button when onIndex is provided", () => {
+    renderWithProviders(
+      <FolderRow name="docs" onClick={vi.fn()} onIndex={vi.fn()} />,
+    );
+
+    expect(
+      screen.getByRole("button", { name: /index/i }),
+    ).toBeInTheDocument();
+  });
+
+  it("calls onIndex when the index button is clicked", async () => {
+    const user = userEvent.setup();
+    const onIndex = vi.fn();
+
+    renderWithProviders(
+      <FolderRow name="docs" onClick={vi.fn()} onIndex={onIndex} />,
+    );
+
+    await user.click(screen.getByRole("button", { name: /index/i }));
+    expect(onIndex).toHaveBeenCalledOnce();
+  });
 });

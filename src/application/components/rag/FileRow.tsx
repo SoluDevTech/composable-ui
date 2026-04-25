@@ -4,12 +4,14 @@ interface FileRowProps {
   filename: string;
   size: number;
   lastModified: string | null;
+  onRead?: () => void;
+  onIndex?: () => void;
 }
 
 function formatDate(dateStr: string | null): string {
   if (!dateStr) return "\u2014";
   const date = new Date(dateStr);
-  if (isNaN(date.getTime())) return "\u2014";
+  if (Number.isNaN(date.getTime())) return "\u2014";
   return date.toLocaleDateString(undefined, {
     year: "numeric",
     month: "short",
@@ -45,10 +47,11 @@ export default function FileRow({
   filename,
   size,
   lastModified,
+  onRead,
+  onIndex,
 }: Readonly<FileRowProps>) {
   return (
     <div
-      role="row"
       className="w-full flex items-center gap-4 px-6 py-4 rounded-xl text-left"
     >
       <span
@@ -66,6 +69,32 @@ export default function FileRow({
       <span className="font-body text-sm text-on-surface-variant w-32 text-right">
         {formatDate(lastModified)}
       </span>
+      <div className="flex items-center gap-1">
+        {onRead && (
+          <button
+            type="button"
+            onClick={onRead}
+            className="flex items-center justify-center w-8 h-8 rounded-lg hover:bg-surface-container transition-colors"
+            aria-label={`Read ${filename}`}
+          >
+            <span className="material-symbols-outlined text-lg text-on-surface-variant">
+              visibility
+            </span>
+          </button>
+        )}
+        {onIndex && (
+          <button
+            type="button"
+            onClick={onIndex}
+            className="flex items-center justify-center w-8 h-8 rounded-lg hover:bg-surface-container transition-colors"
+            aria-label={`Index ${filename}`}
+          >
+            <span className="material-symbols-outlined text-lg text-on-surface-variant">
+              playlist_add
+            </span>
+          </button>
+        )}
+      </div>
     </div>
   );
 }

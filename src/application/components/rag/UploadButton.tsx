@@ -58,17 +58,18 @@ export default function UploadButton({
             <span
               data-testid="upload-spinner"
               className="material-symbols-outlined text-lg animate-spin"
+              aria-hidden="true"
             >
               progress_activity
             </span>
-            Uploading...
+            {"Uploading..."}
           </>
         ) : (
           <>
-            <span className="material-symbols-outlined text-lg">
+            <span className="material-symbols-outlined text-lg" aria-hidden="true">
               upload_file
             </span>
-            Upload
+            {"Upload"}
           </>
         )}
       </button>

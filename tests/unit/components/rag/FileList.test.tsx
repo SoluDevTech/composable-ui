@@ -73,7 +73,7 @@ describe("FileList", () => {
       />,
     );
 
-    const allItems = screen.getAllByRole("row");
+    const allItems = screen.getAllByText(/docs|images|readme\.md/);
     const docsIndex = allItems.findIndex((el) => el.textContent?.includes("docs"));
     const imagesIndex = allItems.findIndex((el) => el.textContent?.includes("images"));
     const readmeIndex = allItems.findIndex((el) => el.textContent?.includes("readme.md"));

@@ -7,9 +7,8 @@ export const ragApi: IRagFilePort = {
     const params = new URLSearchParams();
     if (prefix !== undefined) params.set("prefix", prefix);
     const qs = params.toString();
-    const response = await ragApiClient.get<string[]>(
-      `/api/v1/files/folders${qs ? `?${qs}` : ""}`,
-    );
+    const url = qs ? `/api/v1/files/folders?${qs}` : "/api/v1/files/folders";
+    const response = await ragApiClient.get<string[]>(url);
     return response.data.map((p) => new FolderEntry({ prefix: p }));
   },
 

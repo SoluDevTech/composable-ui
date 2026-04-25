@@ -1,4 +1,5 @@
 import { screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { describe, it, expect, vi } from "vitest";
 import { renderWithProviders } from "../../../utils/render";
 import FileRow from "@/application/components/rag/FileRow";
@@ -82,5 +83,69 @@ describe("FileRow", () => {
     );
 
     expect(screen.queryByRole("button")).not.toBeInTheDocument();
+  });
+
+  it("renders a read button when onRead is provided", () => {
+    renderWithProviders(
+      <FileRow
+        filename="report.pdf"
+        size={1024}
+        lastModified="2026-04-06T10:00:00Z"
+        onRead={vi.fn()}
+      />,
+    );
+
+    expect(
+      screen.getByRole("button", { name: /read/i }),
+    ).toBeInTheDocument();
+  });
+
+  it("calls onRead when the read button is clicked", async () => {
+    const user = userEvent.setup();
+    const onRead = vi.fn();
+
+    renderWithProviders(
+      <FileRow
+        filename="report.pdf"
+        size={1024}
+        lastModified="2026-04-06T10:00:00Z"
+        onRead={onRead}
+      />,
+    );
+
+    await user.click(screen.getByRole("button", { name: /read/i }));
+    expect(onRead).toHaveBeenCalledOnce();
+  });
+
+  it("renders an index button when onIndex is provided", () => {
+    renderWithProviders(
+      <FileRow
+        filename="report.pdf"
+        size={1024}
+        lastModified="2026-04-06T10:00:00Z"
+        onIndex={vi.fn()}
+      />,
+    );
+
+    expect(
+      screen.getByRole("button", { name: /index/i }),
+    ).toBeInTheDocument();
+  });
+
+  it("calls onIndex when the index button is clicked", async () => {
+    const user = userEvent.setup();
+    const onIndex = vi.fn();
+
+    renderWithProviders(
+      <FileRow
+        filename="report.pdf"
+        size={1024}
+        lastModified="2026-04-06T10:00:00Z"
+        onIndex={onIndex}
+      />,
+    );
+
+    await user.click(screen.getByRole("button", { name: /index/i }));
+    expect(onIndex).toHaveBeenCalledOnce();
   });
 });
