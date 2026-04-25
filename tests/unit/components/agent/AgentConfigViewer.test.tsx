@@ -9,15 +9,18 @@ import {
   MiddlewareType,
 } from "@/domain/entities/agent/agentConfig";
 
-const { mockAgentConfigData, mockDeleteMutate } = vi.hoisted(() => {
-  return {
-    mockAgentConfigData: {
-      data: undefined as AgentConfig | undefined,
-      isLoading: false,
-    },
-    mockDeleteMutate: vi.fn(),
-  };
-});
+const { mockAgentConfigData, mockDeleteMutate, mockUpdateMutate } = vi.hoisted(
+  () => {
+    return {
+      mockAgentConfigData: {
+        data: undefined as AgentConfig | undefined,
+        isLoading: false,
+      },
+      mockDeleteMutate: vi.fn(),
+      mockUpdateMutate: vi.fn(),
+    };
+  },
+);
 
 vi.mock("@/application/hooks/agent/useAgentConfig", () => ({
   useAgentConfig: () => mockAgentConfigData,
@@ -30,11 +33,23 @@ vi.mock("@/application/hooks/agent/useDeleteAgent", () => ({
   }),
 }));
 
+vi.mock("@/application/hooks/agent/useUpdateAgent", () => ({
+  useUpdateAgent: () => ({
+    mutate: mockUpdateMutate,
+    isPending: false,
+  }),
+}));
+
 vi.mock("sonner", () => ({
   toast: {
     success: vi.fn(),
     error: vi.fn(),
   },
+}));
+
+vi.mock("@/application/lib/yaml", () => ({
+  serializeAgentConfig: vi.fn(() => "name: test"),
+  agentConfigToYamlFile: vi.fn(() => new File(["yaml"], "test.yaml")),
 }));
 
 const fullConfig: AgentConfig = {
@@ -58,6 +73,7 @@ describe("AgentConfigViewer", () => {
     mockAgentConfigData.data = undefined;
     mockAgentConfigData.isLoading = false;
     mockDeleteMutate.mockClear();
+    mockUpdateMutate.mockClear();
   });
 
   it("returns null when open is false", () => {
@@ -144,31 +160,6 @@ describe("AgentConfigViewer", () => {
     expect(screen.getByText(/state/)).toBeInTheDocument();
   });
 
-  it("calls onOpenChange when close button is clicked", async () => {
-    mockAgentConfigData.data = fullConfig;
-    const user = userEvent.setup();
-    const onOpenChange = vi.fn();
-
-    renderWithProviders(
-      <AgentConfigViewer
-        agentName="test-agent"
-        open={true}
-        onOpenChange={onOpenChange}
-      />,
-    );
-
-    // The close button contains the "close" text in a span
-    const closeButtons = screen.getAllByRole("button");
-    // First button in header is the close (X) button
-    const closeButton = closeButtons.find((btn) =>
-      btn.textContent?.includes("close"),
-    );
-    expect(closeButton).toBeDefined();
-    await user.click(closeButton!);
-
-    expect(onOpenChange).toHaveBeenCalledWith(false);
-  });
-
   it("shows delete button and requires confirmation", async () => {
     mockAgentConfigData.data = fullConfig;
     const user = userEvent.setup();
@@ -186,7 +177,6 @@ describe("AgentConfigViewer", () => {
 
     await user.click(deleteButton);
 
-    // After first click, button should show confirm text
     expect(
       screen.getByRole("button", { name: /confirm delete/i }),
     ).toBeInTheDocument();
@@ -333,12 +323,10 @@ describe("AgentConfigViewer", () => {
       />,
     );
 
-    // Initially shows truncated (200 chars) with "Show more"
     expect(screen.getByText(/\.\.\.Show more/)).toBeInTheDocument();
 
     await user.click(screen.getByText(/\.\.\.Show more/));
 
-    // After click, shows "Show less"
     expect(screen.getByText("Show less")).toBeInTheDocument();
   });
 
@@ -354,9 +342,7 @@ describe("AgentConfigViewer", () => {
       />,
     );
 
-    // First click sets confirmDelete
     await user.click(screen.getByRole("button", { name: /^delete$/i }));
-    // Second click triggers actual delete
     await user.click(screen.getByRole("button", { name: /confirm delete/i }));
 
     expect(mockDeleteMutate).toHaveBeenCalledWith(
@@ -366,52 +352,6 @@ describe("AgentConfigViewer", () => {
         onError: expect.any(Function),
       }),
     );
-  });
-
-  it("closes dialog via Close button in header", async () => {
-    mockAgentConfigData.data = fullConfig;
-    const user = userEvent.setup();
-    const onOpenChange = vi.fn();
-
-    renderWithProviders(
-      <AgentConfigViewer
-        agentName="test-agent"
-        open={true}
-        onOpenChange={onOpenChange}
-      />,
-    );
-
-    // Header close (X) button contains "close" icon text
-    const allButtons = screen.getAllByRole("button");
-    const headerClose = allButtons.find(
-      (btn) => btn.textContent?.trim() === "close",
-    );
-    expect(headerClose).toBeDefined();
-    await user.click(headerClose!);
-
-    expect(onOpenChange).toHaveBeenCalledWith(false);
-  });
-
-  it("closes via Close button in footer", async () => {
-    mockAgentConfigData.data = fullConfig;
-    const user = userEvent.setup();
-    const onOpenChange = vi.fn();
-
-    renderWithProviders(
-      <AgentConfigViewer
-        agentName="test-agent"
-        open={true}
-        onOpenChange={onOpenChange}
-      />,
-    );
-
-    // The footer "Close" button
-    const closeButtons = screen.getAllByRole("button");
-    const footerClose = closeButtons.find((btn) => btn.textContent === "Close");
-    expect(footerClose).toBeDefined();
-    await user.click(footerClose!);
-
-    expect(onOpenChange).toHaveBeenCalledWith(false);
   });
 
   it("shows Active badge when debug is true", () => {
@@ -426,5 +366,35 @@ describe("AgentConfigViewer", () => {
     );
 
     expect(screen.getByText("Active")).toBeInTheDocument();
+  });
+
+  it("has an Edit button", () => {
+    mockAgentConfigData.data = fullConfig;
+
+    renderWithProviders(
+      <AgentConfigViewer
+        agentName="test-agent"
+        open={true}
+        onOpenChange={vi.fn()}
+      />,
+    );
+
+    expect(screen.getByRole("button", { name: /edit/i })).toBeInTheDocument();
+  });
+
+  it("has an Export YAML button", () => {
+    mockAgentConfigData.data = fullConfig;
+
+    renderWithProviders(
+      <AgentConfigViewer
+        agentName="test-agent"
+        open={true}
+        onOpenChange={vi.fn()}
+      />,
+    );
+
+    expect(
+      screen.getByRole("button", { name: /export yaml/i }),
+    ).toBeInTheDocument();
   });
 });

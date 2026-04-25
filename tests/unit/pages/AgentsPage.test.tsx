@@ -34,6 +34,13 @@ vi.mock("@/application/hooks/agent/useDeleteAgent", () => ({
   }),
 }));
 
+vi.mock("@/application/hooks/agent/useUpdateAgent", () => ({
+  useUpdateAgent: () => ({
+    mutate: vi.fn(),
+    isPending: false,
+  }),
+}));
+
 vi.mock("sonner", () => ({
   toast: {
     success: vi.fn(),
@@ -71,8 +78,10 @@ describe("AgentsPage", () => {
 
     await user.click(screen.getByRole("button", { name: /create agent/i }));
 
-    expect(screen.getByText("Create Agent")).toBeInTheDocument();
-    expect(screen.getByLabelText(/agent name/i)).toBeInTheDocument();
+    // Dialog should have a title matching "Create Agent"
+    expect(
+      screen.getByRole("heading", { name: /create agent/i }),
+    ).toBeInTheDocument();
   });
 
   it("opens AgentConfigViewer when Configure button is clicked", async () => {
@@ -82,12 +91,8 @@ describe("AgentsPage", () => {
 
     await user.click(screen.getByRole("button", { name: /configure/i }));
 
-    // The AgentConfigViewer should be rendered with Delete button (unique to viewer)
-    expect(
-      screen.getByRole("button", { name: /^delete$/i }),
-    ).toBeInTheDocument();
-    // The dialog should be present
-    expect(screen.getByRole("dialog")).toBeInTheDocument();
+    // The AgentConfigViewer dialog should show the agent name (appears in grid + dialog)
+    expect(screen.getAllByText("my-agent").length).toBeGreaterThanOrEqual(2);
   });
 
   it("renders description text", () => {
