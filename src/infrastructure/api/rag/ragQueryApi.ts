@@ -1,6 +1,5 @@
 import { ragApiClient } from "@/infrastructure/api/ragAxiosInstance";
 import type { IRagQueryPort } from "@/domain/ports/rag/ragQueryPort";
-import type { RagQueryResponse } from "@/domain/entities/rag/queryRequest";
 
 function mapMetadata(metadata: Record<string, unknown> | undefined): Record<string, unknown> | undefined {
   if (!metadata) return undefined;
@@ -14,18 +13,21 @@ function mapMetadata(metadata: Record<string, unknown> | undefined): Record<stri
 
 export const ragQueryApi: IRagQueryPort = {
   async queryLightRAG(request) {
-    const response = await ragApiClient.post<RagQueryResponse>("/api/v1/query", {
+    const response = await ragApiClient.post<unknown>("/api/v1/query", {
       working_dir: request.working_dir,
       query: request.query,
       mode: request.mode,
       top_k: request.top_k,
     });
-    const data = response.data;
+    if (Array.isArray(response.data)) {
+      return { status: "success", data: response.data, message: undefined, metadata: undefined };
+    }
+    const data = response.data as Record<string, unknown>;
     return {
-      status: data.status,
-      message: (data as Record<string, unknown>).message as string | undefined,
+      status: data.status as string,
+      message: data.message as string | undefined,
       data: data.data,
-      metadata: mapMetadata((data as Record<string, unknown>).metadata as Record<string, unknown> | undefined),
+      metadata: mapMetadata(data.metadata as Record<string, unknown> | undefined),
     };
   },
 
@@ -42,13 +44,16 @@ export const ragQueryApi: IRagQueryPort = {
     if (request.vector_distance_threshold !== undefined) {
       body.vector_distance_threshold = request.vector_distance_threshold;
     }
-    const response = await ragApiClient.post<RagQueryResponse>("/api/v1/classical/query", body);
-    const data = response.data;
+    const response = await ragApiClient.post<unknown>("/api/v1/classical/query", body);
+    if (Array.isArray(response.data)) {
+      return { status: "success", data: response.data, message: undefined, metadata: undefined };
+    }
+    const data = response.data as Record<string, unknown>;
     return {
-      status: data.status,
-      message: (data as Record<string, unknown>).message as string | undefined,
+      status: data.status as string,
+      message: data.message as string | undefined,
       data: data.data,
-      metadata: mapMetadata((data as Record<string, unknown>).metadata as Record<string, unknown> | undefined),
+      metadata: mapMetadata(data.metadata as Record<string, unknown> | undefined),
     };
   },
 };

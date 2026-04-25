@@ -10,8 +10,10 @@ interface FileListProps {
   onFolderClick: (prefix: string) => void;
   onRetry: () => void;
   onFileRead?: (objectName: string) => void;
-  onFileIndex?: (objectName: string) => void;
-  onFolderIndex?: (prefix: string) => void;
+  onFileIndexLightRAG?: (objectName: string) => void;
+  onFileIndexClassical?: (objectName: string) => void;
+  onFolderIndexLightRAG?: (prefix: string) => void;
+  onFolderIndexClassical?: (prefix: string) => void;
 }
 
 export default function FileList({
@@ -22,8 +24,10 @@ export default function FileList({
   onFolderClick,
   onRetry,
   onFileRead,
-  onFileIndex,
-  onFolderIndex,
+  onFileIndexLightRAG,
+  onFileIndexClassical,
+  onFolderIndexLightRAG,
+  onFolderIndexClassical,
 }: Readonly<FileListProps>) {
   if (isLoading) {
     return (
@@ -84,7 +88,8 @@ export default function FileList({
           key={folder.prefix}
           name={folder.name}
           onClick={() => onFolderClick(folder.prefix)}
-          onIndex={onFolderIndex ? () => onFolderIndex(folder.prefix) : undefined}
+          onIndexLightRAG={onFolderIndexLightRAG ? () => onFolderIndexLightRAG(folder.prefix) : undefined}
+          onIndexClassical={onFolderIndexClassical ? () => onFolderIndexClassical(folder.prefix) : undefined}
         />
       ))}
       {files.map((file) => (
@@ -94,7 +99,8 @@ export default function FileList({
           size={file.size}
           lastModified={file.lastModified}
           onRead={onFileRead ? () => onFileRead(file.objectName) : undefined}
-          onIndex={onFileIndex ? () => onFileIndex(file.objectName) : undefined}
+          onIndexLightRAG={onFileIndexLightRAG ? () => onFileIndexLightRAG(file.objectName) : undefined}
+          onIndexClassical={onFileIndexClassical ? () => onFileIndexClassical(file.objectName) : undefined}
         />
       ))}
     </div>

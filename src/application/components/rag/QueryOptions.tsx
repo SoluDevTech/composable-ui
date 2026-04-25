@@ -3,15 +3,17 @@ import type { QueryMode, ClassicalQueryMode } from "@/domain/entities/rag/queryR
 
 interface QueryOptionsProps {
   pipeline: "lightrag" | "classical";
-  mode: string;
+  mode: QueryMode | ClassicalQueryMode;
   topK: number;
   numVariations?: number;
   relevanceThreshold?: number;
+  vectorDistanceThreshold?: number;
   enableLlmJudge?: boolean;
-  onModeChange: (mode: string) => void;
+  onModeChange: (mode: QueryMode | ClassicalQueryMode) => void;
   onTopKChange: (topK: number) => void;
   onNumVariationsChange?: (val: number) => void;
   onRelevanceThresholdChange?: (val: number) => void;
+  onVectorDistanceThresholdChange?: (val: number) => void;
   onEnableLlmJudgeChange?: (val: boolean) => void;
 }
 
@@ -37,11 +39,13 @@ export default function QueryOptions({
   topK,
   numVariations,
   relevanceThreshold,
+  vectorDistanceThreshold,
   enableLlmJudge,
   onModeChange,
   onTopKChange,
   onNumVariationsChange,
   onRelevanceThresholdChange,
+  onVectorDistanceThresholdChange,
   onEnableLlmJudgeChange,
 }: Readonly<QueryOptionsProps>) {
   const [expanded, setExpanded] = useState(false);
@@ -73,7 +77,7 @@ export default function QueryOptions({
             <select
               id="query-mode"
               value={mode}
-              onChange={(e) => onModeChange(e.target.value)}
+              onChange={(e) => onModeChange(e.target.value as QueryMode | ClassicalQueryMode)}
               className="bg-surface-container-lowest border border-outline-variant rounded-md px-3 py-1.5 font-body text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-secondary-brand"
             >
               {modes.map((m) => (
@@ -128,6 +132,22 @@ export default function QueryOptions({
                   step={0.1}
                   value={relevanceThreshold ?? 5}
                   onChange={(e) => onRelevanceThresholdChange?.(Number(e.target.value))}
+                  className="bg-surface-container-lowest border border-outline-variant rounded-md px-3 py-1.5 font-body text-sm text-on-surface w-24 focus:outline-none focus:ring-2 focus:ring-secondary-brand"
+                />
+              </div>
+
+              <div className="flex items-center gap-4">
+                <label htmlFor="query-vector-threshold" className="font-headline text-sm text-on-surface-variant w-28">
+                  Vector Dist.
+                </label>
+                <input
+                  id="query-vector-threshold"
+                  type="number"
+                  min={0}
+                  max={1}
+                  step={0.01}
+                  value={vectorDistanceThreshold ?? 0.5}
+                  onChange={(e) => onVectorDistanceThresholdChange?.(Number(e.target.value))}
                   className="bg-surface-container-lowest border border-outline-variant rounded-md px-3 py-1.5 font-body text-sm text-on-surface w-24 focus:outline-none focus:ring-2 focus:ring-secondary-brand"
                 />
               </div>

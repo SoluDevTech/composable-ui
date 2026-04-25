@@ -40,25 +40,53 @@ describe("FolderRow", () => {
     expect(onClick).toHaveBeenCalledOnce();
   });
 
-  it("renders an index button when onIndex is provided", () => {
+  it("renders an index options button when onIndexLightRAG is provided", () => {
     renderWithProviders(
-      <FolderRow name="docs" onClick={vi.fn()} onIndex={vi.fn()} />,
+      <FolderRow name="docs" onClick={vi.fn()} onIndexLightRAG={vi.fn()} />,
     );
 
     expect(
-      screen.getByRole("button", { name: /index/i }),
+      screen.getByRole("button", { name: /index options/i }),
     ).toBeInTheDocument();
   });
 
-  it("calls onIndex when the index button is clicked", async () => {
+  it("shows dropdown with LightRAG option when index button is clicked", async () => {
     const user = userEvent.setup();
-    const onIndex = vi.fn();
+    const onIndexLightRAG = vi.fn();
 
     renderWithProviders(
-      <FolderRow name="docs" onClick={vi.fn()} onIndex={onIndex} />,
+      <FolderRow name="docs" onClick={vi.fn()} onIndexLightRAG={onIndexLightRAG} />,
     );
 
-    await user.click(screen.getByRole("button", { name: /index/i }));
-    expect(onIndex).toHaveBeenCalledOnce();
+    await user.click(screen.getByRole("button", { name: /index options/i }));
+    expect(screen.getByText("Index with LightRAG")).toBeInTheDocument();
+  });
+
+  it("calls onIndexLightRAG when LightRAG option is clicked", async () => {
+    const user = userEvent.setup();
+    const onIndexLightRAG = vi.fn();
+
+    renderWithProviders(
+      <FolderRow name="docs" onClick={vi.fn()} onIndexLightRAG={onIndexLightRAG} />,
+    );
+
+    await user.click(screen.getByRole("button", { name: /index options/i }));
+    await user.click(screen.getByText("Index with LightRAG"));
+
+    expect(onIndexLightRAG).toHaveBeenCalledOnce();
+  });
+
+  it("calls onIndexClassical when Classical option is clicked", async () => {
+    const user = userEvent.setup();
+    const onIndexClassical = vi.fn();
+
+    renderWithProviders(
+      <FolderRow name="docs" onClick={vi.fn()} onIndexClassical={onIndexClassical} />,
+    );
+
+    await user.click(screen.getByRole("button", { name: /index options/i }));
+    await user.click(screen.getByText("Index with Classical"));
+
+    expect(onIndexClassical).toHaveBeenCalledOnce();
   });
 });

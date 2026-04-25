@@ -117,8 +117,11 @@ describe("RagPage", () => {
     ).toBeInTheDocument();
   });
 
-  it("WorkspaceSelector is visible", () => {
+  it("WorkspaceSelector is visible on Query tab", async () => {
+    const user = userEvent.setup();
     renderWithProviders(<RagPage />, { initialEntries: ["/rag"] });
+
+    await user.click(screen.getByRole("tab", { name: /query/i }));
 
     expect(
       screen.getByLabelText(/workspace|working.?dir/i),

@@ -73,7 +73,7 @@ describe("FileRow", () => {
     expect(screen.getByText("1.2 MB")).toBeInTheDocument();
   });
 
-  it("does not have a clickable role — it is a row, not a button", () => {
+  it("does not render buttons when no callbacks provided", () => {
     renderWithProviders(
       <FileRow
         filename="readme.md"
@@ -117,35 +117,74 @@ describe("FileRow", () => {
     expect(onRead).toHaveBeenCalledOnce();
   });
 
-  it("renders an index button when onIndex is provided", () => {
+  it("renders an index options button when onIndexLightRAG is provided", () => {
     renderWithProviders(
       <FileRow
         filename="report.pdf"
         size={1024}
         lastModified="2026-04-06T10:00:00Z"
-        onIndex={vi.fn()}
+        onIndexLightRAG={vi.fn()}
       />,
     );
 
     expect(
-      screen.getByRole("button", { name: /index/i }),
+      screen.getByRole("button", { name: /index options/i }),
     ).toBeInTheDocument();
   });
 
-  it("calls onIndex when the index button is clicked", async () => {
+  it("shows LightRAG option in dropdown when clicked", async () => {
     const user = userEvent.setup();
-    const onIndex = vi.fn();
+    const onIndexLightRAG = vi.fn();
 
     renderWithProviders(
       <FileRow
         filename="report.pdf"
         size={1024}
         lastModified="2026-04-06T10:00:00Z"
-        onIndex={onIndex}
+        onIndexLightRAG={onIndexLightRAG}
       />,
     );
 
-    await user.click(screen.getByRole("button", { name: /index/i }));
-    expect(onIndex).toHaveBeenCalledOnce();
+    await user.click(screen.getByRole("button", { name: /index options/i }));
+
+    expect(screen.getByText("Index with LightRAG")).toBeInTheDocument();
+  });
+
+  it("calls onIndexLightRAG when LightRAG option is clicked", async () => {
+    const user = userEvent.setup();
+    const onIndexLightRAG = vi.fn();
+
+    renderWithProviders(
+      <FileRow
+        filename="report.pdf"
+        size={1024}
+        lastModified="2026-04-06T10:00:00Z"
+        onIndexLightRAG={onIndexLightRAG}
+      />,
+    );
+
+    await user.click(screen.getByRole("button", { name: /index options/i }));
+    await user.click(screen.getByText("Index with LightRAG"));
+
+    expect(onIndexLightRAG).toHaveBeenCalledOnce();
+  });
+
+  it("calls onIndexClassical when Classical option is clicked", async () => {
+    const user = userEvent.setup();
+    const onIndexClassical = vi.fn();
+
+    renderWithProviders(
+      <FileRow
+        filename="report.pdf"
+        size={1024}
+        lastModified="2026-04-06T10:00:00Z"
+        onIndexClassical={onIndexClassical}
+      />,
+    );
+
+    await user.click(screen.getByRole("button", { name: /index options/i }));
+    await user.click(screen.getByText("Index with Classical"));
+
+    expect(onIndexClassical).toHaveBeenCalledOnce();
   });
 });

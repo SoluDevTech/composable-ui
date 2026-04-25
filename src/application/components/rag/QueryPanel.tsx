@@ -4,6 +4,7 @@ import QueryOptions from "@/application/components/rag/QueryOptions";
 import QueryResults from "@/application/components/rag/QueryResults";
 import { useRagQuery } from "@/application/hooks/rag/useRagQuery";
 import { useClassicalQuery } from "@/application/hooks/rag/useClassicalQuery";
+import type { QueryMode, ClassicalQueryMode } from "@/domain/entities/rag/queryRequest";
 
 interface QueryPanelProps {
   workingDir: string;
@@ -14,10 +15,11 @@ export default function QueryPanel({
 }: Readonly<QueryPanelProps>) {
   const [pipeline, setPipeline] = useState<"lightrag" | "classical">("lightrag");
   const [query, setQuery] = useState("");
-  const [mode, setMode] = useState("naive");
+  const [mode, setMode] = useState<QueryMode | ClassicalQueryMode>("naive");
   const [topK, setTopK] = useState(10);
   const [numVariations, setNumVariations] = useState(3);
   const [relevanceThreshold, setRelevanceThreshold] = useState(5);
+  const [vectorDistanceThreshold, setVectorDistanceThreshold] = useState(0.5);
   const [enableLlmJudge, setEnableLlmJudge] = useState(true);
 
   const ragQuery = useRagQuery();
@@ -31,7 +33,7 @@ export default function QueryPanel({
     if (!workingDir || !query.trim()) return;
 
     if (pipeline === "lightrag") {
-      ragQuery.mutate({ workingDir, query, mode, topK });
+      ragQuery.mutate({ workingDir, query, mode: mode as QueryMode, topK });
     } else {
       classicalQuery.mutate({
         workingDir,
@@ -39,8 +41,9 @@ export default function QueryPanel({
         topK,
         numVariations,
         relevanceThreshold,
+        vectorDistanceThreshold,
         enableLlmJudge,
-        mode: mode as "vector" | "hybrid",
+        mode: mode as ClassicalQueryMode,
       });
     }
   }
@@ -72,11 +75,13 @@ export default function QueryPanel({
         topK={topK}
         numVariations={numVariations}
         relevanceThreshold={relevanceThreshold}
+        vectorDistanceThreshold={vectorDistanceThreshold}
         enableLlmJudge={enableLlmJudge}
         onModeChange={setMode}
         onTopKChange={setTopK}
         onNumVariationsChange={setNumVariations}
         onRelevanceThresholdChange={setRelevanceThreshold}
+        onVectorDistanceThresholdChange={setVectorDistanceThreshold}
         onEnableLlmJudgeChange={setEnableLlmJudge}
       />
 

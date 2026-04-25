@@ -6,12 +6,12 @@ import UploadButton from "@/application/components/rag/UploadButton";
 import RagTabBar from "@/application/components/rag/RagTabBar";
 import QueryPanel from "@/application/components/rag/QueryPanel";
 import WorkspaceSelector from "@/application/components/rag/WorkspaceSelector";
-import IndexActionMenu from "@/application/components/rag/IndexActionMenu";
 import FileContentPanel from "@/application/components/rag/FileContentPanel";
 import { useFolders } from "@/application/hooks/rag/useFolders";
 import { useFiles } from "@/application/hooks/rag/useFiles";
 import { useIndexFile } from "@/application/hooks/rag/useIndexFile";
 import { useIndexFolder } from "@/application/hooks/rag/useIndexFolder";
+import { useClassicalIndexFile } from "@/application/hooks/rag/useClassicalIndexFile";
 import { useClassicalIndexFolder } from "@/application/hooks/rag/useClassicalIndexFolder";
 import { useReadFile } from "@/application/hooks/rag/useReadFile";
 
@@ -35,6 +35,7 @@ export default function RagPage() {
 
   const indexFile = useIndexFile();
   const indexFolder = useIndexFolder();
+  const classicalIndexFile = useClassicalIndexFile();
   const classicalIndexFolder = useClassicalIndexFolder();
   const readFile = useReadFile();
 
@@ -65,38 +66,33 @@ export default function RagPage() {
     filesQuery.refetch();
   };
 
-  const handleLightRagIndex = () => {
-    const dir = workingDir || currentPrefix;
-    if (!dir) return;
-    indexFolder.mutate({ workingDir: dir, recursive: true });
-  };
-
-  const handleClassicalIndex = () => {
-    const dir = workingDir || currentPrefix;
-    if (!dir) return;
-    classicalIndexFolder.mutate({
-      workingDir: dir,
-      recursive: true,
-      chunkSize: 1000,
-      chunkOverlap: 200,
-    });
-  };
-
   const handleFileRead = (objectName: string) => {
     readFile.mutate(objectName);
     setFileContentOpen(true);
   };
 
-  const handleFileIndex = (objectName: string) => {
+  const handleFileIndexLightRAG = (objectName: string) => {
     const dir = workingDir || currentPrefix;
     if (!dir) return;
     indexFile.mutate({ fileName: objectName, workingDir: dir });
   };
 
-  const handleFolderIndex = (prefix: string) => {
+  const handleFileIndexClassical = (objectName: string) => {
+    const dir = workingDir || currentPrefix;
+    if (!dir) return;
+    classicalIndexFile.mutate({ fileName: objectName, workingDir: dir, chunkSize: 1000, chunkOverlap: 200 });
+  };
+
+  const handleFolderIndexLightRAG = (prefix: string) => {
     const dir = workingDir || prefix;
     if (!dir) return;
     indexFolder.mutate({ workingDir: dir, recursive: true });
+  };
+
+  const handleFolderIndexClassical = (prefix: string) => {
+    const dir = workingDir || prefix;
+    if (!dir) return;
+    classicalIndexFolder.mutate({ workingDir: dir, recursive: true, chunkSize: 1000, chunkOverlap: 200 });
   };
 
   const isLoading = foldersQuery.isLoading || filesQuery.isLoading;
@@ -129,11 +125,6 @@ export default function RagPage() {
 
           <div className="flex items-center justify-between mb-6">
             <RagTabBar activeTab={activeTab} onTabChange={setActiveTab} />
-            <WorkspaceSelector
-              value={workingDir}
-              onChange={setWorkingDir}
-              folders={folderSuggestions}
-            />
           </div>
 
           {activeTab === "browse" && (
@@ -141,13 +132,7 @@ export default function RagPage() {
               <BreadcrumbBar segments={segments} onNavigate={handleNavigate} />
 
               <div className="relative">
-                <div className="flex items-center justify-between mb-4">
-                  <h2 className="font-headline text-lg font-semibold text-on-surface">Files</h2>
-                  <IndexActionMenu
-                    onIndexLightRAG={handleLightRagIndex}
-                    onIndexClassical={handleClassicalIndex}
-                  />
-                </div>
+                <h2 className="font-headline text-lg font-semibold text-on-surface mb-4">Files</h2>
 
                 <FileList
                   folders={foldersQuery.data ?? []}
@@ -160,8 +145,10 @@ export default function RagPage() {
                     filesQuery.refetch();
                   }}
                   onFileRead={handleFileRead}
-                  onFileIndex={handleFileIndex}
-                  onFolderIndex={handleFolderIndex}
+                  onFileIndexLightRAG={handleFileIndexLightRAG}
+                  onFileIndexClassical={handleFileIndexClassical}
+                  onFolderIndexLightRAG={handleFolderIndexLightRAG}
+                  onFolderIndexClassical={handleFolderIndexClassical}
                 />
 
                 {fileContentOpen && readFile.data && (
@@ -177,9 +164,16 @@ export default function RagPage() {
           )}
 
           {activeTab === "query" && (
-            <QueryPanel
-              workingDir={workingDir}
-            />
+            <>
+              <WorkspaceSelector
+                value={workingDir}
+                onChange={setWorkingDir}
+                folders={folderSuggestions}
+              />
+              <QueryPanel
+                workingDir={workingDir}
+              />
+            </>
           )}
         </div>
       </div>
