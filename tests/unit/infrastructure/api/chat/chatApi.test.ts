@@ -95,7 +95,7 @@ describe("chatApi", () => {
 
       expect(apiClient.post).toHaveBeenCalledWith("/api/v1/chat/thread-123", {
         message: "Hello",
-      });
+      }, { timeout: 300000 });
       expect(result).toEqual(message);
     });
   });
