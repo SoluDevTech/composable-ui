@@ -2,8 +2,8 @@ import type { AgentConfigMetadata } from "@/domain/entities/agent/agentConfigMet
 import StatusBadge from "@/application/components/shared/StatusBadge";
 
 interface AgentCardProps {
-  agent: AgentConfigMetadata;
-  onConfigure: (name: string) => void;
+  readonly agent: AgentConfigMetadata;
+  readonly onConfigure: (name: string) => void;
 }
 
 const AGENT_ICONS: Record<string, string> = {

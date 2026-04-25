@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useId } from "react";
 import { Button } from "@/application/components/ui/button";
 import { Input } from "@/application/components/ui/input";
 import { Label } from "@/application/components/ui/label";
@@ -20,6 +20,8 @@ export default function KeyValueEditor({
 }: Readonly<KeyValueEditorProps>) {
   const [keyInput, setKeyInput] = useState("");
   const [valueInput, setValueInput] = useState("");
+  const keyId = useId();
+  const valId = useId();
 
   function addEntry() {
     const trimmedKey = keyInput.trim();
@@ -40,21 +42,25 @@ export default function KeyValueEditor({
 
   return (
     <div className="space-y-2">
-      <Label className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">
+      <Label htmlFor={keyId} className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">
         {label}
       </Label>
       <div className="flex gap-2">
         <Input
+          id={keyId}
           value={keyInput}
           onChange={(e) => setKeyInput(e.target.value)}
           placeholder={keyPlaceholder}
           className="flex-1"
+          aria-label={`${label} key`}
         />
         <Input
+          id={valId}
           value={valueInput}
           onChange={(e) => setValueInput(e.target.value)}
           placeholder={valuePlaceholder}
           className="flex-1"
+          aria-label={`${label} value`}
         />
         <Button type="button" variant="outline" size="sm" onClick={addEntry}>
           Add

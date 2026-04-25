@@ -30,7 +30,7 @@ export default function McpServerEditor({
   }
 
   const isStdio = value.transport === McpTransportType.STDIO;
-  const isHttp = value.transport === McpTransportType.HTTP;
+  const idBase = `mcp-${value.name || "new"}`;
 
   return (
     <div className="bg-surface-container-low rounded-xl p-4 space-y-4">
@@ -51,21 +51,23 @@ export default function McpServerEditor({
 
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <Label htmlFor={`mcp-name-${value.name}`}>Name</Label>
+          <Label htmlFor={`${idBase}-name`}>Name</Label>
           <Input
-            id={`mcp-name-${value.name}`}
+            id={`${idBase}-name`}
             value={value.name}
             onChange={(e) => update({ name: e.target.value })}
             placeholder="my-server"
           />
         </div>
         <div>
-          <Label htmlFor={`mcp-transport-${value.name}`}>Transport</Label>
+          <Label htmlFor={`${idBase}-transport`}>Transport</Label>
           <Select
             value={value.transport}
-            onValueChange={(v) => update({ transport: v as McpTransportType })}
+            onValueChange={(v) =>
+              update({ transport: v as McpTransportType })
+            }
           >
-            <SelectTrigger id={`mcp-transport-${value.name}`}>
+            <SelectTrigger id={`${idBase}-transport`}>
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -80,11 +82,13 @@ export default function McpServerEditor({
         <>
           <Separator />
           <div>
-            <Label htmlFor={`mcp-command-${value.name}`}>Command</Label>
+            <Label htmlFor={`${idBase}-command`}>Command</Label>
             <Input
-              id={`mcp-command-${value.name}`}
+              id={`${idBase}-command`}
               value={value.command ?? ""}
-              onChange={(e) => update({ command: e.target.value || undefined })}
+              onChange={(e) =>
+                update({ command: e.target.value || undefined })
+              }
               placeholder="npx"
             />
           </div>
@@ -97,13 +101,13 @@ export default function McpServerEditor({
         </>
       )}
 
-      {isHttp && (
+      {!isStdio && (
         <>
           <Separator />
           <div>
-            <Label htmlFor={`mcp-url-${value.name}`}>URL</Label>
+            <Label htmlFor={`${idBase}-url`}>URL</Label>
             <Input
-              id={`mcp-url-${value.name}`}
+              id={`${idBase}-url`}
               value={value.url ?? ""}
               onChange={(e) => update({ url: e.target.value || undefined })}
               placeholder="http://localhost:3000/mcp"
@@ -119,36 +123,24 @@ export default function McpServerEditor({
         </>
       )}
 
-      {!isStdio && (
-        <KeyValueEditor
-          label="Env"
-          value={value.env}
-          onChange={(env) => update({ env })}
-          keyPlaceholder="Variable name"
-          valuePlaceholder="Variable value"
-        />
-      )}
-
-      {isStdio && (
-        <>
-          <Separator />
-          <KeyValueEditor
-            label="Env"
-            value={value.env}
-            onChange={(env) => update({ env })}
-            keyPlaceholder="Variable name"
-            valuePlaceholder="Variable value"
-          />
-        </>
-      )}
+      <Separator />
+      <KeyValueEditor
+        label="Env"
+        value={value.env}
+        onChange={(env) => update({ env })}
+        keyPlaceholder="Variable name"
+        valuePlaceholder="Variable value"
+      />
 
       <div>
-        <Label htmlFor={`mcp-auth-${value.name}`}>Auth Token</Label>
+        <Label htmlFor={`${idBase}-auth`}>Auth Token</Label>
         <Input
-          id={`mcp-auth-${value.name}`}
+          id={`${idBase}-auth`}
           type="password"
           value={value.auth_token ?? ""}
-          onChange={(e) => update({ auth_token: e.target.value || undefined })}
+          onChange={(e) =>
+            update({ auth_token: e.target.value || undefined })
+          }
           placeholder="Optional auth token"
         />
       </div>

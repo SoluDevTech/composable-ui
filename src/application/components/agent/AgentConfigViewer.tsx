@@ -3,15 +3,15 @@ import { toast } from "sonner";
 import { useAgentConfig } from "@/application/hooks/agent/useAgentConfig";
 import { useUpdateAgent } from "@/application/hooks/agent/useUpdateAgent";
 import { useDeleteAgent } from "@/application/hooks/agent/useDeleteAgent";
-import { serializeAgentConfig } from "@/application/lib/yaml";
+import { serializeAgentConfig, agentConfigToYamlFile } from "@/application/lib/yaml";
 import type { AgentConfig } from "@/domain/entities/agent/agentConfig";
 import type { AgentConfigFormData } from "@/domain/entities/agent/agentConfigSchema";
-import { agentConfigToYamlFile } from "@/application/lib/yaml";
 import StatusBadge from "@/application/components/shared/StatusBadge";
 import ToolTag from "@/application/components/shared/ToolTag";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "@/application/components/ui/dialog";
@@ -21,9 +21,9 @@ import { Separator } from "@/application/components/ui/separator";
 import AgentConfigForm from "./AgentConfigForm";
 
 interface AgentConfigViewerProps {
-  agentName: string;
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
+  readonly agentName: string;
+  readonly open: boolean;
+  readonly onOpenChange: (open: boolean) => void;
 }
 
 export default function AgentConfigViewer({
@@ -95,7 +95,7 @@ export default function AgentConfigViewer({
     a.download = `${agentName}.yaml`;
     document.body.appendChild(a);
     a.click();
-    document.body.removeChild(a);
+    a.remove();
     setTimeout(() => URL.revokeObjectURL(url), 100);
   }
 
@@ -112,12 +112,15 @@ export default function AgentConfigViewer({
         if (!v) handleClose();
       }}
     >
-      <DialogContent className="max-w-3xl max-h-[90vh]">
-        <DialogHeader>
-          <DialogTitle className="font-headline text-2xl font-bold text-on-surface">
-            {agentName}
-          </DialogTitle>
-        </DialogHeader>
+        <DialogContent className="max-w-3xl max-h-[90vh] flex flex-col overflow-hidden">
+          <DialogHeader>
+            <DialogTitle className="font-headline text-2xl font-bold text-on-surface">
+              {agentName}
+            </DialogTitle>
+            <DialogDescription className="sr-only">
+              Agent configuration for {agentName}
+            </DialogDescription>
+          </DialogHeader>
 
         {mode === "edit" && config ? (
           <AgentConfigForm
@@ -308,23 +311,18 @@ export default function AgentConfigViewer({
                 disabled={!config}
                 className="px-6 py-3 rounded-full font-headline text-xs font-bold uppercase tracking-widest"
               >
-                <span className="material-symbols-outlined text-sm mr-1">
-                  download
-                </span>
+                <span className="material-symbols-outlined text-sm mr-1">download</span>{" "}
                 Export YAML
               </Button>
               <Button
                 type="button"
                 onClick={() => {
                   setMode("edit");
-                  setConfirmDelete(false);
                 }}
                 disabled={!config}
                 className="px-6 py-3 rounded-full bg-primary-container text-white font-headline text-xs font-bold uppercase tracking-widest hover:opacity-90 transition-opacity"
               >
-                <span className="material-symbols-outlined text-sm mr-1">
-                  edit
-                </span>
+                <span className="material-symbols-outlined text-sm mr-1">edit</span>{" "}
                 Edit
               </Button>
               <div className="flex-1" />

@@ -70,6 +70,14 @@ describe("backendConfigSchema", () => {
   it("rejects invalid backend type", () => {
     expect(() => backendConfigSchema.parse({ type: "invalid" })).toThrow();
   });
+
+  it("accepts null root_dir", () => {
+    const result = backendConfigSchema.parse({
+      type: BackendType.STATE,
+      root_dir: null,
+    });
+    expect(result.root_dir).toBeNull();
+  });
 });
 
 describe("mcpServerConfigSchema", () => {
@@ -210,6 +218,60 @@ describe("agentConfigSchema", () => {
 
   it("rejects missing required fields", () => {
     expect(() => agentConfigSchema.parse({})).toThrow();
+  });
+
+  it("rejects whitespace-only name", () => {
+    expect(() =>
+      agentConfigSchema.parse({
+        name: "   ",
+        model: "gpt-4",
+        tools: [],
+        middleware: [],
+        backend: { type: BackendType.STATE },
+        hitl: { rules: {} },
+        memory: [],
+        skills: [],
+        subagents: [],
+        mcp_servers: [],
+        debug: false,
+      }),
+    ).toThrow();
+  });
+
+  it("rejects name over 100 characters", () => {
+    expect(() =>
+      agentConfigSchema.parse({
+        name: "a".repeat(101),
+        model: "gpt-4",
+        tools: [],
+        middleware: [],
+        backend: { type: BackendType.STATE },
+        hitl: { rules: {} },
+        memory: [],
+        skills: [],
+        subagents: [],
+        mcp_servers: [],
+        debug: false,
+      }),
+    ).toThrow();
+  });
+
+  it("rejects name with special characters", () => {
+    expect(() =>
+      agentConfigSchema.parse({
+        name: "my agent!",
+        model: "gpt-4",
+        tools: [],
+        middleware: [],
+        backend: { type: BackendType.STATE },
+        hitl: { rules: {} },
+        memory: [],
+        skills: [],
+        subagents: [],
+        mcp_servers: [],
+        debug: false,
+      }),
+    ).toThrow();
   });
 
   it("rejects invalid middleware value", () => {

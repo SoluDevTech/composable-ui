@@ -28,9 +28,7 @@ export default function AgentsPage() {
               onClick={() => setCreateDialogOpen(true)}
               className="flex items-center gap-3 bg-primary-container text-white rounded-full px-8 py-4 font-headline text-xs font-bold uppercase tracking-widest hover:opacity-90 transition-opacity shrink-0"
             >
-              <span className="material-symbols-outlined text-lg">
-                add_circle
-              </span>{" "}
+              <span className="material-symbols-outlined text-lg">add_circle</span>{" "}
               Create Agent
             </button>
           </div>

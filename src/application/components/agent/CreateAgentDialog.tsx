@@ -10,6 +10,7 @@ import {
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "@/application/components/ui/dialog";
@@ -19,8 +20,8 @@ import type { AgentConfig } from "@/domain/entities/agent/agentConfig";
 import { agentConfigToYamlFile } from "@/application/lib/yaml";
 
 interface CreateAgentDialogProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
+  readonly open: boolean;
+  readonly onOpenChange: (open: boolean) => void;
 }
 
 export default function CreateAgentDialog({
@@ -91,11 +92,14 @@ export default function CreateAgentDialog({
 
   return (
     <Dialog open={open} onOpenChange={(v) => { if (!v) handleClose(); }}>
-      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-3xl max-h-[90vh] flex flex-col overflow-hidden">
         <DialogHeader>
           <DialogTitle className="font-headline text-2xl font-bold text-on-surface">
             Create Agent
           </DialogTitle>
+          <DialogDescription className="sr-only">
+            Create a new agent via form or YAML upload
+          </DialogDescription>
         </DialogHeader>
 
         <Tabs value={tab} onValueChange={setTab}>

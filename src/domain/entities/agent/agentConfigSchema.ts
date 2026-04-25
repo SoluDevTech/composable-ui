@@ -12,37 +12,37 @@ export const hitlConfigSchema = z.object({
 });
 
 export const backendConfigSchema = z.object({
-  type: z.nativeEnum(BackendType),
-  root_dir: z.string().optional(),
+  type: z.enum([BackendType.STATE, BackendType.STORE, BackendType.FILESYSTEM, BackendType.COMPOSITE]),
+  root_dir: z.string().nullable().optional(),
 });
 
 export const mcpServerConfigSchema = z.object({
-  name: z.string().min(1),
+  name: z.string().min(1, "MCP server name is required"),
   transport: z.enum([McpTransportType.STDIO, McpTransportType.HTTP]),
-  command: z.string().optional(),
+  command: z.string().nullable().optional(),
   args: z.array(z.string()),
-  url: z.string().optional(),
+  url: z.string().nullable().optional(),
   headers: z.record(z.string(), z.string()),
   env: z.record(z.string(), z.string()),
-  auth_token: z.string().optional(),
+  auth_token: z.string().nullable().optional(),
 });
 
 export const subAgentConfigSchema = z.object({
-  name: z.string().min(1),
-  description: z.string().min(1),
-  instructions: z.string().optional(),
-  model: z.string().optional(),
+  name: z.string().min(1, "Subagent name is required"),
+  description: z.string().min(1, "Subagent description is required"),
+  instructions: z.string().nullable().optional(),
+  model: z.string().nullable().optional(),
   tools: z.array(z.string()),
   skills: z.array(z.string()),
   mcp_servers: z.array(mcpServerConfigSchema),
-  response_format: z.record(z.string(), z.unknown()).optional(),
+  response_format: z.record(z.string(), z.unknown()).nullable().optional(),
 });
 
 export const agentConfigSchema = z.object({
-  name: z.string().min(1),
-  model: z.string().min(1),
-  system_prompt: z.string().optional(),
-  system_prompt_file: z.string().optional(),
+  name: z.string().min(1, "Agent name is required").max(100, "Agent name must be 100 characters or less").regex(/^[a-zA-Z0-9._-]+$/, "Agent name must contain only alphanumeric characters, dots, hyphens, and underscores"),
+  model: z.string().min(1, "Model is required"),
+  system_prompt: z.string().nullable().optional(),
+  system_prompt_file: z.string().nullable().optional(),
   tools: z.array(z.string()),
   middleware: z
     .enum([
@@ -57,7 +57,7 @@ export const agentConfigSchema = z.object({
   skills: z.array(z.string()),
   subagents: z.array(subAgentConfigSchema),
   mcp_servers: z.array(mcpServerConfigSchema),
-  response_format: z.record(z.string(), z.unknown()).optional(),
+  response_format: z.record(z.string(), z.unknown()).nullable().optional(),
   debug: z.boolean(),
 });
 

@@ -1,4 +1,4 @@
-import { useState, type KeyboardEvent } from "react";
+import { useState, useId, type KeyboardEvent } from "react";
 import { Badge } from "@/application/components/ui/badge";
 import { Button } from "@/application/components/ui/button";
 import { Input } from "@/application/components/ui/input";
@@ -18,6 +18,7 @@ export default function StringListEditor({
   placeholder = "Add item...",
 }: Readonly<StringListEditorProps>) {
   const [inputValue, setInputValue] = useState("");
+  const inputId = useId();
 
   function addItem() {
     const trimmed = inputValue.trim();
@@ -39,16 +40,18 @@ export default function StringListEditor({
 
   return (
     <div className="space-y-2">
-      <Label className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">
+      <Label htmlFor={inputId} className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">
         {label}
       </Label>
       <div className="flex gap-2">
         <Input
+          id={inputId}
           value={inputValue}
           onChange={(e) => setInputValue(e.target.value)}
           onKeyDown={handleKeyDown}
           placeholder={placeholder}
           className="flex-1"
+          name={`${label.toLowerCase().replace(/\s+/g, '-')}-input`}
         />
         <Button type="button" variant="outline" size="sm" onClick={addItem}>
           Add
