@@ -1,15 +1,7 @@
 import { ragApiClient } from "@/infrastructure/api/ragAxiosInstance";
 import type { IRagQueryPort } from "@/domain/ports/rag/ragQueryPort";
-
-function mapMetadata(metadata: Record<string, unknown> | undefined): Record<string, unknown> | undefined {
-  if (!metadata) return undefined;
-  const mapped: Record<string, unknown> = {};
-  for (const [key, value] of Object.entries(metadata)) {
-    const camelKey = key.replaceAll(/_([a-z])/g, (_, letter) => letter.toUpperCase());
-    mapped[camelKey] = value;
-  }
-  return mapped;
-}
+import { ChunkResponseSchema } from "@/domain/entities/rag/chunkResponse";
+import { ClassicalQueryResponseSchema } from "@/domain/entities/rag/classicalQueryResponse";
 
 export const ragQueryApi: IRagQueryPort = {
   async queryLightRAG(request) {
@@ -19,16 +11,8 @@ export const ragQueryApi: IRagQueryPort = {
       mode: request.mode,
       top_k: request.top_k,
     });
-    if (Array.isArray(response.data)) {
-      return { status: "success", data: response.data, message: undefined, metadata: undefined };
-    }
-    const data = response.data as Record<string, unknown>;
-    return {
-      status: data.status as string,
-      message: data.message as string | undefined,
-      data: data.data,
-      metadata: mapMetadata(data.metadata as Record<string, unknown> | undefined),
-    };
+    const parsed = ChunkResponseSchema.array().parse(response.data);
+    return parsed;
   },
 
   async queryClassical(request) {
@@ -45,15 +29,7 @@ export const ragQueryApi: IRagQueryPort = {
       body.vector_distance_threshold = request.vector_distance_threshold;
     }
     const response = await ragApiClient.post<unknown>("/api/v1/classical/query", body);
-    if (Array.isArray(response.data)) {
-      return { status: "success", data: response.data, message: undefined, metadata: undefined };
-    }
-    const data = response.data as Record<string, unknown>;
-    return {
-      status: data.status as string,
-      message: data.message as string | undefined,
-      data: data.data,
-      metadata: mapMetadata(data.metadata as Record<string, unknown> | undefined),
-    };
+    const parsed = ClassicalQueryResponseSchema.parse(response.data);
+    return parsed;
   },
 };
