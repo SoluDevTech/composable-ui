@@ -28,9 +28,3 @@ export interface ClassicalQueryRequest {
   mode: ClassicalQueryMode;
 }
 
-export interface RagQueryResponse {
-  status: string;
-  message?: string;
-  data: unknown;
-  metadata?: unknown;
-}

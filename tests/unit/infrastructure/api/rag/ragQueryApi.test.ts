@@ -19,12 +19,14 @@ describe("ragQueryApi", () => {
   describe("queryLightRAG", () => {
     it("sends correct POST to /api/v1/query with body", async () => {
       const mockResponse = {
-        data: {
-          status: "success",
-          message: "Query completed",
-          data: "LightRAG response text",
-          metadata: { source_count: 5, elapsed_time_ms: 1200 },
-        },
+        data: [
+          {
+            reference_id: "ref-1",
+            content: "This is a LightRAG chunk",
+            file_path: "docs/rag.md",
+            chunk_id: "chunk-1",
+          },
+        ],
       };
       vi.mocked(ragApiClient.post).mockResolvedValue(mockResponse);
 
@@ -43,43 +45,32 @@ describe("ragQueryApi", () => {
         mode: "hybrid",
         top_k: 5,
       });
-      expect(result).toEqual({
-        status: "success",
-        message: "Query completed",
-        data: "LightRAG response text",
-        metadata: { sourceCount: 5, elapsedTimeMs: 1200 },
-      });
+      expect(result).toEqual([
+        {
+          reference_id: "ref-1",
+          content: "This is a LightRAG chunk",
+          file_path: "docs/rag.md",
+          chunk_id: "chunk-1",
+        },
+      ]);
     });
 
-    it("maps snake_case response to camelCase", async () => {
+    it("parses multiple chunks from backend", async () => {
       const mockResponse = {
-        data: {
-          status: "success",
-          data: "some result",
-          metadata: { source_count: 3, elapsed_time_ms: 800 },
-        },
-      };
-      vi.mocked(ragApiClient.post).mockResolvedValue(mockResponse);
-
-      const request = {
-        working_dir: "/data/project",
-        query: "test query",
-        mode: "local" as const,
-        top_k: 10,
-      };
-
-      const result = await ragQueryApi.queryLightRAG(request);
-
-      expect(result.metadata?.sourceCount).toBe(3);
-      expect(result.metadata?.elapsedTimeMs).toBe(800);
-    });
-
-    it("handles response without optional message and metadata", async () => {
-      const mockResponse = {
-        data: {
-          status: "success",
-          data: "LightRAG result",
-        },
+        data: [
+          {
+            reference_id: "ref-1",
+            content: "Chunk one",
+            file_path: "doc1.md",
+            chunk_id: "c1",
+          },
+          {
+            reference_id: null,
+            content: "Chunk two",
+            file_path: "doc2.md",
+            chunk_id: "c2",
+          },
+        ],
       };
       vi.mocked(ragApiClient.post).mockResolvedValue(mockResponse);
 
@@ -92,10 +83,9 @@ describe("ragQueryApi", () => {
 
       const result = await ragQueryApi.queryLightRAG(request);
 
-      expect(result.status).toBe("success");
-      expect(result.data).toBe("LightRAG result");
-      expect(result.message).toBeUndefined();
-      expect(result.metadata).toBeUndefined();
+      expect(result).toHaveLength(2);
+      expect(result[0].content).toBe("Chunk one");
+      expect(result[1].reference_id).toBeNull();
     });
 
     it("propagates error when axios rejects", async () => {
@@ -114,6 +104,22 @@ describe("ragQueryApi", () => {
         "Internal server error",
       );
     });
+
+    it("throws ZodError when response does not match schema", async () => {
+      const mockResponse = {
+        data: { invalid: "response" },
+      };
+      vi.mocked(ragApiClient.post).mockResolvedValue(mockResponse);
+
+      const request = {
+        working_dir: "/data/project",
+        query: "test",
+        mode: "hybrid" as const,
+        top_k: 5,
+      };
+
+      await expect(ragQueryApi.queryLightRAG(request)).rejects.toThrow();
+    });
   });
 
   describe("queryClassical", () => {
@@ -122,8 +128,20 @@ describe("ragQueryApi", () => {
         data: {
           status: "success",
           message: "Classical query completed",
-          data: "Classical RAG response",
-          metadata: { source_count: 4, elapsed_time_ms: 950 },
+          queries: ["Explain vector search", "vector search explanation"],
+          chunks: [
+            {
+              chunk_id: "c1",
+              content: "Classical chunk content",
+              file_path: "docs/vector.md",
+              relevance_score: 8.5,
+              metadata: {},
+              bm25_score: 0.85,
+              vector_score: 0.92,
+              combined_score: 0.88,
+            },
+          ],
+          mode: "hybrid",
         },
       };
       vi.mocked(ragApiClient.post).mockResolvedValue(mockResponse);
@@ -152,19 +170,20 @@ describe("ragQueryApi", () => {
           mode: "hybrid",
         },
       );
-      expect(result).toEqual({
-        status: "success",
-        message: "Classical query completed",
-        data: "Classical RAG response",
-        metadata: { sourceCount: 4, elapsedTimeMs: 950 },
-      });
+      expect(result.status).toBe("success");
+      expect(result.chunks).toHaveLength(1);
+      expect(result.chunks[0].relevance_score).toBe(8.5);
+      expect(result.queries).toEqual(["Explain vector search", "vector search explanation"]);
+      expect(result.mode).toBe("hybrid");
     });
 
     it("sends optional vector_distance_threshold when provided", async () => {
       const mockResponse = {
         data: {
           status: "success",
-          data: "result text",
+          queries: [],
+          chunks: [],
+          mode: "vector",
         },
       };
       vi.mocked(ragApiClient.post).mockResolvedValue(mockResponse);
@@ -177,7 +196,7 @@ describe("ragQueryApi", () => {
         relevance_threshold: 0.5,
         vector_distance_threshold: 0.8,
         enable_llm_judge: false,
-        mode: "local" as const,
+        mode: "hybrid" as const,
       };
 
       await ragQueryApi.queryClassical(request);
@@ -194,7 +213,9 @@ describe("ragQueryApi", () => {
       const mockResponse = {
         data: {
           status: "success",
-          data: "result",
+          queries: [],
+          chunks: [],
+          mode: "vector",
         },
       };
       vi.mocked(ragApiClient.post).mockResolvedValue(mockResponse);
@@ -206,7 +227,7 @@ describe("ragQueryApi", () => {
         num_variations: 2,
         relevance_threshold: 0.5,
         enable_llm_judge: false,
-        mode: "local" as const,
+        mode: "hybrid" as const,
       };
 
       await ragQueryApi.queryClassical(request);
@@ -218,12 +239,21 @@ describe("ragQueryApi", () => {
       expect(calledBody).not.toHaveProperty("vector_distance_threshold");
     });
 
-    it("maps snake_case response to camelCase", async () => {
+    it("parses chunks with optional scores", async () => {
       const mockResponse = {
         data: {
           status: "success",
-          data: "classical result",
-          metadata: { source_count: 7, elapsed_time_ms: 2100 },
+          queries: ["test query"],
+          chunks: [
+            {
+              chunk_id: "c1",
+              content: "content",
+              file_path: "doc.md",
+              relevance_score: 7.0,
+              metadata: { key: "value" },
+            },
+          ],
+          mode: "vector",
         },
       };
       vi.mocked(ragApiClient.post).mockResolvedValue(mockResponse);
@@ -235,13 +265,14 @@ describe("ragQueryApi", () => {
         num_variations: 2,
         relevance_threshold: 0.6,
         enable_llm_judge: true,
-        mode: "hybrid" as const,
+        mode: "vector" as const,
       };
 
       const result = await ragQueryApi.queryClassical(request);
 
-      expect(result.metadata?.sourceCount).toBe(7);
-      expect(result.metadata?.elapsedTimeMs).toBe(2100);
+      expect(result.chunks[0].bm25_score).toBeUndefined();
+      expect(result.chunks[0].vector_score).toBeUndefined();
+      expect(result.chunks[0].combined_score).toBeUndefined();
     });
 
     it("propagates error when axios rejects", async () => {
@@ -256,12 +287,31 @@ describe("ragQueryApi", () => {
         num_variations: 2,
         relevance_threshold: 0.5,
         enable_llm_judge: false,
-        mode: "local" as const,
+        mode: "hybrid" as const,
       };
 
       await expect(ragQueryApi.queryClassical(request)).rejects.toThrow(
         "Service unavailable",
       );
+    });
+
+    it("throws ZodError when response does not match schema", async () => {
+      const mockResponse = {
+        data: { invalid: "response" },
+      };
+      vi.mocked(ragApiClient.post).mockResolvedValue(mockResponse);
+
+      const request = {
+        working_dir: "/data/project",
+        query: "test",
+        top_k: 5,
+        num_variations: 2,
+        relevance_threshold: 0.5,
+        enable_llm_judge: false,
+        mode: "hybrid" as const,
+      };
+
+      await expect(ragQueryApi.queryClassical(request)).rejects.toThrow();
     });
   });
 });
