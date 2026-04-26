@@ -12,8 +12,11 @@ export default function TopNav() {
     <header className="bg-slate-50/80 backdrop-blur-xl sticky top-0 z-50 shadow-sm px-8 py-4">
       <div className="flex items-center justify-between max-w-[1440px] mx-auto">
         {/* Left: Brand */}
-        <div className="font-headline text-xl font-bold text-on-surface tracking-tight select-none">
-          Composables
+        <div className="flex items-center gap-3">
+          <img src="/logo.png" alt="Logo" className="h-10 w-auto select-none" />
+          <span className="font-headline text-xl font-bold text-on-surface tracking-tight select-none">
+            Composables
+          </span>
         </div>
 
         {/* Center: Navigation */}
