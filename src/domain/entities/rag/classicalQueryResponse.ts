@@ -10,9 +10,9 @@ export const ClassicalChunkResponseSchema = z.object({
   file_path: z.string(),
   relevance_score: z.number(),
   metadata: z.any().default({}),
-  bm25_score: z.number().optional(),
-  vector_score: z.number().optional(),
-  combined_score: z.number().optional(),
+  bm25_score: z.number().nullish(),
+  vector_score: z.number().nullish(),
+  combined_score: z.number().nullish(),
 });
 
 /**

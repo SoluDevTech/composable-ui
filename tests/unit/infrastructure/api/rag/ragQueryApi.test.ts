@@ -239,7 +239,7 @@ describe("ragQueryApi", () => {
       expect(calledBody).not.toHaveProperty("vector_distance_threshold");
     });
 
-    it("parses chunks with optional scores", async () => {
+    it("parses chunks with null scores", async () => {
       const mockResponse = {
         data: {
           status: "success",
@@ -251,6 +251,9 @@ describe("ragQueryApi", () => {
               file_path: "doc.md",
               relevance_score: 7.0,
               metadata: { key: "value" },
+              bm25_score: null,
+              vector_score: null,
+              combined_score: null,
             },
           ],
           mode: "vector",
@@ -270,9 +273,9 @@ describe("ragQueryApi", () => {
 
       const result = await ragQueryApi.queryClassical(request);
 
-      expect(result.chunks[0].bm25_score).toBeUndefined();
-      expect(result.chunks[0].vector_score).toBeUndefined();
-      expect(result.chunks[0].combined_score).toBeUndefined();
+      expect(result.chunks[0].bm25_score).toBeNull();
+      expect(result.chunks[0].vector_score).toBeNull();
+      expect(result.chunks[0].combined_score).toBeNull();
     });
 
     it("propagates error when axios rejects", async () => {
