@@ -6,6 +6,8 @@ describe("useChatStore", () => {
     useChatStore.setState({
       activeThreadId: null,
       streamingContent: "",
+      streamingThinking: "",
+      structuredResponse: null,
       isStreaming: false,
       pendingUserMessage: null,
       useStreaming: true,
@@ -66,11 +68,32 @@ describe("useChatStore", () => {
     expect(state.pendingUserMessage).toBeNull();
   });
 
-  it("appendStreamChunk appends to streamingContent", () => {
-    useChatStore.getState().appendStreamChunk("Hello ");
-    useChatStore.getState().appendStreamChunk("world");
+  it("appendStreamEvent appends content to streamingContent", () => {
+    useChatStore.getState().appendStreamEvent({ type: "content", data: "Hello " });
+    useChatStore.getState().appendStreamEvent({ type: "content", data: "world" });
 
     expect(useChatStore.getState().streamingContent).toBe("Hello world");
+  });
+
+  it("appendStreamEvent appends thinking to streamingThinking", () => {
+    useChatStore.getState().appendStreamEvent({ type: "thinking", data: "I think " });
+    useChatStore.getState().appendStreamEvent({ type: "thinking", data: "this" });
+
+    expect(useChatStore.getState().streamingThinking).toBe("I think this");
+  });
+
+  it("appendStreamEvent sets structuredResponse from message event", () => {
+    const msg = { structured_response: { answer: 42 } };
+    useChatStore.getState().appendStreamEvent({ type: "message", data: JSON.stringify(msg) });
+
+    expect(useChatStore.getState().structuredResponse).toEqual({ answer: 42 });
+  });
+
+  it("appendStreamEvent ignores unknown event types", () => {
+    const initial = useChatStore.getState().streamingContent;
+    useChatStore.getState().appendStreamEvent({ type: "unknown" as "content", data: "x" });
+
+    expect(useChatStore.getState().streamingContent).toBe(initial);
   });
 
   it("setActiveThread updates activeThreadId", () => {

@@ -5,6 +5,8 @@ import { useMessages } from "@/application/hooks/chat/useMessages";
 import { useChatStore } from "@/application/stores/useChatStore";
 import { MessageRole } from "@/domain/entities/chat/message";
 import ChatMessage from "@/application/components/chat/ChatMessage";
+import ThinkingBlock from "@/application/components/chat/ThinkingBlock";
+import StructuredResponseCard from "@/application/components/chat/StructuredResponseCard";
 
 interface MessageListProps {
   threadId: string;
@@ -16,15 +18,27 @@ export default function MessageList({
   agentName,
 }: Readonly<MessageListProps>) {
   const { data: messages, isLoading } = useMessages(threadId);
-  const { streamingContent, isStreaming, pendingUserMessage } = useChatStore();
+  const {
+    streamingContent,
+    streamingThinking,
+    structuredResponse,
+    isStreaming,
+    pendingUserMessage,
+    error,
+  } = useChatStore();
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  // Auto-scroll to bottom when messages change or streaming content updates
   useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    const el = scrollRef.current;
+    if (!el) return;
+    const isNearBottom =
+      el.scrollHeight - el.scrollTop - el.clientHeight < 150;
+    if (isNearBottom) {
+      requestAnimationFrame(() => {
+        el.scrollTop = el.scrollHeight;
+      });
     }
-  }, [messages, streamingContent, pendingUserMessage, isStreaming]);
+  }, [messages, streamingContent, streamingThinking, pendingUserMessage, error]);
 
   if (isLoading) {
     return (
@@ -34,9 +48,9 @@ export default function MessageList({
     );
   }
 
-  const hasMessages = messages && messages.length > 0;
+  const hasMessages = (messages?.length ?? 0) > 0;
 
-  if (!hasMessages && !isStreaming) {
+  if (!hasMessages && !isStreaming && !error) {
     return (
       <div className="flex-1 flex items-center justify-center px-6">
         <div className="text-center">
@@ -66,7 +80,6 @@ export default function MessageList({
           />
         ))}
 
-        {/* Pending user message (optimistic) */}
         {pendingUserMessage && (
           <ChatMessage
             message={{
@@ -76,13 +89,13 @@ export default function MessageList({
               tool_calls: null,
               status: null,
               structured_response: null,
+              thinking: null,
             }}
             agentName={agentName}
             threadId={threadId}
           />
         )}
 
-        {/* Streaming: single agent bubble with content + spinner */}
         {isStreaming && (
           <div className="flex gap-3 max-w-4xl">
             <div className="w-8 h-8 rounded-lg bg-primary-container flex items-center justify-center shrink-0 mt-1">
@@ -104,7 +117,9 @@ export default function MessageList({
                     </ReactMarkdown>
                   </div>
                 )}
-                <div className="flex items-center gap-2 text-on-surface-variant text-xs">
+                <ThinkingBlock text={streamingThinking} />
+                <StructuredResponseCard data={structuredResponse} />
+                <div className="flex items-center gap-2 text-on-surface-variant text-xs mt-2">
                   <span className="material-symbols-outlined animate-spin text-secondary-brand text-base">
                     progress_activity
                   </span>
@@ -112,6 +127,29 @@ export default function MessageList({
                     {streamingContent ? "Processing..." : "Thinking..."}
                   </span>
                 </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {error && !isStreaming && (
+          <div className="flex gap-3 max-w-4xl">
+            <div className="w-8 h-8 rounded-lg bg-error-container flex items-center justify-center shrink-0 mt-1">
+              <span className="material-symbols-outlined text-error text-sm">
+                error
+              </span>
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="font-headline font-bold text-sm text-on-surface">
+                  {agentName}
+                </span>
+              </div>
+              <div className="bg-error-container/30 p-6 rounded-xl rounded-tl-none border border-error/20">
+                <p className="text-error text-sm font-medium">
+                  Something went wrong
+                </p>
+                <p className="text-error/80 text-xs mt-1">{error}</p>
               </div>
             </div>
           </div>
