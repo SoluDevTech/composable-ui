@@ -4,9 +4,9 @@ React frontend for interacting with the [composable-agents](https://github.com/s
 
 ## Features
 
-- **Agent management** -- Create, view, configure, and delete agents via YAML file upload
-- **Real-time chat** -- Stream AI responses via SSE (Server-Sent Events)
-- **Human-in-the-loop** -- Review and approve/reject tool calls before execution
+- **Agent management** — Create, view, configure, and delete agents via YAML file upload
+- **Real-time chat** — Stream AI responses via SSE with typed events (thinking, content, structured response)
+- **Human-in-the-loop** — Review and approve/reject tool calls before execution
 - **Thread history** -- Conversation threads grouped by agent in a sidebar
 - **RAG file browser** -- Browse MinIO folders and files with breadcrumb navigation and file metadata display
 - **Material Design 3** -- Inspired design system with shadcn/ui components

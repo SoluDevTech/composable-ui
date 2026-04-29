@@ -1,5 +1,6 @@
 import type { ChatRequest } from "@/domain/entities/chat/chatRequest";
 import type { Message } from "@/domain/entities/chat/message";
+import type { StreamEvent, StreamEventType } from "@/domain/entities/chat/streamEvent";
 import type { Thread } from "@/domain/entities/chat/thread";
 import type { IChatPort } from "@/domain/ports/chat/chatPort";
 import { apiClient } from "@/infrastructure/api/axiosInstance";
@@ -47,7 +48,7 @@ export const chatApi: IChatPort = {
   streamMessage(
     threadId: string,
     request: ChatRequest,
-    onChunk: (data: string) => void,
+    onChunk: (event: StreamEvent) => void,
     onComplete: () => void,
     onError: (err: Error) => void,
   ): AbortController {
@@ -65,8 +66,14 @@ export const chatApi: IChatPort = {
         body: JSON.stringify(request),
         signal: ctrl.signal,
         onmessage(ev) {
-          if (ev.data) {
-            onChunk(ev.data);
+          if (ev.data === "[DONE]") return;
+          if (!ev.data) return;
+          try {
+            const event: StreamEvent = JSON.parse(ev.data);
+            onChunk(event);
+          } catch {
+            // Fallback: treat raw data as content for backward compatibility
+            onChunk({ type: "content" as StreamEventType, data: ev.data });
           }
         },
         onclose() {

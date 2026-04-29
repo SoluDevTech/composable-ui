@@ -8,6 +8,8 @@ import {
 } from "@/domain/entities/chat/message";
 import StatusBadge from "@/application/components/shared/StatusBadge";
 import HITLReviewPanel from "@/application/components/chat/HITLReviewPanel";
+import ThinkingBlock from "@/application/components/chat/ThinkingBlock";
+import StructuredResponseCard from "@/application/components/chat/StructuredResponseCard";
 
 interface ChatMessageProps {
   message: Message;
@@ -52,7 +54,6 @@ export default function ChatMessage({
   if (isAi) {
     return (
       <div className="flex gap-3 max-w-4xl">
-        {/* Avatar */}
         <div className="w-8 h-8 rounded-lg bg-primary-container flex items-center justify-center shrink-0 mt-1">
           <span className="material-symbols-outlined text-white text-sm">
             hub
@@ -60,7 +61,6 @@ export default function ChatMessage({
         </div>
 
         <div className="flex-1 min-w-0">
-          {/* Agent name + status */}
           <div className="flex items-center gap-2 mb-2">
             <span className="font-headline font-bold text-sm text-on-surface">
               {agentName}
@@ -68,7 +68,6 @@ export default function ChatMessage({
             {message.status && <StatusBadge status={message.status} />}
           </div>
 
-          {/* Content bubble */}
           <div className="bg-surface-container-lowest p-6 rounded-xl rounded-tl-none ambient-shadow border border-outline-variant/15 overflow-hidden">
             <div
               className={cn(
@@ -84,20 +83,18 @@ export default function ChatMessage({
                 {message.content}
               </ReactMarkdown>
             </div>
+
+            <ThinkingBlock text={message.thinking} />
+            <StructuredResponseCard data={message.structured_response} />
           </div>
 
-          {/* HITL Review Panel */}
-          {isAwaitingHitl &&
-            message.tool_calls &&
-            message.tool_calls.length > 0 &&
-            threadId && (
+          {isAwaitingHitl && message.tool_calls?.length && threadId && (
               <HITLReviewPanel
                 toolCalls={message.tool_calls}
                 threadId={threadId}
               />
             )}
 
-          {/* Timestamp */}
           <p className="text-[11px] text-on-surface-variant mt-2">
             {formatTimestamp(message.timestamp)}
           </p>
@@ -106,7 +103,6 @@ export default function ChatMessage({
     );
   }
 
-  // System / Tool messages: compact, centered
   return (
     <div className="flex justify-center">
       <div className="px-4 py-2 rounded-full bg-surface-container-low text-xs text-on-surface-variant">

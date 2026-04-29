@@ -24,4 +24,5 @@ export interface Message {
   tool_calls: ToolCall[] | null;
   status: MessageStatus | null;
   structured_response: unknown;
+  thinking: string | null;
 }

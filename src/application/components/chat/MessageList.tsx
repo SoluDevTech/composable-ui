@@ -5,6 +5,8 @@ import { useMessages } from "@/application/hooks/chat/useMessages";
 import { useChatStore } from "@/application/stores/useChatStore";
 import { MessageRole } from "@/domain/entities/chat/message";
 import ChatMessage from "@/application/components/chat/ChatMessage";
+import ThinkingBlock from "@/application/components/chat/ThinkingBlock";
+import StructuredResponseCard from "@/application/components/chat/StructuredResponseCard";
 
 interface MessageListProps {
   threadId: string;
@@ -16,15 +18,20 @@ export default function MessageList({
   agentName,
 }: Readonly<MessageListProps>) {
   const { data: messages, isLoading } = useMessages(threadId);
-  const { streamingContent, isStreaming, pendingUserMessage } = useChatStore();
+  const {
+    streamingContent,
+    streamingThinking,
+    structuredResponse,
+    isStreaming,
+    pendingUserMessage,
+  } = useChatStore();
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  // Auto-scroll to bottom when messages change or streaming content updates
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
-  }, [messages, streamingContent, pendingUserMessage, isStreaming]);
+  }, [messages, streamingContent, streamingThinking, pendingUserMessage, isStreaming]);
 
   if (isLoading) {
     return (
@@ -34,7 +41,7 @@ export default function MessageList({
     );
   }
 
-  const hasMessages = messages && messages.length > 0;
+  const hasMessages = (messages?.length ?? 0) > 0;
 
   if (!hasMessages && !isStreaming) {
     return (
@@ -66,7 +73,6 @@ export default function MessageList({
           />
         ))}
 
-        {/* Pending user message (optimistic) */}
         {pendingUserMessage && (
           <ChatMessage
             message={{
@@ -76,13 +82,13 @@ export default function MessageList({
               tool_calls: null,
               status: null,
               structured_response: null,
+              thinking: null,
             }}
             agentName={agentName}
             threadId={threadId}
           />
         )}
 
-        {/* Streaming: single agent bubble with content + spinner */}
         {isStreaming && (
           <div className="flex gap-3 max-w-4xl">
             <div className="w-8 h-8 rounded-lg bg-primary-container flex items-center justify-center shrink-0 mt-1">
@@ -104,7 +110,9 @@ export default function MessageList({
                     </ReactMarkdown>
                   </div>
                 )}
-                <div className="flex items-center gap-2 text-on-surface-variant text-xs">
+                <ThinkingBlock text={streamingThinking} />
+                <StructuredResponseCard data={structuredResponse} />
+                <div className="flex items-center gap-2 text-on-surface-variant text-xs mt-2">
                   <span className="material-symbols-outlined animate-spin text-secondary-brand text-base">
                     progress_activity
                   </span>
