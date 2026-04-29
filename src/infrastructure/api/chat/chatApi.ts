@@ -1,16 +1,14 @@
 import type { ChatRequest } from "@/domain/entities/chat/chatRequest";
 import type { Message } from "@/domain/entities/chat/message";
-import type {
-  StreamEvent,
-  StreamEventType,
-} from "@/domain/entities/chat/streamEvent";
+import { StreamEventType } from "@/domain/entities/chat/streamEvent";
+import type { StreamEvent } from "@/domain/entities/chat/streamEvent";
 import type { Thread } from "@/domain/entities/chat/thread";
 import type { IChatPort } from "@/domain/ports/chat/chatPort";
 import { apiClient } from "@/infrastructure/api/axiosInstance";
 import { configRepository } from "@/infrastructure/config/configRepositoryInstance";
 import { fetchEventSource } from "@microsoft/fetch-event-source";
 
-const VALID_EVENT_TYPES: string[] = ["thinking", "content", "message"];
+const VALID_EVENT_TYPES: string[] = Object.values(StreamEventType);
 
 function isValidStreamEvent(parsed: unknown): parsed is StreamEvent {
   if (typeof parsed !== "object" || parsed === null) return false;
@@ -84,17 +82,17 @@ export const chatApi: IChatPort = {
           try {
             const parsed = JSON.parse(ev.data);
             if (isValidStreamEvent(parsed)) {
-              onChunk(parsed as StreamEvent);
+              onChunk(parsed);
             } else {
               console.warn("[SSE] Unknown event format:", ev.data);
               onChunk({
-                type: "content" as StreamEventType,
+                type: StreamEventType.CONTENT,
                 data: ev.data,
               });
             }
           } catch {
             // Fallback: treat raw data as content for backward compatibility
-            onChunk({ type: "content" as StreamEventType, data: ev.data });
+            onChunk({ type: StreamEventType.CONTENT, data: ev.data });
           }
         },
         onclose() {

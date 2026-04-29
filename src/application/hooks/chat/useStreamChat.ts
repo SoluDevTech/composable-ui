@@ -14,11 +14,8 @@ export function useStreamChat(threadId: string | null) {
       if (!threadId) return;
 
       // Use getState() for all imperative store calls to avoid stale closures
-      const {
-        clearStream,
-        setStreaming,
-        setPendingUserMessage,
-      } = useChatStore.getState();
+      const { clearStream, setStreaming, setPendingUserMessage } =
+        useChatStore.getState();
 
       clearStream();
       setStreaming(true);
@@ -36,16 +33,17 @@ export function useStreamChat(threadId: string | null) {
               queryKey: ["messages", threadId],
             });
           } finally {
-            useChatStore.getState().setPendingUserMessage(null);
-            useChatStore.getState().setStreaming(false);
+            const { setPendingUserMessage, setStreaming } =
+              useChatStore.getState();
+            setPendingUserMessage(null);
+            setStreaming(false);
           }
         },
         (error) => {
           console.error("Stream error:", error);
           useChatStore.getState().clearStream();
           toast.error("Stream error", {
-            description:
-              error.message || "An error occurred while streaming.",
+            description: error.message || "An error occurred while streaming.",
           });
         },
       );
