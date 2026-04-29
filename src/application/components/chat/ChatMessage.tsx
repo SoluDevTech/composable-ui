@@ -89,11 +89,11 @@ export default function ChatMessage({
           </div>
 
           {isAwaitingHitl && message.tool_calls?.length && threadId && (
-              <HITLReviewPanel
-                toolCalls={message.tool_calls}
-                threadId={threadId}
-              />
-            )}
+            <HITLReviewPanel
+              toolCalls={message.tool_calls}
+              threadId={threadId}
+            />
+          )}
 
           <p className="text-[11px] text-on-surface-variant mt-2">
             {formatTimestamp(message.timestamp)}

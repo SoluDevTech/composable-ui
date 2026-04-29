@@ -1,6 +1,9 @@
 import type { ChatRequest } from "@/domain/entities/chat/chatRequest";
 import type { Message } from "@/domain/entities/chat/message";
-import type { StreamEvent, StreamEventType } from "@/domain/entities/chat/streamEvent";
+import type {
+  StreamEvent,
+  StreamEventType,
+} from "@/domain/entities/chat/streamEvent";
 import type { Thread } from "@/domain/entities/chat/thread";
 import type { IChatPort } from "@/domain/ports/chat/chatPort";
 import { apiClient } from "@/infrastructure/api/axiosInstance";

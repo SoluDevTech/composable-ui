@@ -31,7 +31,13 @@ export default function MessageList({
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
-  }, [messages, streamingContent, streamingThinking, pendingUserMessage, isStreaming]);
+  }, [
+    messages,
+    streamingContent,
+    streamingThinking,
+    pendingUserMessage,
+    isStreaming,
+  ]);
 
   if (isLoading) {
     return (
