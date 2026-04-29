@@ -3,6 +3,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { chatApi } from "@/infrastructure/api/chat/chatApi";
 import { useChatStore } from "@/application/stores/useChatStore";
+import { StreamEventType } from "@/domain/entities/chat/streamEvent";
 import type { ChatRequest } from "@/domain/entities/chat/chatRequest";
 
 export function useStreamChat(threadId: string | null) {
@@ -25,6 +26,13 @@ export function useStreamChat(threadId: string | null) {
         threadId,
         request,
         (event) => {
+          if (event.type === StreamEventType.ERROR) {
+            useChatStore.getState().clearStream();
+            toast.error("Agent error", {
+              description: event.data || "An unknown agent error occurred.",
+            });
+            return;
+          }
           useChatStore.getState().appendStreamEvent(event);
         },
         async () => {
