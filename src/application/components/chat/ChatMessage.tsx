@@ -84,7 +84,7 @@ export default function ChatMessage({
               </ReactMarkdown>
             </div>
 
-            <ThinkingBlock text={message.thinking} />
+            <ThinkingBlock key={message.timestamp} text={message.thinking} />
             <StructuredResponseCard data={message.structured_response} />
           </div>
 

@@ -10,6 +10,16 @@ import { apiClient } from "@/infrastructure/api/axiosInstance";
 import { configRepository } from "@/infrastructure/config/configRepositoryInstance";
 import { fetchEventSource } from "@microsoft/fetch-event-source";
 
+const VALID_EVENT_TYPES: string[] = ["thinking", "content", "message"];
+
+function isValidStreamEvent(parsed: unknown): parsed is StreamEvent {
+  if (typeof parsed !== "object" || parsed === null) return false;
+  const p = parsed as Record<string, unknown>;
+  if (!VALID_EVENT_TYPES.includes(p.type as string)) return false;
+  if (typeof p.data !== "string") return false;
+  return true;
+}
+
 export const chatApi: IChatPort = {
   async createThread(agentName: string): Promise<Thread> {
     const response = await apiClient.post<Thread>("/api/v1/threads", {
@@ -72,8 +82,16 @@ export const chatApi: IChatPort = {
           if (ev.data === "[DONE]") return;
           if (!ev.data) return;
           try {
-            const event: StreamEvent = JSON.parse(ev.data);
-            onChunk(event);
+            const parsed = JSON.parse(ev.data);
+            if (isValidStreamEvent(parsed)) {
+              onChunk(parsed as StreamEvent);
+            } else {
+              console.warn("[SSE] Unknown event format:", ev.data);
+              onChunk({
+                type: "content" as StreamEventType,
+                data: ev.data,
+              });
+            }
           } catch {
             // Fallback: treat raw data as content for backward compatibility
             onChunk({ type: "content" as StreamEventType, data: ev.data });

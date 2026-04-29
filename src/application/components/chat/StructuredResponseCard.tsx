@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import { cn } from "@/application/lib/utils";
 
 interface StructuredResponseCardProps {
@@ -11,6 +11,13 @@ export default function StructuredResponseCard({
   className,
 }: StructuredResponseCardProps) {
   const [copied, setCopied] = useState(false);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) clearTimeout(timerRef.current);
+    };
+  }, []);
 
   if (data == null) return null;
 
@@ -18,14 +25,19 @@ export default function StructuredResponseCard({
   try {
     displayText = JSON.stringify(data, null, 2);
   } catch {
-    displayText = String(data);
+    try {
+      displayText = String(data);
+    } catch {
+      displayText = "[Unable to display data]";
+    }
   }
 
   const handleCopy = async () => {
     try {
       await navigator.clipboard.writeText(displayText);
       setCopied(true);
-      setTimeout(() => setCopied(false), 1500);
+      if (timerRef.current) clearTimeout(timerRef.current);
+      timerRef.current = setTimeout(() => setCopied(false), 1500);
     } catch {
       /* ignore */
     }
@@ -51,11 +63,19 @@ export default function StructuredResponseCard({
           type="button"
           onClick={handleCopy}
           className="flex items-center gap-1 text-[11px] text-secondary-brand hover:opacity-80 transition-opacity"
+          aria-label={
+            copied
+              ? "Copied to clipboard"
+              : "Copy structured response to clipboard"
+          }
         >
-          <span className="material-symbols-outlined text-base">
+          <span
+            className="material-symbols-outlined text-base"
+            aria-hidden="true"
+          >
             {copied ? "check" : "content_copy"}
           </span>
-          {copied ? "Copied" : "Copy"}
+          <span aria-live="polite">{copied ? "Copied" : "Copy"}</span>
         </button>
       </div>
       <div className="px-4 pb-3">

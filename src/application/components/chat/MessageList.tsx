@@ -28,16 +28,16 @@ export default function MessageList({
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    const el = scrollRef.current;
+    if (!el) return;
+    const isNearBottom =
+      el.scrollHeight - el.scrollTop - el.clientHeight < 150;
+    if (isNearBottom) {
+      requestAnimationFrame(() => {
+        el.scrollTop = el.scrollHeight;
+      });
     }
-  }, [
-    messages,
-    streamingContent,
-    streamingThinking,
-    pendingUserMessage,
-    isStreaming,
-  ]);
+  }, [messages, streamingContent, streamingThinking, pendingUserMessage]);
 
   if (isLoading) {
     return (
