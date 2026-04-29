@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import type { StreamEvent } from "@/domain/entities/chat/streamEvent";
+
 interface ChatState {
   activeThreadId: string | null;
   streamingContent: string;
@@ -8,12 +9,13 @@ interface ChatState {
   isStreaming: boolean;
   pendingUserMessage: string | null;
   useStreaming: boolean;
+  error: string | null;
   setActiveThread: (id: string | null) => void;
-  setStructuredResponse: (data: unknown | null) => void;
   appendStreamEvent: (event: StreamEvent) => void;
   clearStream: () => void;
   setStreaming: (streaming: boolean) => void;
   setPendingUserMessage: (msg: string | null) => void;
+  setError: (msg: string | null) => void;
   toggleStreaming: () => void;
 }
 
@@ -25,8 +27,8 @@ export const useChatStore = create<ChatState>((set) => ({
   isStreaming: false,
   pendingUserMessage: null,
   useStreaming: true,
+  error: null,
   setActiveThread: (id) => set({ activeThreadId: id }),
-  setStructuredResponse: (data) => set({ structuredResponse: data }),
   appendStreamEvent: (ev: StreamEvent) =>
     set((state) => {
       if (!ev.type || typeof ev.data !== "string") {
@@ -61,9 +63,11 @@ export const useChatStore = create<ChatState>((set) => ({
       structuredResponse: null,
       isStreaming: false,
       pendingUserMessage: null,
+      error: null,
     }),
   setStreaming: (streaming) => set({ isStreaming: streaming }),
   setPendingUserMessage: (msg) => set({ pendingUserMessage: msg }),
+  setError: (msg) => set({ error: msg }),
   toggleStreaming: () =>
     set((state) => ({ useStreaming: !state.useStreaming })),
 }));

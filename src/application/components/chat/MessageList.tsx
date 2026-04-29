@@ -24,6 +24,7 @@ export default function MessageList({
     structuredResponse,
     isStreaming,
     pendingUserMessage,
+    error,
   } = useChatStore();
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -37,7 +38,7 @@ export default function MessageList({
         el.scrollTop = el.scrollHeight;
       });
     }
-  }, [messages, streamingContent, streamingThinking, pendingUserMessage]);
+  }, [messages, streamingContent, streamingThinking, pendingUserMessage, error]);
 
   if (isLoading) {
     return (
@@ -49,7 +50,7 @@ export default function MessageList({
 
   const hasMessages = (messages?.length ?? 0) > 0;
 
-  if (!hasMessages && !isStreaming) {
+  if (!hasMessages && !isStreaming && !error) {
     return (
       <div className="flex-1 flex items-center justify-center px-6">
         <div className="text-center">
@@ -126,6 +127,29 @@ export default function MessageList({
                     {streamingContent ? "Processing..." : "Thinking..."}
                   </span>
                 </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {error && !isStreaming && (
+          <div className="flex gap-3 max-w-4xl">
+            <div className="w-8 h-8 rounded-lg bg-error-container flex items-center justify-center shrink-0 mt-1">
+              <span className="material-symbols-outlined text-error text-sm">
+                error
+              </span>
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="font-headline font-bold text-sm text-on-surface">
+                  {agentName}
+                </span>
+              </div>
+              <div className="bg-error-container/30 p-6 rounded-xl rounded-tl-none border border-error/20">
+                <p className="text-error text-sm font-medium">
+                  Something went wrong
+                </p>
+                <p className="text-error/80 text-xs mt-1">{error}</p>
               </div>
             </div>
           </div>

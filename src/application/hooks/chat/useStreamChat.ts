@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useRef } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { toast } from "sonner";
 import { chatApi } from "@/infrastructure/api/chat/chatApi";
 import { useChatStore } from "@/application/stores/useChatStore";
 import { StreamEventType } from "@/domain/entities/chat/streamEvent";
@@ -14,9 +13,12 @@ export function useStreamChat(threadId: string | null) {
     (request: ChatRequest) => {
       if (!threadId) return;
 
-      // Use getState() for all imperative store calls to avoid stale closures
-      const { clearStream, setStreaming, setPendingUserMessage } =
-        useChatStore.getState();
+      const {
+        clearStream,
+        setStreaming,
+        setPendingUserMessage,
+        // setError read via getState() in callbacks
+      } = useChatStore.getState();
 
       clearStream();
       setStreaming(true);
@@ -27,10 +29,8 @@ export function useStreamChat(threadId: string | null) {
         request,
         (event) => {
           if (event.type === StreamEventType.ERROR) {
-            useChatStore.getState().clearStream();
-            toast.error("Agent error", {
-              description: event.data || "An unknown agent error occurred.",
-            });
+            useChatStore.getState().setStreaming(false);
+            useChatStore.getState().setError(event.data);
             return;
           }
           useChatStore.getState().appendStreamEvent(event);
@@ -49,10 +49,10 @@ export function useStreamChat(threadId: string | null) {
         },
         (error) => {
           console.error("Stream error:", error);
-          useChatStore.getState().clearStream();
-          toast.error("Stream error", {
-            description: error.message || "An error occurred while streaming.",
-          });
+          useChatStore.getState().setStreaming(false);
+          useChatStore.getState().setError(
+            error.message || "An error occurred while streaming.",
+          );
         },
       );
     },
