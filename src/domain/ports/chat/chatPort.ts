@@ -1,5 +1,6 @@
 import type { ChatRequest } from "@/domain/entities/chat/chatRequest";
 import type { Message } from "@/domain/entities/chat/message";
+import type { StreamEvent } from "@/domain/entities/chat/streamEvent";
 import type { Thread } from "@/domain/entities/chat/thread";
 
 export interface IChatPort {
@@ -12,7 +13,7 @@ export interface IChatPort {
   streamMessage(
     threadId: string,
     request: ChatRequest,
-    onChunk: (data: string) => void,
+    onChunk: (event: StreamEvent) => void,
     onComplete: () => void,
     onError: (err: Error) => void,
   ): AbortController;

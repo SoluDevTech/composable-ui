@@ -1,10 +1,22 @@
 import type { ChatRequest } from "@/domain/entities/chat/chatRequest";
 import type { Message } from "@/domain/entities/chat/message";
+import { StreamEventType } from "@/domain/entities/chat/streamEvent";
+import type { StreamEvent } from "@/domain/entities/chat/streamEvent";
 import type { Thread } from "@/domain/entities/chat/thread";
 import type { IChatPort } from "@/domain/ports/chat/chatPort";
 import { apiClient } from "@/infrastructure/api/axiosInstance";
 import { configRepository } from "@/infrastructure/config/configRepositoryInstance";
 import { fetchEventSource } from "@microsoft/fetch-event-source";
+
+const VALID_EVENT_TYPES: string[] = Object.values(StreamEventType);
+
+function isValidStreamEvent(parsed: unknown): parsed is StreamEvent {
+  if (typeof parsed !== "object" || parsed === null) return false;
+  const p = parsed as Record<string, unknown>;
+  if (!VALID_EVENT_TYPES.includes(p.type as string)) return false;
+  if (typeof p.data !== "string") return false;
+  return true;
+}
 
 export const chatApi: IChatPort = {
   async createThread(agentName: string): Promise<Thread> {
@@ -47,7 +59,7 @@ export const chatApi: IChatPort = {
   streamMessage(
     threadId: string,
     request: ChatRequest,
-    onChunk: (data: string) => void,
+    onChunk: (event: StreamEvent) => void,
     onComplete: () => void,
     onError: (err: Error) => void,
   ): AbortController {
@@ -65,8 +77,22 @@ export const chatApi: IChatPort = {
         body: JSON.stringify(request),
         signal: ctrl.signal,
         onmessage(ev) {
-          if (ev.data) {
-            onChunk(ev.data);
+          if (ev.data === "[DONE]") return;
+          if (!ev.data) return;
+          try {
+            const parsed = JSON.parse(ev.data);
+            if (isValidStreamEvent(parsed)) {
+              onChunk(parsed);
+            } else {
+              console.warn("[SSE] Unknown event format:", ev.data);
+              onChunk({
+                type: StreamEventType.CONTENT,
+                data: ev.data,
+              });
+            }
+          } catch {
+            // Fallback: treat raw data as content for backward compatibility
+            onChunk({ type: StreamEventType.CONTENT, data: ev.data });
           }
         },
         onclose() {
