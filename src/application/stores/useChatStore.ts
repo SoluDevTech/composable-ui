@@ -40,6 +40,13 @@ export const useChatStore = create<ChatState>((set) => ({
           return { streamingThinking: state.streamingThinking + ev.data };
         case "content":
           return { streamingContent: state.streamingContent + ev.data };
+        case "structured":
+          try {
+            return { structuredResponse: JSON.parse(ev.data) };
+          } catch (e) {
+            console.warn("[ChatStore] Failed to parse structured event data:", ev.data, e);
+            return state;
+          }
         case "message":
           try {
             const msg = JSON.parse(ev.data);

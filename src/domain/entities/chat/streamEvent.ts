@@ -1,6 +1,7 @@
 export enum StreamEventType {
   THINKING = "thinking",
   CONTENT = "content",
+  STRUCTURED = "structured",
   MESSAGE = "message",
   ERROR = "error",
 }
