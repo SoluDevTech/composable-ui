@@ -76,6 +76,7 @@ export const chatApi: IChatPort = {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(request),
         signal: ctrl.signal,
+        openWhenHidden: true,
         onmessage(ev) {
           if (ev.data === "[DONE]") return;
           if (!ev.data) return;
