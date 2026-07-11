@@ -59,10 +59,7 @@ export default function QueryOptions({
         onClick={() => setExpanded(!expanded)}
         className="flex items-center gap-2 text-on-surface-variant font-headline text-sm hover:text-on-surface transition-colors"
       >
-        <span
-          className="material-symbols-outlined text-base"
-          aria-hidden="true"
-        >
+        <span className="material-symbols-outlined text-base" aria-hidden="true">
           {expanded ? "expand_less" : "expand_more"}
         </span>
         {"Advanced Options"}
@@ -71,7 +68,10 @@ export default function QueryOptions({
       {expanded && (
         <div className="mt-3 space-y-4 pl-6">
           <div className="flex items-center gap-4">
-            <label htmlFor="query-mode" className="font-headline text-sm text-on-surface-variant w-28">
+            <label
+              htmlFor="query-mode"
+              className="font-headline text-sm text-on-surface-variant w-28"
+            >
               Mode
             </label>
             <select
@@ -89,7 +89,10 @@ export default function QueryOptions({
           </div>
 
           <div className="flex items-center gap-4">
-            <label htmlFor="query-topk" className="font-headline text-sm text-on-surface-variant w-28">
+            <label
+              htmlFor="query-topk"
+              className="font-headline text-sm text-on-surface-variant w-28"
+            >
               Top K
             </label>
             <input
@@ -106,7 +109,10 @@ export default function QueryOptions({
           {pipeline === "classical" && (
             <>
               <div className="flex items-center gap-4">
-                <label htmlFor="query-variations" className="font-headline text-sm text-on-surface-variant w-28">
+                <label
+                  htmlFor="query-variations"
+                  className="font-headline text-sm text-on-surface-variant w-28"
+                >
                   Variations
                 </label>
                 <input
@@ -121,7 +127,10 @@ export default function QueryOptions({
               </div>
 
               <div className="flex items-center gap-4">
-                <label htmlFor="query-threshold" className="font-headline text-sm text-on-surface-variant w-28">
+                <label
+                  htmlFor="query-threshold"
+                  className="font-headline text-sm text-on-surface-variant w-28"
+                >
                   Threshold
                 </label>
                 <input
@@ -137,7 +146,10 @@ export default function QueryOptions({
               </div>
 
               <div className="flex items-center gap-4">
-                <label htmlFor="query-vector-threshold" className="font-headline text-sm text-on-surface-variant w-28">
+                <label
+                  htmlFor="query-vector-threshold"
+                  className="font-headline text-sm text-on-surface-variant w-28"
+                >
                   Vector Dist.
                 </label>
                 <input
@@ -153,7 +165,10 @@ export default function QueryOptions({
               </div>
 
               <div className="flex items-center gap-4">
-                <label htmlFor="query-llm-judge" className="font-headline text-sm text-on-surface-variant w-28">
+                <label
+                  htmlFor="query-llm-judge"
+                  className="font-headline text-sm text-on-surface-variant w-28"
+                >
                   LLM Judge
                 </label>
                 <input

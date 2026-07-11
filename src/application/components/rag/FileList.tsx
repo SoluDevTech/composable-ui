@@ -74,9 +74,7 @@ export default function FileList({
         >
           folder_off
         </span>
-        <p className="text-on-surface-variant font-headline text-sm">
-          No files or folders found.
-        </p>
+        <p className="text-on-surface-variant font-headline text-sm">No files or folders found.</p>
       </div>
     );
   }
@@ -88,8 +86,12 @@ export default function FileList({
           key={folder.prefix}
           name={folder.name}
           onClick={() => onFolderClick(folder.prefix)}
-          onIndexLightRAG={onFolderIndexLightRAG ? () => onFolderIndexLightRAG(folder.prefix) : undefined}
-          onIndexClassical={onFolderIndexClassical ? () => onFolderIndexClassical(folder.prefix) : undefined}
+          onIndexLightRAG={
+            onFolderIndexLightRAG ? () => onFolderIndexLightRAG(folder.prefix) : undefined
+          }
+          onIndexClassical={
+            onFolderIndexClassical ? () => onFolderIndexClassical(folder.prefix) : undefined
+          }
         />
       ))}
       {files.map((file) => (
@@ -99,8 +101,12 @@ export default function FileList({
           size={file.size}
           lastModified={file.lastModified}
           onRead={onFileRead ? () => onFileRead(file.objectName) : undefined}
-          onIndexLightRAG={onFileIndexLightRAG ? () => onFileIndexLightRAG(file.objectName) : undefined}
-          onIndexClassical={onFileIndexClassical ? () => onFileIndexClassical(file.objectName) : undefined}
+          onIndexLightRAG={
+            onFileIndexLightRAG ? () => onFileIndexLightRAG(file.objectName) : undefined
+          }
+          onIndexClassical={
+            onFileIndexClassical ? () => onFileIndexClassical(file.objectName) : undefined
+          }
         />
       ))}
     </div>

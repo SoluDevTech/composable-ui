@@ -52,17 +52,13 @@ describe("AgentsPage", () => {
   it("renders Active Agents heading", () => {
     renderWithProviders(<AgentsPage />, { initialEntries: ["/agents"] });
 
-    expect(
-      screen.getByRole("heading", { name: /active agents/i }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: /active agents/i })).toBeInTheDocument();
   });
 
   it("renders Create Agent button", () => {
     renderWithProviders(<AgentsPage />, { initialEntries: ["/agents"] });
 
-    expect(
-      screen.getByRole("button", { name: /create agent/i }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /create agent/i })).toBeInTheDocument();
   });
 
   it("shows agent grid with agents", () => {
@@ -79,9 +75,7 @@ describe("AgentsPage", () => {
     await user.click(screen.getByRole("button", { name: /create agent/i }));
 
     // Dialog should have a title matching "Create Agent"
-    expect(
-      screen.getByRole("heading", { name: /create agent/i }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: /create agent/i })).toBeInTheDocument();
   });
 
   it("opens AgentConfigViewer when Configure button is clicked", async () => {
@@ -98,8 +92,6 @@ describe("AgentsPage", () => {
   it("renders description text", () => {
     renderWithProviders(<AgentsPage />, { initialEntries: ["/agents"] });
 
-    expect(
-      screen.getByText(/configure and manage your ai agent fleet/i),
-    ).toBeInTheDocument();
+    expect(screen.getByText(/configure and manage your ai agent fleet/i)).toBeInTheDocument();
   });
 });

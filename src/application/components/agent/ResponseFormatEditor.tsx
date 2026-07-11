@@ -11,9 +11,7 @@ export default function ResponseFormatEditor({
   value,
   onChange,
 }: Readonly<ResponseFormatEditorProps>) {
-  const [text, setText] = useState(() =>
-    value ? JSON.stringify(value, null, 2) : "",
-  );
+  const [text, setText] = useState(() => (value ? JSON.stringify(value, null, 2) : ""));
   const [parseError, setParseError] = useState<string | null>(null);
 
   function handleChange(e: React.ChangeEvent<HTMLTextAreaElement>) {
@@ -49,11 +47,7 @@ export default function ResponseFormatEditor({
         aria-describedby={parseError ? "response-format-error" : undefined}
       />
       {parseError && (
-        <p
-          id="response-format-error"
-          role="alert"
-          className="text-destructive text-xs mt-1"
-        >
+        <p id="response-format-error" role="alert" className="text-destructive text-xs mt-1">
           {parseError}
         </p>
       )}

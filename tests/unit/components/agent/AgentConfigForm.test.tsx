@@ -13,11 +13,7 @@ describe("AgentConfigForm", () => {
   describe("create mode", () => {
     it("renders form with sections", () => {
       renderWithProviders(
-        <AgentConfigForm
-          mode="create"
-          onSubmit={mockSubmit}
-          onCancel={mockCancel}
-        />,
+        <AgentConfigForm mode="create" onSubmit={mockSubmit} onCancel={mockCancel} />,
       );
 
       expect(screen.getByText("General")).toBeInTheDocument();
@@ -27,11 +23,7 @@ describe("AgentConfigForm", () => {
 
     it("renders name field enabled in create mode", () => {
       renderWithProviders(
-        <AgentConfigForm
-          mode="create"
-          onSubmit={mockSubmit}
-          onCancel={mockCancel}
-        />,
+        <AgentConfigForm mode="create" onSubmit={mockSubmit} onCancel={mockCancel} />,
       );
 
       const nameInput = screen.getByLabelText(/agent name/i);
@@ -41,11 +33,7 @@ describe("AgentConfigForm", () => {
 
     it("renders model and debug fields", () => {
       renderWithProviders(
-        <AgentConfigForm
-          mode="create"
-          onSubmit={mockSubmit}
-          onCancel={mockCancel}
-        />,
+        <AgentConfigForm mode="create" onSubmit={mockSubmit} onCancel={mockCancel} />,
       );
 
       expect(screen.getByLabelText(/model/i)).toBeInTheDocument();
@@ -53,27 +41,17 @@ describe("AgentConfigForm", () => {
 
     it("renders cancel button", () => {
       renderWithProviders(
-        <AgentConfigForm
-          mode="create"
-          onSubmit={mockSubmit}
-          onCancel={mockCancel}
-        />,
+        <AgentConfigForm mode="create" onSubmit={mockSubmit} onCancel={mockCancel} />,
       );
 
-      expect(
-        screen.getByRole("button", { name: /cancel/i }),
-      ).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: /cancel/i })).toBeInTheDocument();
     });
 
     it("calls onCancel when cancel button is clicked", async () => {
       const user = userEvent.setup();
 
       renderWithProviders(
-        <AgentConfigForm
-          mode="create"
-          onSubmit={mockSubmit}
-          onCancel={mockCancel}
-        />,
+        <AgentConfigForm mode="create" onSubmit={mockSubmit} onCancel={mockCancel} />,
       );
 
       await user.click(screen.getByRole("button", { name: /cancel/i }));
@@ -82,16 +60,10 @@ describe("AgentConfigForm", () => {
 
     it("shows create button in create mode", () => {
       renderWithProviders(
-        <AgentConfigForm
-          mode="create"
-          onSubmit={mockSubmit}
-          onCancel={mockCancel}
-        />,
+        <AgentConfigForm mode="create" onSubmit={mockSubmit} onCancel={mockCancel} />,
       );
 
-      expect(
-        screen.getByRole("button", { name: /create/i }),
-      ).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: /create/i })).toBeInTheDocument();
     });
   });
 
@@ -121,9 +93,7 @@ describe("AgentConfigForm", () => {
         />,
       );
 
-      const nameInput = screen.getByLabelText(
-        /agent name/i,
-      ) as HTMLInputElement;
+      const nameInput = screen.getByLabelText(/agent name/i) as HTMLInputElement;
       expect(nameInput).toBeDisabled();
     });
 
@@ -137,9 +107,7 @@ describe("AgentConfigForm", () => {
         />,
       );
 
-      const nameInput = screen.getByLabelText(
-        /agent name/i,
-      ) as HTMLInputElement;
+      const nameInput = screen.getByLabelText(/agent name/i) as HTMLInputElement;
       expect(nameInput.value).toBe("existing-agent");
 
       const modelInput = screen.getByLabelText(/model/i) as HTMLInputElement;
@@ -156,12 +124,8 @@ describe("AgentConfigForm", () => {
         />,
       );
 
-      expect(
-        screen.getByRole("button", { name: /update/i }),
-      ).toBeInTheDocument();
-      expect(
-        screen.queryByRole("button", { name: /create/i }),
-      ).not.toBeInTheDocument();
+      expect(screen.getByRole("button", { name: /update/i })).toBeInTheDocument();
+      expect(screen.queryByRole("button", { name: /create/i })).not.toBeInTheDocument();
     });
   });
 });

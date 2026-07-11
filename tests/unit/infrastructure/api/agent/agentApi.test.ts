@@ -59,11 +59,9 @@ describe("agentApi", () => {
 
       const result = await agentApi.createAgent("new-agent", file);
 
-      expect(apiClient.post).toHaveBeenCalledWith(
-        "/api/v1/agents",
-        expect.any(FormData),
-        { headers: { "Content-Type": "multipart/form-data" } },
-      );
+      expect(apiClient.post).toHaveBeenCalledWith("/api/v1/agents", expect.any(FormData), {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
       expect(result).toEqual(config);
     });
   });
@@ -93,9 +91,7 @@ describe("agentApi", () => {
 
       await agentApi.deleteAgent("test-agent");
 
-      expect(apiClient.delete).toHaveBeenCalledWith(
-        "/api/v1/agents/test-agent",
-      );
+      expect(apiClient.delete).toHaveBeenCalledWith("/api/v1/agents/test-agent");
     });
   });
 });

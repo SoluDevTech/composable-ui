@@ -13,6 +13,7 @@ import AgentConfigForm from "./AgentConfigForm";
 import type { AgentConfigFormData } from "@/domain/entities/agent/agentConfigSchema";
 import type { AgentConfig } from "@/domain/entities/agent/agentConfig";
 import { agentConfigToYamlFile } from "@/application/lib/yaml";
+import { AGENT_CONFIG_FORM_ID, AGENT_YAML_FORM_ID } from "./formConstants";
 
 interface CreateAgentDialogProps {
   readonly open: boolean;
@@ -103,8 +104,7 @@ export default function CreateAgentDialog({
           <DialogHeader className="space-y-2">
             <DialogTitle className="text-2xl">Create Agent</DialogTitle>
             <DialogDescription>
-              Configure a new agent via form, or upload an existing YAML
-              configuration.
+              Configure a new agent via form, or upload an existing YAML configuration.
             </DialogDescription>
           </DialogHeader>
 
@@ -131,11 +131,7 @@ export default function CreateAgentDialog({
               isPending={createAgent.isPending}
             />
           ) : (
-            <form
-              id="agent-yaml-form"
-              onSubmit={handleYamlSubmit}
-              className="space-y-6"
-            >
+            <form id={AGENT_YAML_FORM_ID} onSubmit={handleYamlSubmit} className="space-y-6">
               <div>
                 <label
                   htmlFor="agent-name"
@@ -187,7 +183,7 @@ export default function CreateAgentDialog({
             // The form triggers its own submit; we use a form attribute to bind.
             <button
               type="submit"
-              form="agent-config-form"
+              form={AGENT_CONFIG_FORM_ID}
               disabled={createAgent.isPending}
               className="flex-1 sm:flex-initial px-6 py-3 rounded-full bg-primary-container text-white font-headline text-xs font-bold uppercase tracking-widest hover:opacity-90 transition-opacity disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary-brand focus-visible:ring-offset-2"
             >
@@ -196,7 +192,7 @@ export default function CreateAgentDialog({
           ) : (
             <button
               type="submit"
-              form="agent-yaml-form"
+              form={AGENT_YAML_FORM_ID}
               disabled={createAgent.isPending}
               className="flex-1 sm:flex-initial px-6 py-3 rounded-full bg-primary-container text-white font-headline text-xs font-bold uppercase tracking-widest hover:opacity-90 transition-opacity disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary-brand focus-visible:ring-offset-2"
             >

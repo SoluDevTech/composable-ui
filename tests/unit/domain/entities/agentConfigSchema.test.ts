@@ -7,10 +7,7 @@ import {
   mcpServerConfigSchema,
   subAgentConfigSchema,
 } from "@/domain/entities/agent/agentConfigSchema";
-import {
-  BackendType,
-  MiddlewareType,
-} from "@/domain/entities/agent/agentConfig";
+import { BackendType, MiddlewareType } from "@/domain/entities/agent/agentConfig";
 import { McpTransportType } from "@/domain/entities/agent/mcpServerConfig";
 
 describe("interruptRuleSchema", () => {

@@ -12,10 +12,7 @@ const PIPELINE_OPTIONS = [
   { value: "classical" as const, label: "Classical" },
 ];
 
-export default function PipelineToggle({
-  value,
-  onChange,
-}: Readonly<PipelineToggleProps>) {
+export default function PipelineToggle({ value, onChange }: Readonly<PipelineToggleProps>) {
   return (
     <SegmentedToggle
       value={value}

@@ -27,11 +27,7 @@ const httpServer: McpServerConfig = {
 describe("McpServerEditor", () => {
   it("renders server name field", () => {
     renderWithProviders(
-      <McpServerEditor
-        value={stdioServer}
-        onChange={vi.fn()}
-        onRemove={vi.fn()}
-      />,
+      <McpServerEditor value={stdioServer} onChange={vi.fn()} onRemove={vi.fn()} />,
     );
 
     expect(screen.getByLabelText(/name/i)).toBeInTheDocument();
@@ -40,11 +36,7 @@ describe("McpServerEditor", () => {
 
   it("shows command field for stdio transport", () => {
     renderWithProviders(
-      <McpServerEditor
-        value={stdioServer}
-        onChange={vi.fn()}
-        onRemove={vi.fn()}
-      />,
+      <McpServerEditor value={stdioServer} onChange={vi.fn()} onRemove={vi.fn()} />,
     );
 
     expect(screen.getByLabelText(/command/i)).toBeInTheDocument();
@@ -53,11 +45,7 @@ describe("McpServerEditor", () => {
 
   it("shows url field for http transport", () => {
     renderWithProviders(
-      <McpServerEditor
-        value={httpServer}
-        onChange={vi.fn()}
-        onRemove={vi.fn()}
-      />,
+      <McpServerEditor value={httpServer} onChange={vi.fn()} onRemove={vi.fn()} />,
     );
 
     expect(screen.getByLabelText(/url/i)).toBeInTheDocument();
@@ -69,11 +57,7 @@ describe("McpServerEditor", () => {
     const onRemove = vi.fn();
 
     renderWithProviders(
-      <McpServerEditor
-        value={stdioServer}
-        onChange={vi.fn()}
-        onRemove={onRemove}
-      />,
+      <McpServerEditor value={stdioServer} onChange={vi.fn()} onRemove={onRemove} />,
     );
 
     await user.click(screen.getByRole("button", { name: /remove server/i }));

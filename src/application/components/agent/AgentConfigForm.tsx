@@ -31,6 +31,7 @@ import McpServerEditor from "./McpServerEditor";
 import SubAgentEditor from "./SubAgentEditor";
 import HITLEditor from "./HITLEditor";
 import ResponseFormatEditor from "./ResponseFormatEditor";
+import { AGENT_CONFIG_FORM_ID as FORM_ID } from "./formConstants";
 
 // ─── Constants ──────────────────────────────────────────────────────────────
 
@@ -48,10 +49,7 @@ type SectionValue =
 // Only essential sections are open by default, others can be revealed on demand.
 const DEFAULT_OPEN_SECTIONS: SectionValue[] = ["general", "system-prompt"];
 
-const SECTION_META: Record<
-  SectionValue,
-  { label: string; icon: string }
-> = {
+const SECTION_META: Record<SectionValue, { label: string; icon: string }> = {
   general: { label: "General", icon: "tune" },
   "system-prompt": { label: "System Prompt", icon: "description" },
   "tools-middleware": { label: "Tools & Middleware", icon: "build" },
@@ -115,10 +113,7 @@ const DEFAULT_FORM_VALUES: AgentConfigFormData = {
   debug: false,
 };
 
-function getDefaultValues(
-  mode: "create" | "edit",
-  initialData?: AgentConfig,
-): AgentConfigFormData {
+function getDefaultValues(mode: "create" | "edit", initialData?: AgentConfig): AgentConfigFormData {
   if (mode === "edit" && initialData) {
     return {
       ...DEFAULT_FORM_VALUES,
@@ -160,8 +155,6 @@ interface AgentConfigFormProps {
 }
 
 // ─── Component ────────────────────────────────────────────────────────────
-
-const FORM_ID = "agent-config-form";
 
 export default function AgentConfigForm({
   mode,
@@ -236,11 +229,7 @@ export default function AgentConfigForm({
         <AccordionItem value="general">
           <SectionTrigger value="general" />
           <AccordionContent className="space-y-4">
-            <FormField
-              id="agent-name"
-              label="Agent Name"
-              error={errors.name?.message}
-            >
+            <FormField id="agent-name" label="Agent Name" error={errors.name?.message}>
               <Input
                 id="agent-name"
                 {...register("name")}
@@ -250,11 +239,7 @@ export default function AgentConfigForm({
                 aria-invalid={!!errors.name}
               />
             </FormField>
-            <FormField
-              id="model"
-              label="Model"
-              error={errors.model?.message}
-            >
+            <FormField id="model" label="Model" error={errors.model?.message}>
               <Input
                 id="model"
                 {...register("model")}
@@ -321,9 +306,7 @@ export default function AgentConfigForm({
                     <button
                       key={opt.value}
                       type="button"
-                      onClick={() =>
-                        toggleMiddleware(opt.value, !isActive)
-                      }
+                      onClick={() => toggleMiddleware(opt.value, !isActive)}
                       aria-pressed={isActive}
                       className={cn(
                         "px-3 py-1.5 rounded-full text-xs font-bold font-headline uppercase tracking-widest border transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary-brand focus-visible:ring-inset",
@@ -349,9 +332,7 @@ export default function AgentConfigForm({
               <Label className="text-on-surface text-sm">Type</Label>
               <Select
                 value={backendType}
-                onValueChange={(v) =>
-                  setValue("backend.type", v as BackendType)
-                }
+                onValueChange={(v) => setValue("backend.type", v as BackendType)}
               >
                 <SelectTrigger className="mt-1.5">
                   <SelectValue />
@@ -478,10 +459,7 @@ function SectionTrigger({ value }: Readonly<{ value: SectionValue }>) {
   return (
     <AccordionTrigger className={buildAccordionTriggerClass()}>
       <span className="flex items-center gap-2">
-        <span
-          className="material-symbols-outlined text-sm text-secondary-brand"
-          aria-hidden="true"
-        >
+        <span className="material-symbols-outlined text-sm text-secondary-brand" aria-hidden="true">
           {meta.icon}
         </span>
         {meta.label}
@@ -511,11 +489,7 @@ function FormField({ id, label, error, children }: Readonly<FormFieldProps>) {
         {children}
       </div>
       {error && (
-        <p
-          id={errorId}
-          role="alert"
-          className="text-destructive text-xs mt-1.5"
-        >
+        <p id={errorId} role="alert" className="text-destructive text-xs mt-1.5">
           {error}
         </p>
       )}
@@ -530,17 +504,8 @@ interface AddButtonProps {
 
 function AddButton({ onClick, label }: Readonly<AddButtonProps>) {
   return (
-    <Button
-      type="button"
-      variant="outline"
-      size="sm"
-      onClick={onClick}
-      className="w-full"
-    >
-      <span
-        className="material-symbols-outlined text-sm mr-1"
-        aria-hidden="true"
-      >
+    <Button type="button" variant="outline" size="sm" onClick={onClick} className="w-full">
+      <span className="material-symbols-outlined text-sm mr-1" aria-hidden="true">
         add
       </span>
       {label}

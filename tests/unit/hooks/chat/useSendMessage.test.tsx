@@ -71,9 +71,7 @@ describe("useSendMessage", () => {
     });
 
     await waitFor(() => expect(result.current.isError).toBe(true));
-    expect(result.current.error?.message).toBe(
-      "Cannot send message without an active thread",
-    );
+    expect(result.current.error?.message).toBe("Cannot send message without an active thread");
   });
 
   it("invalidates messages query on success", async () => {

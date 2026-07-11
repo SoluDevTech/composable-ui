@@ -59,9 +59,7 @@ describe("useMessages", () => {
   });
 
   it("returns error state when API call fails", async () => {
-    vi.mocked(chatApi.getMessages).mockRejectedValue(
-      new Error("Thread not found"),
-    );
+    vi.mocked(chatApi.getMessages).mockRejectedValue(new Error("Thread not found"));
 
     const { result } = renderHook(() => useMessages("bad-thread"), {
       wrapper: createWrapper(),

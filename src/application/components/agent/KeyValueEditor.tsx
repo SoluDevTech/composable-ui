@@ -42,7 +42,10 @@ export default function KeyValueEditor({
 
   return (
     <div className="space-y-2">
-      <Label htmlFor={keyId} className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">
+      <Label
+        htmlFor={keyId}
+        className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant"
+      >
         {label}
       </Label>
       <div className="flex gap-2">
@@ -75,19 +78,14 @@ export default function KeyValueEditor({
             >
               <span className="font-mono text-xs text-on-surface">{k}</span>
               <span className="text-on-surface-variant text-xs">=</span>
-              <span className="font-mono text-xs text-on-surface-variant flex-1 truncate">
-                {v}
-              </span>
+              <span className="font-mono text-xs text-on-surface-variant flex-1 truncate">{v}</span>
               <button
                 type="button"
                 onClick={() => removeEntry(k)}
                 className="shrink-0 rounded-full hover:bg-destructive/15 p-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-destructive focus-visible:ring-inset"
                 aria-label={`Remove ${k}`}
               >
-                <span
-                  className="material-symbols-outlined text-xs"
-                  aria-hidden="true"
-                >
+                <span className="material-symbols-outlined text-xs" aria-hidden="true">
                   close
                 </span>
               </button>

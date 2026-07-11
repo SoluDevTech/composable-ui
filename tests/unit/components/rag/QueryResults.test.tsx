@@ -39,9 +39,7 @@ describe("QueryResults", () => {
       <QueryResults data={mockData} error={null} isLoading={false} onRetry={vi.fn()} />,
     );
 
-    expect(
-      screen.getByRole("button", { name: /copy/i }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /copy/i })).toBeInTheDocument();
   });
 
   it("does not show copy button when data is null", () => {
@@ -49,9 +47,7 @@ describe("QueryResults", () => {
       <QueryResults data={null} error={null} isLoading={false} onRetry={vi.fn()} />,
     );
 
-    expect(
-      screen.queryByRole("button", { name: /copy/i }),
-    ).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /copy/i })).not.toBeInTheDocument();
   });
 
   it("shows error message with retry button when error is present", () => {
@@ -62,9 +58,7 @@ describe("QueryResults", () => {
     );
 
     expect(screen.getByText("Query failed")).toBeInTheDocument();
-    expect(
-      screen.getByRole("button", { name: /retry/i }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /retry/i })).toBeInTheDocument();
   });
 
   it("clicking retry button calls onRetry", async () => {

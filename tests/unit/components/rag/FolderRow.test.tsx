@@ -34,13 +34,9 @@ describe("FolderRow", () => {
   });
 
   it("renders an index action menu when onIndexLightRAG is provided", () => {
-    renderWithProviders(
-      <FolderRow name="docs" onClick={vi.fn()} onIndexLightRAG={vi.fn()} />,
-    );
+    renderWithProviders(<FolderRow name="docs" onClick={vi.fn()} onIndexLightRAG={vi.fn()} />);
 
-    expect(
-      screen.getByRole("button", { name: /index options/i }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /index options/i })).toBeInTheDocument();
   });
 
   it("shows dropdown with LightRAG option when index button is clicked", async () => {

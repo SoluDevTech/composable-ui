@@ -10,9 +10,7 @@ interface QueryPanelProps {
   workingDir: string;
 }
 
-export default function QueryPanel({
-  workingDir,
-}: Readonly<QueryPanelProps>) {
+export default function QueryPanel({ workingDir }: Readonly<QueryPanelProps>) {
   const [pipeline, setPipeline] = useState<"lightrag" | "classical">("lightrag");
   const [query, setQuery] = useState("");
   const [mode, setMode] = useState<QueryMode | ClassicalQueryMode>("naive");
@@ -94,12 +92,16 @@ export default function QueryPanel({
         >
           {isLoading ? (
             <>
-              <span className="material-symbols-outlined text-lg animate-spin" aria-hidden="true">progress_activity</span>
+              <span className="material-symbols-outlined text-lg animate-spin" aria-hidden="true">
+                progress_activity
+              </span>
               {"Searching..."}
             </>
           ) : (
             <>
-              <span className="material-symbols-outlined text-lg" aria-hidden="true">search</span>
+              <span className="material-symbols-outlined text-lg" aria-hidden="true">
+                search
+              </span>
               {"Search"}
             </>
           )}
@@ -107,15 +109,8 @@ export default function QueryPanel({
       </div>
 
       <div>
-        <h3 className="font-headline text-sm font-semibold text-on-surface mb-3">
-          Results
-        </h3>
-        <QueryResults
-          data={result}
-          error={error}
-          isLoading={isLoading}
-          onRetry={handleRetry}
-        />
+        <h3 className="font-headline text-sm font-semibold text-on-surface mb-3">Results</h3>
+        <QueryResults data={result} error={error} isLoading={isLoading} onRetry={handleRetry} />
       </div>
     </div>
   );

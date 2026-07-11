@@ -98,9 +98,7 @@ describe("useClassicalQuery", () => {
   });
 
   it("sets error state on failure", async () => {
-    vi.mocked(ragQueryApi.queryClassical).mockRejectedValue(
-      new Error("Query failed"),
-    );
+    vi.mocked(ragQueryApi.queryClassical).mockRejectedValue(new Error("Query failed"));
     const { wrapper } = createWrapper();
 
     const { result } = renderHook(() => useClassicalQuery(), { wrapper });

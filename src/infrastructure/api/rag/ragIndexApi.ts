@@ -3,10 +3,13 @@ import type { IRagIndexPort } from "@/domain/ports/rag/ragIndexPort";
 
 export const ragIndexApi: IRagIndexPort = {
   async indexFile(request) {
-    const response = await ragApiClient.post<{ status: string; message: string }>("/api/v1/file/index", {
-      file_name: request.file_name,
-      working_dir: request.working_dir,
-    });
+    const response = await ragApiClient.post<{ status: string; message: string }>(
+      "/api/v1/file/index",
+      {
+        file_name: request.file_name,
+        working_dir: request.working_dir,
+      },
+    );
     return {
       status: response.data.status,
       message: response.data.message,
@@ -21,7 +24,10 @@ export const ragIndexApi: IRagIndexPort = {
     if (request.file_extensions) {
       body.file_extensions = request.file_extensions;
     }
-    const response = await ragApiClient.post<{ status: string; message: string }>("/api/v1/folder/index", body);
+    const response = await ragApiClient.post<{ status: string; message: string }>(
+      "/api/v1/folder/index",
+      body,
+    );
     return {
       status: response.data.status,
       message: response.data.message,
@@ -29,12 +35,15 @@ export const ragIndexApi: IRagIndexPort = {
   },
 
   async indexFileClassical(request) {
-    const response = await ragApiClient.post<{ status: string; message: string }>("/api/v1/classical/file/index", {
-      file_name: request.file_name,
-      working_dir: request.working_dir,
-      chunk_size: request.chunk_size,
-      chunk_overlap: request.chunk_overlap,
-    });
+    const response = await ragApiClient.post<{ status: string; message: string }>(
+      "/api/v1/classical/file/index",
+      {
+        file_name: request.file_name,
+        working_dir: request.working_dir,
+        chunk_size: request.chunk_size,
+        chunk_overlap: request.chunk_overlap,
+      },
+    );
     return {
       status: response.data.status,
       message: response.data.message,
@@ -51,7 +60,10 @@ export const ragIndexApi: IRagIndexPort = {
     if (request.file_extensions) {
       body.file_extensions = request.file_extensions;
     }
-    const response = await ragApiClient.post<{ status: string; message: string }>("/api/v1/classical/folder/index", body);
+    const response = await ragApiClient.post<{ status: string; message: string }>(
+      "/api/v1/classical/folder/index",
+      body,
+    );
     return {
       status: response.data.status,
       message: response.data.message,

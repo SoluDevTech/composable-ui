@@ -41,18 +41,14 @@ export const chatApi: IChatPort = {
   },
 
   async getMessages(threadId: string): Promise<Message[]> {
-    const response = await apiClient.get<Message[]>(
-      `/api/v1/threads/${threadId}/messages`,
-    );
+    const response = await apiClient.get<Message[]>(`/api/v1/threads/${threadId}/messages`);
     return response.data;
   },
 
   async sendMessage(threadId: string, request: ChatRequest): Promise<Message> {
-    const response = await apiClient.post<Message>(
-      `/api/v1/chat/${threadId}`,
-      request,
-      { timeout: 300000 },
-    );
+    const response = await apiClient.post<Message>(`/api/v1/chat/${threadId}`, request, {
+      timeout: 300000,
+    });
     return response.data;
   },
 

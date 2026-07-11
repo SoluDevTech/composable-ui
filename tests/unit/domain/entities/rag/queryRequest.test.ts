@@ -2,9 +2,7 @@ import { describe, it, expect } from "vitest";
 
 describe("LightRAGQueryRequest", () => {
   it("allows constructing an object with all required fields", async () => {
-    const { LightRAGQueryRequest } = await import(
-      "@/domain/entities/rag/queryRequest"
-    );
+    const { LightRAGQueryRequest } = await import("@/domain/entities/rag/queryRequest");
 
     const request: LightRAGQueryRequest = {
       working_dir: "/data/projects/acme",
@@ -20,9 +18,7 @@ describe("LightRAGQueryRequest", () => {
   });
 
   it("accepts all valid QueryMode values", async () => {
-    const { LightRAGQueryRequest, QueryMode } = await import(
-      "@/domain/entities/rag/queryRequest"
-    );
+    const { LightRAGQueryRequest, QueryMode } = await import("@/domain/entities/rag/queryRequest");
 
     const validModes: QueryMode[] = [
       "naive",
@@ -49,9 +45,7 @@ describe("LightRAGQueryRequest", () => {
 
 describe("ClassicalQueryRequest", () => {
   it("allows constructing an object with all required fields", async () => {
-    const { ClassicalQueryRequest } = await import(
-      "@/domain/entities/rag/queryRequest"
-    );
+    const { ClassicalQueryRequest } = await import("@/domain/entities/rag/queryRequest");
 
     const request: ClassicalQueryRequest = {
       working_dir: "/data/projects/acme",
@@ -73,9 +67,7 @@ describe("ClassicalQueryRequest", () => {
   });
 
   it("accepts optional vector_distance_threshold", async () => {
-    const { ClassicalQueryRequest } = await import(
-      "@/domain/entities/rag/queryRequest"
-    );
+    const { ClassicalQueryRequest } = await import("@/domain/entities/rag/queryRequest");
 
     const withThreshold: ClassicalQueryRequest = {
       working_dir: "/data/test",
@@ -92,9 +84,7 @@ describe("ClassicalQueryRequest", () => {
   });
 
   it("allows omitting optional vector_distance_threshold", async () => {
-    const { ClassicalQueryRequest } = await import(
-      "@/domain/entities/rag/queryRequest"
-    );
+    const { ClassicalQueryRequest } = await import("@/domain/entities/rag/queryRequest");
 
     const withoutThreshold: ClassicalQueryRequest = {
       working_dir: "/data/test",
@@ -110,9 +100,7 @@ describe("ClassicalQueryRequest", () => {
   });
 
   it("accepts all valid ClassicalQueryMode values", async () => {
-    const { ClassicalQueryMode } = await import(
-      "@/domain/entities/rag/queryRequest"
-    );
+    const { ClassicalQueryMode } = await import("@/domain/entities/rag/queryRequest");
 
     const validModes: ClassicalQueryMode[] = ["vector", "hybrid"];
 
@@ -133,9 +121,7 @@ describe("ClassicalQueryRequest", () => {
 
 describe("RagQueryResponse", () => {
   it("allows constructing a response with status and data", async () => {
-    const { RagQueryResponse } = await import(
-      "@/domain/entities/rag/queryRequest"
-    );
+    const { RagQueryResponse } = await import("@/domain/entities/rag/queryRequest");
 
     const response: RagQueryResponse = {
       status: "success",
@@ -147,9 +133,7 @@ describe("RagQueryResponse", () => {
   });
 
   it("allows including optional message and metadata", async () => {
-    const { RagQueryResponse } = await import(
-      "@/domain/entities/rag/queryRequest"
-    );
+    const { RagQueryResponse } = await import("@/domain/entities/rag/queryRequest");
 
     const response: RagQueryResponse = {
       status: "success",
@@ -163,9 +147,7 @@ describe("RagQueryResponse", () => {
   });
 
   it("allows constructing an error response", async () => {
-    const { RagQueryResponse } = await import(
-      "@/domain/entities/rag/queryRequest"
-    );
+    const { RagQueryResponse } = await import("@/domain/entities/rag/queryRequest");
 
     const response: RagQueryResponse = {
       status: "error",
@@ -178,9 +160,7 @@ describe("RagQueryResponse", () => {
   });
 
   it("allows omitting optional message and metadata", async () => {
-    const { RagQueryResponse } = await import(
-      "@/domain/entities/rag/queryRequest"
-    );
+    const { RagQueryResponse } = await import("@/domain/entities/rag/queryRequest");
 
     const response: RagQueryResponse = {
       status: "success",

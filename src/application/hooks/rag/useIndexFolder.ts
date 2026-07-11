@@ -4,11 +4,7 @@ import { ragIndexApi } from "@/infrastructure/api/rag/ragIndexApi";
 
 export function useIndexFolder() {
   return useMutation({
-    mutationFn: (request: {
-      workingDir: string;
-      recursive: boolean;
-      fileExtensions?: string[];
-    }) =>
+    mutationFn: (request: { workingDir: string; recursive: boolean; fileExtensions?: string[] }) =>
       ragIndexApi.indexFolder({
         working_dir: request.workingDir,
         recursive: request.recursive,

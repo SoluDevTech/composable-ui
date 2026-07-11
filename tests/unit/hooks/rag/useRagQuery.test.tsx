@@ -40,7 +40,12 @@ describe("useRagQuery", () => {
     const { result } = renderHook(() => useRagQuery(), { wrapper });
 
     act(() => {
-      result.current.mutate({ workingDir: "/data/project", query: "What is RAG?", mode: "hybrid", topK: 5 });
+      result.current.mutate({
+        workingDir: "/data/project",
+        query: "What is RAG?",
+        mode: "hybrid",
+        topK: 5,
+      });
     });
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
@@ -64,7 +69,12 @@ describe("useRagQuery", () => {
     expect(result.current.isPending).toBe(false);
 
     act(() => {
-      result.current.mutate({ workingDir: "/data/project", query: "What is RAG?", mode: "hybrid", topK: 5 });
+      result.current.mutate({
+        workingDir: "/data/project",
+        query: "What is RAG?",
+        mode: "hybrid",
+        topK: 5,
+      });
     });
 
     await waitFor(() => expect(result.current.isPending).toBe(true));
@@ -78,15 +88,18 @@ describe("useRagQuery", () => {
   });
 
   it("sets error state on failure", async () => {
-    vi.mocked(ragQueryApi.queryLightRAG).mockRejectedValue(
-      new Error("Query failed"),
-    );
+    vi.mocked(ragQueryApi.queryLightRAG).mockRejectedValue(new Error("Query failed"));
     const { wrapper } = createWrapper();
 
     const { result } = renderHook(() => useRagQuery(), { wrapper });
 
     act(() => {
-      result.current.mutate({ workingDir: "/data/project", query: "What is RAG?", mode: "hybrid", topK: 5 });
+      result.current.mutate({
+        workingDir: "/data/project",
+        query: "What is RAG?",
+        mode: "hybrid",
+        topK: 5,
+      });
     });
 
     await waitFor(() => expect(result.current.isError).toBe(true));

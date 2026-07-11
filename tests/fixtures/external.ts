@@ -4,11 +4,7 @@ import type { AgentConfigMetadata } from "@/domain/entities/agent/agentConfigMet
 import type { McpServerConfig } from "@/domain/entities/agent/mcpServerConfig";
 import { McpTransportType } from "@/domain/entities/agent/mcpServerConfig";
 import { Thread } from "@/domain/entities/chat/thread";
-import {
-  Message,
-  MessageRole,
-  MessageStatus,
-} from "@/domain/entities/chat/message";
+import { Message, MessageRole, MessageStatus } from "@/domain/entities/chat/message";
 
 export function createAgentConfigMetadata(
   overrides: Partial<AgentConfigMetadata> = {},
@@ -35,9 +31,7 @@ export function createThread(overrides: Partial<Thread> = {}): Thread {
   };
 }
 
-export function createAgentConfig(
-  overrides: Partial<AgentConfig> = {},
-): AgentConfig {
+export function createAgentConfig(overrides: Partial<AgentConfig> = {}): AgentConfig {
   return {
     name: "test-agent",
     model: "openai:anthropic/claude-haiku-4.5:nitro",
@@ -55,9 +49,7 @@ export function createAgentConfig(
   };
 }
 
-export function createMcpServerConfig(
-  overrides: Partial<McpServerConfig> = {},
-): McpServerConfig {
+export function createMcpServerConfig(overrides: Partial<McpServerConfig> = {}): McpServerConfig {
   return {
     name: "fs-server",
     transport: McpTransportType.STDIO,

@@ -10,10 +10,7 @@ const TAB_OPTIONS = [
   { value: "query" as const, label: "Query" },
 ];
 
-export default function RagTabBar({
-  activeTab,
-  onTabChange,
-}: Readonly<RagTabBarProps>) {
+export default function RagTabBar({ activeTab, onTabChange }: Readonly<RagTabBarProps>) {
   return (
     <SegmentedToggle
       value={activeTab}

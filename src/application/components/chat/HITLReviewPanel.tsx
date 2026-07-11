@@ -10,10 +10,7 @@ interface HITLReviewPanelProps {
 
 type ReviewState = "idle" | "reviewing" | "rejecting";
 
-export default function HITLReviewPanel({
-  toolCalls,
-  threadId,
-}: Readonly<HITLReviewPanelProps>) {
+export default function HITLReviewPanel({ toolCalls, threadId }: Readonly<HITLReviewPanelProps>) {
   const [reviewState, setReviewState] = useState<ReviewState>("idle");
   const [rejectReason, setRejectReason] = useState("");
   const sendMessage = useSendMessage(threadId);
@@ -53,9 +50,7 @@ export default function HITLReviewPanel({
     return (
       <div className="mt-4 p-4 bg-surface-container-low rounded-xl flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <span className="material-symbols-outlined text-secondary-brand text-xl">
-            warning
-          </span>
+          <span className="material-symbols-outlined text-secondary-brand text-xl">warning</span>
           <span className="text-sm font-medium text-on-surface">
             Validation required: <span className="font-mono">{toolName}</span>
           </span>
@@ -75,9 +70,7 @@ export default function HITLReviewPanel({
     <div className="mt-4 p-4 bg-surface-container-low rounded-xl space-y-4">
       {/* Tool call details */}
       <div className="flex items-center gap-3">
-        <span className="material-symbols-outlined text-secondary-brand text-xl">
-          warning
-        </span>
+        <span className="material-symbols-outlined text-secondary-brand text-xl">warning</span>
         <span className="text-sm font-medium text-on-surface">
           Review: <span className="font-mono">{toolName}</span>
         </span>

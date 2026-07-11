@@ -36,20 +36,13 @@ export default function SegmentedToggle<V extends string>({
   const isRadio = pattern === "radio";
 
   // Parent role varies by pattern.
-  const parentRole = isTab
-    ? "tablist"
-    : isRadio
-      ? "radiogroup"
-      : undefined;
+  const parentRole = isTab ? "tablist" : isRadio ? "radiogroup" : undefined;
 
   return (
     <div
       role={parentRole}
       aria-label={ariaLabel}
-      className={cn(
-        "flex items-center gap-1 bg-surface-container rounded-lg p-1",
-        className,
-      )}
+      className={cn("flex items-center gap-1 bg-surface-container rounded-lg p-1", className)}
     >
       {options.map((opt) => {
         const selected = opt.value === value;

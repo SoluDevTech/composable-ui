@@ -8,15 +8,13 @@ const RagPage = lazy(() => import("@/application/pages/RagPage"));
 
 function PageFallback() {
   return (
-    <div
-      className="flex-1 flex items-center justify-center"
-      role="status"
-      aria-live="polite"
-    >
+    <div className="flex-1 flex items-center justify-center" role="status" aria-live="polite">
       <p className="text-on-surface-variant text-sm">Loading…</p>
     </div>
   );
 }
+
+export { PageFallback };
 
 function App() {
   return (

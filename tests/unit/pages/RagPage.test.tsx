@@ -71,9 +71,7 @@ describe("RagPage", () => {
   it("renders page title RAG Storage", () => {
     renderWithProviders(<RagPage />, { initialEntries: ["/rag"] });
 
-    expect(
-      screen.getByRole("heading", { name: /rag storage/i }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: /rag storage/i })).toBeInTheDocument();
   });
 
   it("shows breadcrumb navigation", () => {
@@ -112,9 +110,7 @@ describe("RagPage", () => {
 
     await user.click(screen.getByRole("tab", { name: /query/i }));
 
-    expect(
-      screen.getByRole("button", { name: /lightrag/i }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /lightrag/i })).toBeInTheDocument();
   });
 
   it("WorkspaceSelector is visible on Query tab", async () => {
@@ -123,8 +119,6 @@ describe("RagPage", () => {
 
     await user.click(screen.getByRole("tab", { name: /query/i }));
 
-    expect(
-      screen.getByLabelText(/workspace|working.?dir/i),
-    ).toBeInTheDocument();
+    expect(screen.getByLabelText(/workspace|working.?dir/i)).toBeInTheDocument();
   });
 });

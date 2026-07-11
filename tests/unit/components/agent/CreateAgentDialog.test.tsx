@@ -47,29 +47,21 @@ describe("CreateAgentDialog", () => {
   });
 
   it("renders dialog title when open", () => {
-    renderWithProviders(
-      <CreateAgentDialog open={true} onOpenChange={vi.fn()} />,
-    );
+    renderWithProviders(<CreateAgentDialog open={true} onOpenChange={vi.fn()} />);
 
     // The dialog title is a heading; the visible Submit button also says "Create Agent" so target heading.
-    expect(
-      screen.getByRole("heading", { name: /create agent/i, level: 2 }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: /create agent/i, level: 2 })).toBeInTheDocument();
   });
 
   it("has form and yaml tabs", () => {
-    renderWithProviders(
-      <CreateAgentDialog open={true} onOpenChange={vi.fn()} />,
-    );
+    renderWithProviders(<CreateAgentDialog open={true} onOpenChange={vi.fn()} />);
 
     expect(screen.getByText("Form")).toBeInTheDocument();
     expect(screen.getByText("Upload YAML")).toBeInTheDocument();
   });
 
   it("defaults to form tab", () => {
-    renderWithProviders(
-      <CreateAgentDialog open={true} onOpenChange={vi.fn()} />,
-    );
+    renderWithProviders(<CreateAgentDialog open={true} onOpenChange={vi.fn()} />);
 
     expect(screen.getByLabelText(/agent name/i)).toBeInTheDocument();
   });
@@ -77,9 +69,7 @@ describe("CreateAgentDialog", () => {
   it("switches to yaml tab and shows file input", async () => {
     const user = userEvent.setup();
 
-    renderWithProviders(
-      <CreateAgentDialog open={true} onOpenChange={vi.fn()} />,
-    );
+    renderWithProviders(<CreateAgentDialog open={true} onOpenChange={vi.fn()} />);
 
     await user.click(screen.getByText("Upload YAML"));
 
@@ -90,9 +80,7 @@ describe("CreateAgentDialog", () => {
     const user = userEvent.setup();
     const onOpenChange = vi.fn();
 
-    renderWithProviders(
-      <CreateAgentDialog open={true} onOpenChange={onOpenChange} />,
-    );
+    renderWithProviders(<CreateAgentDialog open={true} onOpenChange={onOpenChange} />);
 
     await user.click(screen.getByText("Upload YAML"));
     await user.click(screen.getByRole("button", { name: /cancel/i }));

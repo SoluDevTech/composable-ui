@@ -79,9 +79,7 @@ describe("FileConfigRepository", () => {
       } as Response);
 
       const repo = new FileConfigRepository();
-      await expect(repo.getConfig()).rejects.toThrow(
-        "Failed to load config: 500",
-      );
+      await expect(repo.getConfig()).rejects.toThrow("Failed to load config: 500");
 
       expect(mockToast.error).toHaveBeenCalledWith("Configuration Error", {
         description: "App is not configured.",

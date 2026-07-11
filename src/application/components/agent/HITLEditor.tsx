@@ -11,10 +11,7 @@ interface HITLEditorProps {
   onChange: (value: Record<string, RuleValue>) => void;
 }
 
-export default function HITLEditor({
-  value,
-  onChange,
-}: Readonly<HITLEditorProps>) {
+export default function HITLEditor({ value, onChange }: Readonly<HITLEditorProps>) {
   const [ruleName, setRuleName] = useState("");
   const inputId = useId();
   const entries = Object.entries(value);
@@ -67,31 +64,22 @@ export default function HITLEditor({
           {typeof val === "boolean" ? (
             <div className="flex items-center gap-2">
               <Label className="text-xs text-on-surface-variant">Enabled</Label>
-              <Switch
-                checked={val}
-                onCheckedChange={(v) => updateRule(key, v)}
-              />
+              <Switch checked={val} onCheckedChange={(v) => updateRule(key, v)} />
             </div>
           ) : (
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-1">
-                <Label className="text-xs text-on-surface-variant">
-                  Before
-                </Label>
+                <Label className="text-xs text-on-surface-variant">Before</Label>
                 <Switch
                   checked={val.before ?? false}
-                  onCheckedChange={(v) =>
-                    updateRule(key, { ...val, before: v })
-                  }
+                  onCheckedChange={(v) => updateRule(key, { ...val, before: v })}
                 />
               </div>
               <div className="flex items-center gap-1">
                 <Label className="text-xs text-on-surface-variant">After</Label>
                 <Switch
                   checked={val.after ?? false}
-                  onCheckedChange={(v) =>
-                    updateRule(key, { ...val, after: v })
-                  }
+                  onCheckedChange={(v) => updateRule(key, { ...val, after: v })}
                 />
               </div>
             </div>
@@ -102,19 +90,14 @@ export default function HITLEditor({
             className="rounded-full hover:bg-destructive/15 p-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-destructive focus-visible:ring-inset"
             aria-label={`Remove ${key}`}
           >
-            <span
-              className="material-symbols-outlined text-xs"
-              aria-hidden="true"
-            >
+            <span className="material-symbols-outlined text-xs" aria-hidden="true">
               close
             </span>
           </button>
         </div>
       ))}
       {entries.length === 0 && (
-        <p className="text-xs text-on-surface-variant italic">
-          No HITL rules configured
-        </p>
+        <p className="text-xs text-on-surface-variant italic">No HITL rules configured</p>
       )}
     </div>
   );

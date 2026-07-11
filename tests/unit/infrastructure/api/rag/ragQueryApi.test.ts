@@ -89,9 +89,7 @@ describe("ragQueryApi", () => {
     });
 
     it("propagates error when axios rejects", async () => {
-      vi.mocked(ragApiClient.post).mockRejectedValue(
-        new Error("Internal server error"),
-      );
+      vi.mocked(ragApiClient.post).mockRejectedValue(new Error("Internal server error"));
 
       const request = {
         working_dir: "/data/project",
@@ -100,9 +98,7 @@ describe("ragQueryApi", () => {
         top_k: 5,
       };
 
-      await expect(ragQueryApi.queryLightRAG(request)).rejects.toThrow(
-        "Internal server error",
-      );
+      await expect(ragQueryApi.queryLightRAG(request)).rejects.toThrow("Internal server error");
     });
 
     it("throws ZodError when response does not match schema", async () => {
@@ -158,18 +154,15 @@ describe("ragQueryApi", () => {
 
       const result = await ragQueryApi.queryClassical(request);
 
-      expect(ragApiClient.post).toHaveBeenCalledWith(
-        "/api/v1/classical/query",
-        {
-          working_dir: "/data/my-project",
-          query: "Explain vector search",
-          top_k: 8,
-          num_variations: 3,
-          relevance_threshold: 0.7,
-          enable_llm_judge: true,
-          mode: "hybrid",
-        },
-      );
+      expect(ragApiClient.post).toHaveBeenCalledWith("/api/v1/classical/query", {
+        working_dir: "/data/my-project",
+        query: "Explain vector search",
+        top_k: 8,
+        num_variations: 3,
+        relevance_threshold: 0.7,
+        enable_llm_judge: true,
+        mode: "hybrid",
+      });
       expect(result.status).toBe("success");
       expect(result.chunks).toHaveLength(1);
       expect(result.chunks[0].relevance_score).toBe(8.5);
@@ -232,10 +225,7 @@ describe("ragQueryApi", () => {
 
       await ragQueryApi.queryClassical(request);
 
-      const calledBody = vi.mocked(ragApiClient.post).mock.calls[0][1] as Record<
-        string,
-        unknown
-      >;
+      const calledBody = vi.mocked(ragApiClient.post).mock.calls[0][1] as Record<string, unknown>;
       expect(calledBody).not.toHaveProperty("vector_distance_threshold");
     });
 
@@ -279,9 +269,7 @@ describe("ragQueryApi", () => {
     });
 
     it("propagates error when axios rejects", async () => {
-      vi.mocked(ragApiClient.post).mockRejectedValue(
-        new Error("Service unavailable"),
-      );
+      vi.mocked(ragApiClient.post).mockRejectedValue(new Error("Service unavailable"));
 
       const request = {
         working_dir: "/data/project",
@@ -293,9 +281,7 @@ describe("ragQueryApi", () => {
         mode: "hybrid" as const,
       };
 
-      await expect(ragQueryApi.queryClassical(request)).rejects.toThrow(
-        "Service unavailable",
-      );
+      await expect(ragQueryApi.queryClassical(request)).rejects.toThrow("Service unavailable");
     });
 
     it("throws ZodError when response does not match schema", async () => {

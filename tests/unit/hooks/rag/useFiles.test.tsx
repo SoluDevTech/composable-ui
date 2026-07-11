@@ -57,9 +57,7 @@ describe("useFiles", () => {
   });
 
   it("handles API errors", async () => {
-    vi.mocked(ragApi.listFiles).mockRejectedValue(
-      new Error("Server error"),
-    );
+    vi.mocked(ragApi.listFiles).mockRejectedValue(new Error("Server error"));
 
     const { result } = renderHook(() => useFiles(""), {
       wrapper: createWrapper(),

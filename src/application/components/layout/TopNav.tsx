@@ -29,10 +29,7 @@ export default function TopNav() {
         </div>
 
         {/* Center: Navigation (desktop) */}
-        <nav
-          className="hidden md:flex items-center gap-8"
-          aria-label="Primary navigation"
-        >
+        <nav className="hidden md:flex items-center gap-8" aria-label="Primary navigation">
           {NAV_LINKS.map((link) => (
             <NavLink
               key={link.to}

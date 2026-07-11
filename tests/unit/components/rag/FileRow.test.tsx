@@ -7,11 +7,7 @@ import FileRow from "@/application/components/rag/FileRow";
 describe("FileRow", () => {
   it("renders filename as the last path segment", () => {
     renderWithProviders(
-      <FileRow
-        filename="readme.md"
-        size={1024}
-        lastModified="2026-04-06T10:00:00Z"
-      />,
+      <FileRow filename="readme.md" size={1024} lastModified="2026-04-06T10:00:00Z" />,
     );
 
     expect(screen.getByText("readme.md")).toBeInTheDocument();
@@ -19,11 +15,7 @@ describe("FileRow", () => {
 
   it("renders human-readable file size", () => {
     renderWithProviders(
-      <FileRow
-        filename="report.pdf"
-        size={1536000}
-        lastModified="2026-04-06T10:00:00Z"
-      />,
+      <FileRow filename="report.pdf" size={1536000} lastModified="2026-04-06T10:00:00Z" />,
     );
 
     expect(screen.getByText("1.5 MB")).toBeInTheDocument();
@@ -31,31 +23,21 @@ describe("FileRow", () => {
 
   it("renders formatted date", () => {
     renderWithProviders(
-      <FileRow
-        filename="guide.md"
-        size={500}
-        lastModified="2026-04-06T10:00:00Z"
-      />,
+      <FileRow filename="guide.md" size={500} lastModified="2026-04-06T10:00:00Z" />,
     );
 
     expect(screen.getByText(/2026/)).toBeInTheDocument();
   });
 
   it("shows — for null lastModified", () => {
-    renderWithProviders(
-      <FileRow filename="draft.txt" size={100} lastModified={null} />,
-    );
+    renderWithProviders(<FileRow filename="draft.txt" size={100} lastModified={null} />);
 
     expect(screen.getByText("—")).toBeInTheDocument();
   });
 
   it("shows 0 B for zero size", () => {
     renderWithProviders(
-      <FileRow
-        filename="empty.log"
-        size={0}
-        lastModified="2026-04-06T10:00:00Z"
-      />,
+      <FileRow filename="empty.log" size={0} lastModified="2026-04-06T10:00:00Z" />,
     );
 
     expect(screen.getByText("0 B")).toBeInTheDocument();
@@ -63,11 +45,7 @@ describe("FileRow", () => {
 
   it("shows 1.2 MB for large files", () => {
     renderWithProviders(
-      <FileRow
-        filename="archive.zip"
-        size={1258291}
-        lastModified="2026-04-06T10:00:00Z"
-      />,
+      <FileRow filename="archive.zip" size={1258291} lastModified="2026-04-06T10:00:00Z" />,
     );
 
     expect(screen.getByText("1.2 MB")).toBeInTheDocument();
@@ -75,11 +53,7 @@ describe("FileRow", () => {
 
   it("does not render buttons when no callbacks provided", () => {
     renderWithProviders(
-      <FileRow
-        filename="readme.md"
-        size={1024}
-        lastModified="2026-04-06T10:00:00Z"
-      />,
+      <FileRow filename="readme.md" size={1024} lastModified="2026-04-06T10:00:00Z" />,
     );
 
     expect(screen.queryByRole("button")).not.toBeInTheDocument();
@@ -95,9 +69,7 @@ describe("FileRow", () => {
       />,
     );
 
-    expect(
-      screen.getByRole("button", { name: /read/i }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /read/i })).toBeInTheDocument();
   });
 
   it("calls onRead when the read button is clicked", async () => {
@@ -127,9 +99,7 @@ describe("FileRow", () => {
       />,
     );
 
-    expect(
-      screen.getByRole("button", { name: /index options/i }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /index options/i })).toBeInTheDocument();
   });
 
   it("shows LightRAG option in dropdown when clicked", async () => {
@@ -190,12 +160,7 @@ describe("FileRow", () => {
 
   it("shows spinner when isIndexing is true", () => {
     renderWithProviders(
-      <FileRow
-        filename="report.pdf"
-        size={1024}
-        lastModified="2026-04-06T10:00:00Z"
-        isIndexing
-      />,
+      <FileRow filename="report.pdf" size={1024} lastModified="2026-04-06T10:00:00Z" isIndexing />,
     );
 
     expect(screen.getByText("report.pdf")).toBeInTheDocument();

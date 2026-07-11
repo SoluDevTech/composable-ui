@@ -34,9 +34,7 @@ export default function QueryResults({
         >
           progress_activity
         </span>
-        <p className="ml-3 text-on-surface-variant font-headline text-sm">
-          Searching...
-        </p>
+        <p className="ml-3 text-on-surface-variant font-headline text-sm">Searching...</p>
       </div>
     );
   }
@@ -44,10 +42,7 @@ export default function QueryResults({
   if (error) {
     return (
       <div className="flex flex-col items-center justify-center py-12 gap-4">
-        <span
-          className="material-symbols-outlined text-4xl text-red-600"
-          aria-hidden="true"
-        >
+        <span className="material-symbols-outlined text-4xl text-red-600" aria-hidden="true">
           error
         </span>
         <p className="text-red-600 font-headline text-sm">{error.message}</p>
@@ -91,11 +86,11 @@ export default function QueryResults({
         className="absolute top-3 right-3 flex items-center gap-1.5 text-on-surface-variant hover:text-on-surface transition-colors bg-surface-container px-2 py-1 rounded-md"
         title="Copy to clipboard"
       >
-          <span className="material-symbols-outlined text-base" aria-hidden="true">
-            {copied ? "check" : "content_copy"}
-          </span>
-          <span className="font-headline text-xs">{copied ? "Copied" : "Copy"}</span>
-        </button>
+        <span className="material-symbols-outlined text-base" aria-hidden="true">
+          {copied ? "check" : "content_copy"}
+        </span>
+        <span className="font-headline text-xs">{copied ? "Copied" : "Copy"}</span>
+      </button>
       <pre className="bg-surface-container-lowest rounded-lg p-4 overflow-auto max-h-[500px] text-xs font-body text-on-surface border border-outline-variant">
         {jsonText}
       </pre>

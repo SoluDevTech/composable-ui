@@ -14,11 +14,7 @@ type BadgeVariant = {
 function resolveVariant(status: string): BadgeVariant {
   const normalized = status.toLowerCase();
 
-  if (
-    normalized === "active" ||
-    normalized === "completed" ||
-    normalized === "approved"
-  ) {
+  if (normalized === "active" || normalized === "completed" || normalized === "approved") {
     return { bg: "bg-emerald-100", text: "text-emerald-700" };
   }
 
@@ -39,11 +35,7 @@ function resolveVariant(status: string): BadgeVariant {
     return { bg: "bg-blue-100", text: "text-blue-700" };
   }
 
-  if (
-    normalized === "rejected" ||
-    normalized === "error" ||
-    normalized === "failed"
-  ) {
+  if (normalized === "rejected" || normalized === "error" || normalized === "failed") {
     return { bg: "bg-red-100", text: "text-red-700" };
   }
 
@@ -56,15 +48,10 @@ function resolveVariant(status: string): BadgeVariant {
 
 /** Format display label from a raw status string. */
 function formatLabel(status: string): string {
-  return status
-    .replace(/_/g, " ")
-    .replace(/\b\w/g, (m) => m.toUpperCase());
+  return status.replace(/_/g, " ").replace(/\b\w/g, (m) => m.toUpperCase());
 }
 
-export default function StatusBadge({
-  status,
-  className,
-}: Readonly<StatusBadgeProps>) {
+export default function StatusBadge({ status, className }: Readonly<StatusBadgeProps>) {
   const { bg, text } = resolveVariant(status);
 
   return (

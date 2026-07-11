@@ -13,10 +13,7 @@ interface MessageListProps {
   agentName: string;
 }
 
-export default function MessageList({
-  threadId,
-  agentName,
-}: Readonly<MessageListProps>) {
+export default function MessageList({ threadId, agentName }: Readonly<MessageListProps>) {
   const { data: messages, isLoading } = useMessages(threadId);
   const {
     streamingContent,
@@ -31,8 +28,7 @@ export default function MessageList({
   useEffect(() => {
     const el = scrollRef.current;
     if (!el) return;
-    const isNearBottom =
-      el.scrollHeight - el.scrollTop - el.clientHeight < 150;
+    const isNearBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 150;
     if (isNearBottom) {
       requestAnimationFrame(() => {
         el.scrollTop = el.scrollHeight;
@@ -71,10 +67,7 @@ export default function MessageList({
   }
 
   return (
-    <div
-      ref={scrollRef}
-      className="flex-1 overflow-y-auto px-6 py-8 md:px-12 lg:px-24 xl:px-48"
-    >
+    <div ref={scrollRef} className="flex-1 overflow-y-auto px-6 py-8 md:px-12 lg:px-24 xl:px-48">
       <div className="space-y-6">
         {messages?.map((msg, idx) => (
           <ChatMessage
@@ -104,25 +97,18 @@ export default function MessageList({
         {isStreaming && (
           <div className="flex gap-3 max-w-4xl">
             <div className="w-8 h-8 rounded-lg bg-primary-container flex items-center justify-center shrink-0 mt-1">
-              <span
-                className="material-symbols-outlined text-white text-sm"
-                aria-hidden="true"
-              >
+              <span className="material-symbols-outlined text-white text-sm" aria-hidden="true">
                 hub
               </span>
             </div>
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 mb-2">
-                <span className="font-headline font-bold text-sm text-on-surface">
-                  {agentName}
-                </span>
+                <span className="font-headline font-bold text-sm text-on-surface">{agentName}</span>
               </div>
               <div className="bg-surface-container-lowest p-6 rounded-xl rounded-tl-none ambient-shadow border border-outline-variant/15">
                 {streamingContent && (
                   <div className="prose prose-sm max-w-none break-words overflow-wrap-anywhere prose-p:text-on-surface prose-p:leading-relaxed prose-code:text-xs prose-code:bg-surface-container-low prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-pre:bg-surface-container prose-pre:rounded-xl prose-pre:overflow-x-auto mb-4">
-                    <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                      {streamingContent}
-                    </ReactMarkdown>
+                    <ReactMarkdown remarkPlugins={[remarkGfm]}>{streamingContent}</ReactMarkdown>
                   </div>
                 )}
                 <ThinkingBlock text={streamingThinking} />
@@ -156,14 +142,10 @@ export default function MessageList({
             </div>
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 mb-2">
-                <span className="font-headline font-bold text-sm text-on-surface">
-                  {agentName}
-                </span>
+                <span className="font-headline font-bold text-sm text-on-surface">{agentName}</span>
               </div>
               <div className="bg-destructive/5 p-6 rounded-xl rounded-tl-none border border-destructive/20">
-                <p className="text-destructive text-sm font-medium">
-                  Something went wrong
-                </p>
+                <p className="text-destructive text-sm font-medium">Something went wrong</p>
                 <p className="text-destructive/80 text-xs mt-1">{error}</p>
               </div>
             </div>

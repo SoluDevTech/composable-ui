@@ -2,9 +2,7 @@ import { describe, it, expect } from "vitest";
 
 describe("DocumentMetadata", () => {
   it("allows constructing an object with format_type and mime_type", async () => {
-    const { DocumentMetadata } = await import(
-      "@/domain/entities/rag/fileContent"
-    );
+    const { DocumentMetadata } = await import("@/domain/entities/rag/fileContent");
 
     const metadata: DocumentMetadata = {
       format_type: "markdown",
@@ -16,9 +14,7 @@ describe("DocumentMetadata", () => {
   });
 
   it("accepts various format and mime type combinations", async () => {
-    const { DocumentMetadata } = await import(
-      "@/domain/entities/rag/fileContent"
-    );
+    const { DocumentMetadata } = await import("@/domain/entities/rag/fileContent");
 
     const pdfMeta: DocumentMetadata = {
       format_type: "pdf",
@@ -82,9 +78,7 @@ describe("TableData", () => {
 
 describe("FileContentResponse", () => {
   it("allows constructing a response with content, metadata, and tables", async () => {
-    const { FileContentResponse } = await import(
-      "@/domain/entities/rag/fileContent"
-    );
+    const { FileContentResponse } = await import("@/domain/entities/rag/fileContent");
 
     const response: FileContentResponse = {
       content: "This is the extracted text content.",
@@ -109,9 +103,7 @@ describe("FileContentResponse", () => {
   });
 
   it("allows constructing a response with empty tables", async () => {
-    const { FileContentResponse } = await import(
-      "@/domain/entities/rag/fileContent"
-    );
+    const { FileContentResponse } = await import("@/domain/entities/rag/fileContent");
 
     const response: FileContentResponse = {
       content: "Plain text with no tables.",
@@ -127,9 +119,7 @@ describe("FileContentResponse", () => {
   });
 
   it("allows constructing a response with multiple tables", async () => {
-    const { FileContentResponse } = await import(
-      "@/domain/entities/rag/fileContent"
-    );
+    const { FileContentResponse } = await import("@/domain/entities/rag/fileContent");
 
     const response: FileContentResponse = {
       content: "Document with multiple tables.",
@@ -144,7 +134,10 @@ describe("FileContentResponse", () => {
         },
         {
           headers: ["X", "Y"],
-          rows: [["3", "4"], ["5", "6"]],
+          rows: [
+            ["3", "4"],
+            ["5", "6"],
+          ],
         },
       ],
     };

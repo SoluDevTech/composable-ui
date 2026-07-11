@@ -3,10 +3,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { vi, describe, it, expect, beforeEach } from "vitest";
 import { useUpdateAgent } from "@/application/hooks/agent/useUpdateAgent";
 import { agentApi } from "@/infrastructure/api/agent/agentApi";
-import type {
-  AgentConfig,
-  BackendType,
-} from "@/domain/entities/agent/agentConfig";
+import type { AgentConfig, BackendType } from "@/domain/entities/agent/agentConfig";
 import type { ReactNode } from "react";
 
 vi.mock("@/infrastructure/api/agent/agentApi", () => ({
@@ -92,9 +89,7 @@ describe("useUpdateAgent", () => {
   });
 
   it("returns error state when update fails", async () => {
-    vi.mocked(agentApi.updateAgent).mockRejectedValue(
-      new Error("Invalid YAML"),
-    );
+    vi.mocked(agentApi.updateAgent).mockRejectedValue(new Error("Invalid YAML"));
     const { wrapper } = createWrapper();
     const file = new File(["invalid"], "bad.yaml", {
       type: "application/x-yaml",

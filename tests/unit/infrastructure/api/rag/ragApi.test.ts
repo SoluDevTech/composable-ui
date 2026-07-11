@@ -39,9 +39,7 @@ describe("ragApi", () => {
 
       const result = await ragApi.listFolders("docs/");
 
-      expect(ragApiClient.get).toHaveBeenCalledWith(
-        "/api/v1/files/folders?prefix=docs%2F",
-      );
+      expect(ragApiClient.get).toHaveBeenCalledWith("/api/v1/files/folders?prefix=docs%2F");
       expect(result).toHaveLength(1);
       expect(result[0].prefix).toBe("docs/reports/");
       expect(result[0].name).toBe("reports");
@@ -61,9 +59,7 @@ describe("ragApi", () => {
 
       const result = await ragApi.listFiles("");
 
-      expect(ragApiClient.get).toHaveBeenCalledWith(
-        "/api/v1/files/list?prefix=&recursive=false",
-      );
+      expect(ragApiClient.get).toHaveBeenCalledWith("/api/v1/files/list?prefix=&recursive=false");
       expect(result).toEqual([
         {
           objectName: "readme.md",

@@ -33,9 +33,7 @@ function getThreadPreview(thread: Thread): string {
   return `Thread · ${thread.id.slice(0, 8)}`;
 }
 
-export default function ThreadSidebar({
-  activeThreadId,
-}: Readonly<ThreadSidebarProps>) {
+export default function ThreadSidebar({ activeThreadId }: Readonly<ThreadSidebarProps>) {
   const { data: threads, isLoading } = useThreads();
   const { data: agents, isLoading: agentsLoading } = useAgents();
   const createThread = useCreateThread();
@@ -96,10 +94,7 @@ export default function ThreadSidebar({
           onClick={handleNewConversation}
           className="w-full flex items-center gap-2 px-4 py-3 rounded-xl bg-primary-container text-white font-headline text-xs font-bold uppercase tracking-widest hover:opacity-90 transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary-brand focus-visible:ring-offset-2"
         >
-          <span
-            className="material-symbols-outlined text-base"
-            aria-hidden="true"
-          >
+          <span className="material-symbols-outlined text-base" aria-hidden="true">
             add
           </span>
           New Conversation
@@ -109,10 +104,7 @@ export default function ThreadSidebar({
       {/* Thread list */}
       <div className="flex-1 overflow-y-auto px-2 pb-4 overscroll-contain">
         {isLoading && (
-          <p
-            className="text-xs text-on-surface-variant px-3 py-2"
-            aria-live="polite"
-          >
+          <p className="text-xs text-on-surface-variant px-3 py-2" aria-live="polite">
             Loading threads…
           </p>
         )}
@@ -171,24 +163,16 @@ export default function ThreadSidebar({
       </div>
 
       {/* Agent selection dialog */}
-      <Dialog
-        open={showAgentDialog}
-        onOpenChange={(v) => setShowAgentDialog(v)}
-      >
+      <Dialog open={showAgentDialog} onOpenChange={(v) => setShowAgentDialog(v)}>
         <DialogContent className="max-w-sm w-full">
           <DialogHeader>
-            <DialogTitle className="font-headline text-lg font-bold">
-              Choose an Agent
-            </DialogTitle>
+            <DialogTitle className="font-headline text-lg font-bold">Choose an Agent</DialogTitle>
             <DialogDescription className="sr-only">
               Select an agent to start a new conversation thread
             </DialogDescription>
           </DialogHeader>
           {agentsLoading ? (
-            <p
-              className="text-sm text-on-surface-variant"
-              aria-live="polite"
-            >
+            <p className="text-sm text-on-surface-variant" aria-live="polite">
               Loading agents…
             </p>
           ) : (
@@ -207,9 +191,7 @@ export default function ThreadSidebar({
                   className="w-full text-left p-3 rounded-lg hover:bg-surface-container-low transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary-brand focus-visible:ring-offset-2 disabled:opacity-50"
                 >
                   <span className="block font-medium text-sm">{agent.name}</span>
-                  <span className="block text-xs text-on-surface-variant">
-                    {agent.model}
-                  </span>
+                  <span className="block text-xs text-on-surface-variant">{agent.model}</span>
                 </button>
               ))}
             </div>

@@ -51,9 +51,7 @@ describe("useFolders", () => {
   });
 
   it("handles API errors", async () => {
-    vi.mocked(ragApi.listFolders).mockRejectedValue(
-      new Error("Network error"),
-    );
+    vi.mocked(ragApi.listFolders).mockRejectedValue(new Error("Network error"));
 
     const { result } = renderHook(() => useFolders(""), {
       wrapper: createWrapper(),

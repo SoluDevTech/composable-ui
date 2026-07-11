@@ -18,6 +18,7 @@ import {
 import { Button } from "@/application/components/ui/button";
 import { ScrollArea } from "@/application/components/ui/scroll-area";
 import AgentConfigForm from "./AgentConfigForm";
+import { AGENT_CONFIG_FORM_ID } from "./formConstants";
 
 interface AgentConfigViewerProps {
   readonly agentName: string;
@@ -137,7 +138,7 @@ export default function AgentConfigViewer({
               <div className="lg:hidden flex items-center gap-3 mt-4 pt-4 border-t border-outline-variant/30">
                 <Button
                   type="submit"
-                  form="agent-config-form"
+                  form={AGENT_CONFIG_FORM_ID}
                   disabled={updateAgent.isPending}
                   className="flex-1"
                 >
@@ -148,10 +149,7 @@ export default function AgentConfigViewer({
           ) : (
             <ScrollArea className="max-h-[70vh]">
               {isLoading && (
-                <p
-                  className="text-on-surface-variant text-sm py-8 text-center"
-                  aria-live="polite"
-                >
+                <p className="text-on-surface-variant text-sm py-8 text-center" aria-live="polite">
                   Loading configuration…
                 </p>
               )}
@@ -168,9 +166,7 @@ export default function AgentConfigViewer({
                   <div className="flex items-center gap-4">
                     <div className="flex-1 min-w-0">
                       <SectionLabel>Model</SectionLabel>
-                      <p className="text-on-surface text-sm font-mono break-all">
-                        {config.model}
-                      </p>
+                      <p className="text-on-surface text-sm font-mono break-all">{config.model}</p>
                     </div>
                     <div>
                       <SectionLabel>Debug</SectionLabel>
@@ -202,9 +198,7 @@ export default function AgentConfigViewer({
                   {/* Tools */}
                   {config.tools.length > 0 && (
                     <div>
-                      <SectionLabel>
-                        Tools ({config.tools.length})
-                      </SectionLabel>
+                      <SectionLabel>Tools ({config.tools.length})</SectionLabel>
                       <div className="flex flex-wrap gap-2">
                         {config.tools.map((tool) => (
                           <ToolTag key={tool} label={tool} />
@@ -216,9 +210,7 @@ export default function AgentConfigViewer({
                   {/* Middleware */}
                   {config.middleware.length > 0 && (
                     <div>
-                      <SectionLabel>
-                        Middleware ({config.middleware.length})
-                      </SectionLabel>
+                      <SectionLabel>Middleware ({config.middleware.length})</SectionLabel>
                       <div className="flex flex-wrap gap-2">
                         {config.middleware.map((mw) => (
                           <ToolTag key={mw} label={mw} />
@@ -231,15 +223,12 @@ export default function AgentConfigViewer({
                   <div>
                     <SectionLabel>Backend</SectionLabel>
                     <p className="text-on-surface text-sm">
-                      Type:{" "}
-                      <span className="font-mono">{config.backend.type}</span>
+                      Type: <span className="font-mono">{config.backend.type}</span>
                       {config.backend.root_dir && (
                         <>
                           {" "}
                           &middot; Root:{" "}
-                          <span className="font-mono">
-                            {config.backend.root_dir}
-                          </span>
+                          <span className="font-mono">{config.backend.root_dir}</span>
                         </>
                       )}
                     </p>
@@ -251,13 +240,8 @@ export default function AgentConfigViewer({
                       <SectionLabel>HITL Rules</SectionLabel>
                       <div className="bg-surface-container-low rounded-xl p-4 space-y-1">
                         {Object.entries(config.hitl.rules).map(([key, value]) => (
-                          <div
-                            key={key}
-                            className="flex items-center justify-between text-xs"
-                          >
-                            <span className="font-mono text-on-surface break-all">
-                              {key}
-                            </span>
+                          <div key={key} className="flex items-center justify-between text-xs">
+                            <span className="font-mono text-on-surface break-all">{key}</span>
                             <span className="text-on-surface-variant ml-3 shrink-0">
                               {(() => {
                                 if (typeof value === "boolean")
@@ -274,9 +258,7 @@ export default function AgentConfigViewer({
                   {/* MCP Servers */}
                   {config.mcp_servers.length > 0 && (
                     <div>
-                      <SectionLabel>
-                        MCP Servers ({config.mcp_servers.length})
-                      </SectionLabel>
+                      <SectionLabel>MCP Servers ({config.mcp_servers.length})</SectionLabel>
                       <div className="space-y-2">
                         {config.mcp_servers.map((server) => (
                           <div
@@ -296,18 +278,11 @@ export default function AgentConfigViewer({
                   {/* Subagents */}
                   {config.subagents.length > 0 && (
                     <div>
-                      <SectionLabel>
-                        Subagents ({config.subagents.length})
-                      </SectionLabel>
+                      <SectionLabel>Subagents ({config.subagents.length})</SectionLabel>
                       <div className="space-y-2">
                         {config.subagents.map((sub) => (
-                          <div
-                            key={sub.name}
-                            className="bg-surface-container-low rounded-xl p-3"
-                          >
-                            <p className="text-sm font-medium text-on-surface">
-                              {sub.name}
-                            </p>
+                          <div key={sub.name} className="bg-surface-container-low rounded-xl p-3">
+                            <p className="text-sm font-medium text-on-surface">{sub.name}</p>
                             <p className="text-xs text-on-surface-variant mt-1">
                               {sub.description}
                             </p>
@@ -326,30 +301,15 @@ export default function AgentConfigViewer({
         {mode === "view" && (
           <div className="shrink-0 px-6 sm:px-8 py-4 border-t border-outline-variant/30 bg-surface-container-lowest">
             <div className="flex items-center gap-3">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={handleExportYaml}
-                disabled={!config}
-              >
-                <span
-                  className="material-symbols-outlined text-sm mr-1"
-                  aria-hidden="true"
-                >
+              <Button type="button" variant="outline" onClick={handleExportYaml} disabled={!config}>
+                <span className="material-symbols-outlined text-sm mr-1" aria-hidden="true">
                   download
                 </span>
                 <span className="hidden sm:inline">Export YAML</span>
                 <span className="sm:hidden">Export</span>
               </Button>
-              <Button
-                type="button"
-                onClick={() => setMode("edit")}
-                disabled={!config}
-              >
-                <span
-                  className="material-symbols-outlined text-sm mr-1"
-                  aria-hidden="true"
-                >
+              <Button type="button" onClick={() => setMode("edit")} disabled={!config}>
+                <span className="material-symbols-outlined text-sm mr-1" aria-hidden="true">
                   edit
                 </span>
                 <span className="hidden sm:inline">Edit</span>

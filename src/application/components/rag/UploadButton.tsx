@@ -7,10 +7,7 @@ interface UploadButtonProps {
   onUploadComplete?: () => void;
 }
 
-export default function UploadButton({
-  prefix,
-  onUploadComplete,
-}: Readonly<UploadButtonProps>) {
+export default function UploadButton({ prefix, onUploadComplete }: Readonly<UploadButtonProps>) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { mutate, isPending } = useUploadFile();
 

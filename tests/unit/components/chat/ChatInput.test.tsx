@@ -47,9 +47,7 @@ describe("ChatInput", () => {
   it("renders input with correct placeholder", () => {
     renderWithProviders(<ChatInput threadId="thread-1" />);
 
-    expect(
-      screen.getByPlaceholderText("Orchestrate your next move..."),
-    ).toBeInTheDocument();
+    expect(screen.getByPlaceholderText("Orchestrate your next move...")).toBeInTheDocument();
   });
 
   it("has a send button", () => {
@@ -63,9 +61,7 @@ describe("ChatInput", () => {
 
     renderWithProviders(<ChatInput threadId="thread-1" />);
 
-    const textarea = screen.getByPlaceholderText(
-      "Orchestrate your next move...",
-    );
+    const textarea = screen.getByPlaceholderText("Orchestrate your next move...");
     await user.type(textarea, "Hello agent");
     await user.click(screen.getByRole("button", { name: /send/i }));
 
@@ -80,9 +76,7 @@ describe("ChatInput", () => {
 
     renderWithProviders(<ChatInput threadId="thread-1" />);
 
-    const textarea = screen.getByPlaceholderText(
-      "Orchestrate your next move...",
-    );
+    const textarea = screen.getByPlaceholderText("Orchestrate your next move...");
     await user.type(textarea, "Enter message");
     await user.keyboard("{Enter}");
 
@@ -97,9 +91,7 @@ describe("ChatInput", () => {
 
     renderWithProviders(<ChatInput threadId="thread-1" />);
 
-    const textarea = screen.getByPlaceholderText(
-      "Orchestrate your next move...",
-    );
+    const textarea = screen.getByPlaceholderText("Orchestrate your next move...");
     await user.type(textarea, "Line 1");
     await user.keyboard("{Shift>}{Enter}{/Shift}");
 
@@ -121,9 +113,7 @@ describe("ChatInput", () => {
 
     renderWithProviders(<ChatInput threadId="thread-1" />);
 
-    const textarea = screen.getByPlaceholderText(
-      "Orchestrate your next move...",
-    );
+    const textarea = screen.getByPlaceholderText("Orchestrate your next move...");
     await user.type(textarea, "Standard message");
     await user.click(screen.getByRole("button", { name: /send/i }));
 
@@ -147,9 +137,7 @@ describe("ChatInput", () => {
 
     renderWithProviders(<ChatInput threadId="thread-1" />);
 
-    const textarea = screen.getByPlaceholderText(
-      "Orchestrate your next move...",
-    );
+    const textarea = screen.getByPlaceholderText("Orchestrate your next move...");
     expect(textarea).toBeDisabled();
 
     mockStoreState.isStreaming = false;
