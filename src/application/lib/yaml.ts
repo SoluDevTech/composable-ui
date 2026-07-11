@@ -22,9 +22,7 @@ function cleanSubagent(sub: AgentConfig["subagents"][number]): PlainRecord {
   return result;
 }
 
-function cleanMcpServer(
-  server: AgentConfig["mcp_servers"][number],
-): PlainRecord {
+function cleanMcpServer(server: AgentConfig["mcp_servers"][number]): PlainRecord {
   const result: PlainRecord = {
     name: server.name,
     transport: server.transport,
@@ -61,10 +59,7 @@ export function serializeAgentConfig(config: AgentConfig): string {
   if (config.system_prompt_file) {
     clean.system_prompt_file = config.system_prompt_file;
   }
-  if (
-    config.response_format &&
-    Object.keys(config.response_format).length > 0
-  ) {
+  if (config.response_format && Object.keys(config.response_format).length > 0) {
     clean.response_format = config.response_format;
   }
 
@@ -91,10 +86,7 @@ export function parseAgentConfig(yamlString: string): AgentConfig {
   return agentConfigSchema.parse(raw);
 }
 
-export function agentConfigToYamlFile(
-  config: AgentConfig,
-  filename?: string,
-): File {
+export function agentConfigToYamlFile(config: AgentConfig, filename?: string): File {
   const yamlContent = serializeAgentConfig(config);
   const safeName = config.name.replaceAll(/[^a-z0-9_-]/gi, "_");
   const name = filename ?? `${safeName}.yaml`;

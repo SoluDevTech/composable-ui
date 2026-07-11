@@ -48,7 +48,12 @@ describe("useClassicalIndexFolder", () => {
     const { result } = renderHook(() => useClassicalIndexFolder(), { wrapper });
 
     act(() => {
-      result.current.mutate({ workingDir: "/data/docs", recursive: true, chunkSize: 1000, chunkOverlap: 200 });
+      result.current.mutate({
+        workingDir: "/data/docs",
+        recursive: true,
+        chunkSize: 1000,
+        chunkOverlap: 200,
+      });
     });
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
@@ -69,7 +74,12 @@ describe("useClassicalIndexFolder", () => {
     const { result } = renderHook(() => useClassicalIndexFolder(), { wrapper });
 
     act(() => {
-      result.current.mutate({ workingDir: "/data/docs", recursive: true, chunkSize: 1000, chunkOverlap: 200 });
+      result.current.mutate({
+        workingDir: "/data/docs",
+        recursive: true,
+        chunkSize: 1000,
+        chunkOverlap: 200,
+      });
     });
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
@@ -84,7 +94,12 @@ describe("useClassicalIndexFolder", () => {
     const { result } = renderHook(() => useClassicalIndexFolder(), { wrapper });
 
     act(() => {
-      result.current.mutate({ workingDir: "/data/docs", recursive: true, chunkSize: 1000, chunkOverlap: 200 });
+      result.current.mutate({
+        workingDir: "/data/docs",
+        recursive: true,
+        chunkSize: 1000,
+        chunkOverlap: 200,
+      });
     });
 
     await waitFor(() => expect(result.current.isError).toBe(true));
@@ -103,7 +118,12 @@ describe("useClassicalIndexFolder", () => {
     expect(result.current.isPending).toBe(false);
 
     act(() => {
-      result.current.mutate({ workingDir: "/data/docs", recursive: true, chunkSize: 1000, chunkOverlap: 200 });
+      result.current.mutate({
+        workingDir: "/data/docs",
+        recursive: true,
+        chunkSize: 1000,
+        chunkOverlap: 200,
+      });
     });
 
     await waitFor(() => expect(result.current.isPending).toBe(true));

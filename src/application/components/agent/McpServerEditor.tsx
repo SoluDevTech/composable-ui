@@ -45,10 +45,7 @@ export default function McpServerEditor({
           onClick={onRemove}
           aria-label="Remove server"
         >
-          <span
-            className="material-symbols-outlined text-sm"
-            aria-hidden="true"
-          >
+          <span className="material-symbols-outlined text-sm" aria-hidden="true">
             delete
           </span>
         </Button>
@@ -68,9 +65,7 @@ export default function McpServerEditor({
           <Label htmlFor={`${idBase}-transport`}>Transport</Label>
           <Select
             value={value.transport}
-            onValueChange={(v) =>
-              update({ transport: v as McpTransportType })
-            }
+            onValueChange={(v) => update({ transport: v as McpTransportType })}
           >
             <SelectTrigger id={`${idBase}-transport`}>
               <SelectValue />
@@ -91,9 +86,7 @@ export default function McpServerEditor({
             <Input
               id={`${idBase}-command`}
               value={value.command ?? ""}
-              onChange={(e) =>
-                update({ command: e.target.value || undefined })
-              }
+              onChange={(e) => update({ command: e.target.value || undefined })}
               placeholder="npx"
             />
           </div>
@@ -143,9 +136,7 @@ export default function McpServerEditor({
           id={`${idBase}-auth`}
           type="password"
           value={value.auth_token ?? ""}
-          onChange={(e) =>
-            update({ auth_token: e.target.value || undefined })
-          }
+          onChange={(e) => update({ auth_token: e.target.value || undefined })}
           placeholder="Optional auth token"
         />
       </div>

@@ -64,18 +64,14 @@ describe("ragIndexApi", () => {
     });
 
     it("propagates error when axios rejects", async () => {
-      vi.mocked(ragApiClient.post).mockRejectedValue(
-        new Error("File not found on storage"),
-      );
+      vi.mocked(ragApiClient.post).mockRejectedValue(new Error("File not found on storage"));
 
       const request = {
         file_name: "missing.txt",
         working_dir: "/data/project",
       };
 
-      await expect(ragIndexApi.indexFile(request)).rejects.toThrow(
-        "File not found on storage",
-      );
+      await expect(ragIndexApi.indexFile(request)).rejects.toThrow("File not found on storage");
     });
   });
 
@@ -124,10 +120,7 @@ describe("ragIndexApi", () => {
 
       await ragIndexApi.indexFolder(request);
 
-      const calledBody = vi.mocked(ragApiClient.post).mock.calls[0][1] as Record<
-        string,
-        unknown
-      >;
+      const calledBody = vi.mocked(ragApiClient.post).mock.calls[0][1] as Record<string, unknown>;
       expect(calledBody).not.toHaveProperty("file_extensions");
     });
 
@@ -157,18 +150,14 @@ describe("ragIndexApi", () => {
     });
 
     it("propagates error when axios rejects", async () => {
-      vi.mocked(ragApiClient.post).mockRejectedValue(
-        new Error("Folder not accessible"),
-      );
+      vi.mocked(ragApiClient.post).mockRejectedValue(new Error("Folder not accessible"));
 
       const request = {
         working_dir: "/data/missing",
         recursive: true,
       };
 
-      await expect(ragIndexApi.indexFolder(request)).rejects.toThrow(
-        "Folder not accessible",
-      );
+      await expect(ragIndexApi.indexFolder(request)).rejects.toThrow("Folder not accessible");
     });
   });
 
@@ -191,15 +180,12 @@ describe("ragIndexApi", () => {
 
       const result = await ragIndexApi.indexFileClassical(request);
 
-      expect(ragApiClient.post).toHaveBeenCalledWith(
-        "/api/v1/classical/file/index",
-        {
-          file_name: "guide.md",
-          working_dir: "/data/my-project",
-          chunk_size: 512,
-          chunk_overlap: 50,
-        },
-      );
+      expect(ragApiClient.post).toHaveBeenCalledWith("/api/v1/classical/file/index", {
+        file_name: "guide.md",
+        working_dir: "/data/my-project",
+        chunk_size: 512,
+        chunk_overlap: 50,
+      });
       expect(result).toEqual({
         status: "success",
         message: "File indexed with classical method",
@@ -229,9 +215,7 @@ describe("ragIndexApi", () => {
     });
 
     it("propagates error when axios rejects", async () => {
-      vi.mocked(ragApiClient.post).mockRejectedValue(
-        new Error("Chunking failed"),
-      );
+      vi.mocked(ragApiClient.post).mockRejectedValue(new Error("Chunking failed"));
 
       const request = {
         file_name: "bad.txt",
@@ -240,9 +224,7 @@ describe("ragIndexApi", () => {
         chunk_overlap: 50,
       };
 
-      await expect(ragIndexApi.indexFileClassical(request)).rejects.toThrow(
-        "Chunking failed",
-      );
+      await expect(ragIndexApi.indexFileClassical(request)).rejects.toThrow("Chunking failed");
     });
   });
 
@@ -266,16 +248,13 @@ describe("ragIndexApi", () => {
 
       const result = await ragIndexApi.indexFolderClassical(request);
 
-      expect(ragApiClient.post).toHaveBeenCalledWith(
-        "/api/v1/classical/folder/index",
-        {
-          working_dir: "/data/my-project",
-          recursive: true,
-          file_extensions: [".md", ".txt"],
-          chunk_size: 1024,
-          chunk_overlap: 100,
-        },
-      );
+      expect(ragApiClient.post).toHaveBeenCalledWith("/api/v1/classical/folder/index", {
+        working_dir: "/data/my-project",
+        recursive: true,
+        file_extensions: [".md", ".txt"],
+        chunk_size: 1024,
+        chunk_overlap: 100,
+      });
       expect(result).toEqual({
         status: "success",
         message: "Folder indexed with classical method",
@@ -300,10 +279,7 @@ describe("ragIndexApi", () => {
 
       await ragIndexApi.indexFolderClassical(request);
 
-      const calledBody = vi.mocked(ragApiClient.post).mock.calls[0][1] as Record<
-        string,
-        unknown
-      >;
+      const calledBody = vi.mocked(ragApiClient.post).mock.calls[0][1] as Record<string, unknown>;
       expect(calledBody).not.toHaveProperty("file_extensions");
     });
 
@@ -357,9 +333,7 @@ describe("ragIndexApi", () => {
     });
 
     it("propagates error when axios rejects", async () => {
-      vi.mocked(ragApiClient.post).mockRejectedValue(
-        new Error("Folder read error"),
-      );
+      vi.mocked(ragApiClient.post).mockRejectedValue(new Error("Folder read error"));
 
       const request = {
         working_dir: "/data/missing",
@@ -368,9 +342,7 @@ describe("ragIndexApi", () => {
         chunk_overlap: 50,
       };
 
-      await expect(ragIndexApi.indexFolderClassical(request)).rejects.toThrow(
-        "Folder read error",
-      );
+      await expect(ragIndexApi.indexFolderClassical(request)).rejects.toThrow("Folder read error");
     });
   });
 });

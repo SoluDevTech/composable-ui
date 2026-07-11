@@ -77,9 +77,7 @@ describe("useCreateThread", () => {
   });
 
   it("returns error state when creation fails", async () => {
-    vi.mocked(chatApi.createThread).mockRejectedValue(
-      new Error("Agent not found"),
-    );
+    vi.mocked(chatApi.createThread).mockRejectedValue(new Error("Agent not found"));
     const { wrapper } = createWrapper();
 
     const { result } = renderHook(() => useCreateThread(), { wrapper });

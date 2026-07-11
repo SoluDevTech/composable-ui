@@ -2,9 +2,7 @@ import { describe, it, expect } from "vitest";
 
 describe("IndexFileRequest", () => {
   it("allows constructing an object with all required fields", async () => {
-    const { IndexFileRequest } = await import(
-      "@/domain/entities/rag/indexingRequest"
-    );
+    const { IndexFileRequest } = await import("@/domain/entities/rag/indexingRequest");
 
     const request: IndexFileRequest = {
       file_name: "report.pdf",
@@ -16,9 +14,7 @@ describe("IndexFileRequest", () => {
   });
 
   it("accepts various file name formats", async () => {
-    const { IndexFileRequest } = await import(
-      "@/domain/entities/rag/indexingRequest"
-    );
+    const { IndexFileRequest } = await import("@/domain/entities/rag/indexingRequest");
 
     const mdRequest: IndexFileRequest = {
       file_name: "docs/guide.md",
@@ -38,9 +34,7 @@ describe("IndexFileRequest", () => {
 
 describe("IndexFolderRequest", () => {
   it("allows constructing an object with all required fields", async () => {
-    const { IndexFolderRequest } = await import(
-      "@/domain/entities/rag/indexingRequest"
-    );
+    const { IndexFolderRequest } = await import("@/domain/entities/rag/indexingRequest");
 
     const request: IndexFolderRequest = {
       working_dir: "/data/projects/acme",
@@ -52,9 +46,7 @@ describe("IndexFolderRequest", () => {
   });
 
   it("accepts optional file_extensions", async () => {
-    const { IndexFolderRequest } = await import(
-      "@/domain/entities/rag/indexingRequest"
-    );
+    const { IndexFolderRequest } = await import("@/domain/entities/rag/indexingRequest");
 
     const withExtensions: IndexFolderRequest = {
       working_dir: "/data/projects/acme",
@@ -66,9 +58,7 @@ describe("IndexFolderRequest", () => {
   });
 
   it("allows omitting optional file_extensions", async () => {
-    const { IndexFolderRequest } = await import(
-      "@/domain/entities/rag/indexingRequest"
-    );
+    const { IndexFolderRequest } = await import("@/domain/entities/rag/indexingRequest");
 
     const withoutExtensions: IndexFolderRequest = {
       working_dir: "/data/projects/acme",
@@ -79,9 +69,7 @@ describe("IndexFolderRequest", () => {
   });
 
   it("supports non-recursive folder indexing", async () => {
-    const { IndexFolderRequest } = await import(
-      "@/domain/entities/rag/indexingRequest"
-    );
+    const { IndexFolderRequest } = await import("@/domain/entities/rag/indexingRequest");
 
     const request: IndexFolderRequest = {
       working_dir: "/data/docs",
@@ -94,9 +82,7 @@ describe("IndexFolderRequest", () => {
 
 describe("ClassicalIndexFileRequest", () => {
   it("allows constructing an object with all required fields", async () => {
-    const { ClassicalIndexFileRequest } = await import(
-      "@/domain/entities/rag/indexingRequest"
-    );
+    const { ClassicalIndexFileRequest } = await import("@/domain/entities/rag/indexingRequest");
 
     const request: ClassicalIndexFileRequest = {
       file_name: "handbook.docx",
@@ -112,9 +98,7 @@ describe("ClassicalIndexFileRequest", () => {
   });
 
   it("accepts different chunk configurations", async () => {
-    const { ClassicalIndexFileRequest } = await import(
-      "@/domain/entities/rag/indexingRequest"
-    );
+    const { ClassicalIndexFileRequest } = await import("@/domain/entities/rag/indexingRequest");
 
     const smallChunks: ClassicalIndexFileRequest = {
       file_name: "data.csv",
@@ -140,9 +124,7 @@ describe("ClassicalIndexFileRequest", () => {
 
 describe("ClassicalIndexFolderRequest", () => {
   it("allows constructing an object with all required fields", async () => {
-    const { ClassicalIndexFolderRequest } = await import(
-      "@/domain/entities/rag/indexingRequest"
-    );
+    const { ClassicalIndexFolderRequest } = await import("@/domain/entities/rag/indexingRequest");
 
     const request: ClassicalIndexFolderRequest = {
       working_dir: "/data/projects/acme",
@@ -158,9 +140,7 @@ describe("ClassicalIndexFolderRequest", () => {
   });
 
   it("accepts optional file_extensions", async () => {
-    const { ClassicalIndexFolderRequest } = await import(
-      "@/domain/entities/rag/indexingRequest"
-    );
+    const { ClassicalIndexFolderRequest } = await import("@/domain/entities/rag/indexingRequest");
 
     const withExtensions: ClassicalIndexFolderRequest = {
       working_dir: "/data/docs",
@@ -174,9 +154,7 @@ describe("ClassicalIndexFolderRequest", () => {
   });
 
   it("allows omitting optional file_extensions", async () => {
-    const { ClassicalIndexFolderRequest } = await import(
-      "@/domain/entities/rag/indexingRequest"
-    );
+    const { ClassicalIndexFolderRequest } = await import("@/domain/entities/rag/indexingRequest");
 
     const withoutExtensions: ClassicalIndexFolderRequest = {
       working_dir: "/data/docs",

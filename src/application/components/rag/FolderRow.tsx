@@ -8,7 +8,13 @@ interface FolderRowProps {
   onIndexClassical?: () => void;
 }
 
-export default function FolderRow({ name, onClick, isIndexing, onIndexLightRAG, onIndexClassical }: Readonly<FolderRowProps>) {
+export default function FolderRow({
+  name,
+  onClick,
+  isIndexing,
+  onIndexLightRAG,
+  onIndexClassical,
+}: Readonly<FolderRowProps>) {
   const hasIndexOptions = onIndexLightRAG || onIndexClassical;
 
   return (
@@ -27,18 +33,16 @@ export default function FolderRow({ name, onClick, isIndexing, onIndexLightRAG, 
         >
           {isIndexing ? "progress_activity" : "folder"}
         </span>
-        <span className="font-headline text-sm font-semibold text-on-surface flex-1">
-          {name}
-        </span>
+        <span className="font-headline text-sm font-semibold text-on-surface flex-1">{name}</span>
         {isIndexing && (
-          <span className="material-symbols-outlined text-lg animate-spin text-secondary-brand" aria-hidden="true">
+          <span
+            className="material-symbols-outlined text-lg animate-spin text-secondary-brand"
+            aria-hidden="true"
+          >
             progress_activity
           </span>
         )}
-        <span
-          className="material-symbols-outlined text-lg text-outline"
-          aria-hidden="true"
-        >
+        <span className="material-symbols-outlined text-lg text-outline" aria-hidden="true">
           chevron_right
         </span>
       </button>

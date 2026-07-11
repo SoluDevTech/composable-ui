@@ -4,23 +4,18 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { renderWithProviders } from "../../../utils/render";
 import AgentConfigViewer from "@/application/components/agent/AgentConfigViewer";
 import type { AgentConfig } from "@/domain/entities/agent/agentConfig";
-import {
-  BackendType,
-  MiddlewareType,
-} from "@/domain/entities/agent/agentConfig";
+import { BackendType, MiddlewareType } from "@/domain/entities/agent/agentConfig";
 
-const { mockAgentConfigData, mockDeleteMutate, mockUpdateMutate } = vi.hoisted(
-  () => {
-    return {
-      mockAgentConfigData: {
-        data: undefined as AgentConfig | undefined,
-        isLoading: false,
-      },
-      mockDeleteMutate: vi.fn(),
-      mockUpdateMutate: vi.fn(),
-    };
-  },
-);
+const { mockAgentConfigData, mockDeleteMutate, mockUpdateMutate } = vi.hoisted(() => {
+  return {
+    mockAgentConfigData: {
+      data: undefined as AgentConfig | undefined,
+      isLoading: false,
+    },
+    mockDeleteMutate: vi.fn(),
+    mockUpdateMutate: vi.fn(),
+  };
+});
 
 vi.mock("@/application/hooks/agent/useAgentConfig", () => ({
   useAgentConfig: () => mockAgentConfigData,
@@ -55,8 +50,7 @@ vi.mock("@/application/lib/yaml", () => ({
 const fullConfig: AgentConfig = {
   name: "test-agent",
   model: "openai:gpt-4o",
-  system_prompt:
-    "You are a helpful assistant that provides accurate information.",
+  system_prompt: "You are a helpful assistant that provides accurate information.",
   tools: ["search", "calculator"],
   middleware: [],
   backend: { type: "state" as BackendType },
@@ -78,11 +72,7 @@ describe("AgentConfigViewer", () => {
 
   it("returns null when open is false", () => {
     const { container } = renderWithProviders(
-      <AgentConfigViewer
-        agentName="test-agent"
-        open={false}
-        onOpenChange={vi.fn()}
-      />,
+      <AgentConfigViewer agentName="test-agent" open={false} onOpenChange={vi.fn()} />,
     );
 
     expect(container.innerHTML).toBe("");
@@ -92,11 +82,7 @@ describe("AgentConfigViewer", () => {
     mockAgentConfigData.data = fullConfig;
 
     renderWithProviders(
-      <AgentConfigViewer
-        agentName="test-agent"
-        open={true}
-        onOpenChange={vi.fn()}
-      />,
+      <AgentConfigViewer agentName="test-agent" open={true} onOpenChange={vi.fn()} />,
     );
 
     expect(screen.getByText("test-agent")).toBeInTheDocument();
@@ -106,11 +92,7 @@ describe("AgentConfigViewer", () => {
     mockAgentConfigData.isLoading = true;
 
     renderWithProviders(
-      <AgentConfigViewer
-        agentName="test-agent"
-        open={true}
-        onOpenChange={vi.fn()}
-      />,
+      <AgentConfigViewer agentName="test-agent" open={true} onOpenChange={vi.fn()} />,
     );
 
     expect(screen.getByText("Loading configuration…")).toBeInTheDocument();
@@ -120,11 +102,7 @@ describe("AgentConfigViewer", () => {
     mockAgentConfigData.data = fullConfig;
 
     renderWithProviders(
-      <AgentConfigViewer
-        agentName="test-agent"
-        open={true}
-        onOpenChange={vi.fn()}
-      />,
+      <AgentConfigViewer agentName="test-agent" open={true} onOpenChange={vi.fn()} />,
     );
 
     expect(screen.getByText("openai:gpt-4o")).toBeInTheDocument();
@@ -134,11 +112,7 @@ describe("AgentConfigViewer", () => {
     mockAgentConfigData.data = fullConfig;
 
     renderWithProviders(
-      <AgentConfigViewer
-        agentName="test-agent"
-        open={true}
-        onOpenChange={vi.fn()}
-      />,
+      <AgentConfigViewer agentName="test-agent" open={true} onOpenChange={vi.fn()} />,
     );
 
     expect(screen.getByText("search")).toBeInTheDocument();
@@ -150,11 +124,7 @@ describe("AgentConfigViewer", () => {
     mockAgentConfigData.data = fullConfig;
 
     renderWithProviders(
-      <AgentConfigViewer
-        agentName="test-agent"
-        open={true}
-        onOpenChange={vi.fn()}
-      />,
+      <AgentConfigViewer agentName="test-agent" open={true} onOpenChange={vi.fn()} />,
     );
 
     expect(screen.getByText(/state/)).toBeInTheDocument();
@@ -165,11 +135,7 @@ describe("AgentConfigViewer", () => {
     const user = userEvent.setup();
 
     renderWithProviders(
-      <AgentConfigViewer
-        agentName="test-agent"
-        open={true}
-        onOpenChange={vi.fn()}
-      />,
+      <AgentConfigViewer agentName="test-agent" open={true} onOpenChange={vi.fn()} />,
     );
 
     const deleteButton = screen.getByRole("button", { name: /^delete$/i });
@@ -177,20 +143,14 @@ describe("AgentConfigViewer", () => {
 
     await user.click(deleteButton);
 
-    expect(
-      screen.getByRole("button", { name: /confirm delete/i }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /confirm delete/i })).toBeInTheDocument();
   });
 
   it("renders debug status badge", () => {
     mockAgentConfigData.data = fullConfig;
 
     renderWithProviders(
-      <AgentConfigViewer
-        agentName="test-agent"
-        open={true}
-        onOpenChange={vi.fn()}
-      />,
+      <AgentConfigViewer agentName="test-agent" open={true} onOpenChange={vi.fn()} />,
     );
 
     expect(screen.getByText("Off")).toBeInTheDocument();
@@ -203,11 +163,7 @@ describe("AgentConfigViewer", () => {
     };
 
     renderWithProviders(
-      <AgentConfigViewer
-        agentName="test-agent"
-        open={true}
-        onOpenChange={vi.fn()}
-      />,
+      <AgentConfigViewer agentName="test-agent" open={true} onOpenChange={vi.fn()} />,
     );
 
     expect(screen.getByText("Middleware (2)")).toBeInTheDocument();
@@ -222,11 +178,7 @@ describe("AgentConfigViewer", () => {
     };
 
     renderWithProviders(
-      <AgentConfigViewer
-        agentName="test-agent"
-        open={true}
-        onOpenChange={vi.fn()}
-      />,
+      <AgentConfigViewer agentName="test-agent" open={true} onOpenChange={vi.fn()} />,
     );
 
     expect(screen.getByText("HITL Rules")).toBeInTheDocument();
@@ -251,11 +203,7 @@ describe("AgentConfigViewer", () => {
     };
 
     renderWithProviders(
-      <AgentConfigViewer
-        agentName="test-agent"
-        open={true}
-        onOpenChange={vi.fn()}
-      />,
+      <AgentConfigViewer agentName="test-agent" open={true} onOpenChange={vi.fn()} />,
     );
 
     expect(screen.getByText("MCP Servers (1)")).toBeInTheDocument();
@@ -278,11 +226,7 @@ describe("AgentConfigViewer", () => {
     };
 
     renderWithProviders(
-      <AgentConfigViewer
-        agentName="test-agent"
-        open={true}
-        onOpenChange={vi.fn()}
-      />,
+      <AgentConfigViewer agentName="test-agent" open={true} onOpenChange={vi.fn()} />,
     );
 
     expect(screen.getByText("Subagents (1)")).toBeInTheDocument();
@@ -297,11 +241,7 @@ describe("AgentConfigViewer", () => {
     };
 
     renderWithProviders(
-      <AgentConfigViewer
-        agentName="test-agent"
-        open={true}
-        onOpenChange={vi.fn()}
-      />,
+      <AgentConfigViewer agentName="test-agent" open={true} onOpenChange={vi.fn()} />,
     );
 
     expect(screen.getByText(/\/data\/agents/)).toBeInTheDocument();
@@ -316,11 +256,7 @@ describe("AgentConfigViewer", () => {
     const user = userEvent.setup();
 
     renderWithProviders(
-      <AgentConfigViewer
-        agentName="test-agent"
-        open={true}
-        onOpenChange={vi.fn()}
-      />,
+      <AgentConfigViewer agentName="test-agent" open={true} onOpenChange={vi.fn()} />,
     );
 
     const showMoreBtn = screen.getByRole("button", { name: /show more/i });
@@ -335,11 +271,7 @@ describe("AgentConfigViewer", () => {
     const user = userEvent.setup();
 
     renderWithProviders(
-      <AgentConfigViewer
-        agentName="test-agent"
-        open={true}
-        onOpenChange={vi.fn()}
-      />,
+      <AgentConfigViewer agentName="test-agent" open={true} onOpenChange={vi.fn()} />,
     );
 
     await user.click(screen.getByRole("button", { name: /^delete$/i }));
@@ -358,11 +290,7 @@ describe("AgentConfigViewer", () => {
     mockAgentConfigData.data = { ...fullConfig, debug: true };
 
     renderWithProviders(
-      <AgentConfigViewer
-        agentName="test-agent"
-        open={true}
-        onOpenChange={vi.fn()}
-      />,
+      <AgentConfigViewer agentName="test-agent" open={true} onOpenChange={vi.fn()} />,
     );
 
     expect(screen.getByText("Active")).toBeInTheDocument();
@@ -372,11 +300,7 @@ describe("AgentConfigViewer", () => {
     mockAgentConfigData.data = fullConfig;
 
     renderWithProviders(
-      <AgentConfigViewer
-        agentName="test-agent"
-        open={true}
-        onOpenChange={vi.fn()}
-      />,
+      <AgentConfigViewer agentName="test-agent" open={true} onOpenChange={vi.fn()} />,
     );
 
     expect(screen.getByRole("button", { name: /edit/i })).toBeInTheDocument();
@@ -386,15 +310,9 @@ describe("AgentConfigViewer", () => {
     mockAgentConfigData.data = fullConfig;
 
     renderWithProviders(
-      <AgentConfigViewer
-        agentName="test-agent"
-        open={true}
-        onOpenChange={vi.fn()}
-      />,
+      <AgentConfigViewer agentName="test-agent" open={true} onOpenChange={vi.fn()} />,
     );
 
-    expect(
-      screen.getByRole("button", { name: /export yaml/i }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /export yaml/i })).toBeInTheDocument();
   });
 });

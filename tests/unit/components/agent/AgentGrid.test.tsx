@@ -19,9 +19,7 @@ describe("AgentGrid", () => {
       error: null,
     } as ReturnType<typeof useAgents>);
 
-    renderWithProviders(
-      <AgentGrid onCreateNew={vi.fn()} onConfigure={vi.fn()} />,
-    );
+    renderWithProviders(<AgentGrid onCreateNew={vi.fn()} onConfigure={vi.fn()} />);
 
     expect(screen.getByText("Loading agents...")).toBeInTheDocument();
   });
@@ -37,9 +35,7 @@ describe("AgentGrid", () => {
       error: null,
     } as ReturnType<typeof useAgents>);
 
-    renderWithProviders(
-      <AgentGrid onCreateNew={vi.fn()} onConfigure={vi.fn()} />,
-    );
+    renderWithProviders(<AgentGrid onCreateNew={vi.fn()} onConfigure={vi.fn()} />);
 
     expect(screen.getByText("agent-alpha")).toBeInTheDocument();
     expect(screen.getByText("agent-beta")).toBeInTheDocument();
@@ -52,9 +48,7 @@ describe("AgentGrid", () => {
       error: null,
     } as ReturnType<typeof useAgents>);
 
-    renderWithProviders(
-      <AgentGrid onCreateNew={vi.fn()} onConfigure={vi.fn()} />,
-    );
+    renderWithProviders(<AgentGrid onCreateNew={vi.fn()} onConfigure={vi.fn()} />);
 
     expect(screen.getByText("New Agent Template")).toBeInTheDocument();
   });
@@ -68,9 +62,7 @@ describe("AgentGrid", () => {
     } as ReturnType<typeof useAgents>);
     const onCreateNew = vi.fn();
 
-    renderWithProviders(
-      <AgentGrid onCreateNew={onCreateNew} onConfigure={vi.fn()} />,
-    );
+    renderWithProviders(<AgentGrid onCreateNew={onCreateNew} onConfigure={vi.fn()} />);
 
     await user.click(screen.getByText("New Agent Template"));
 

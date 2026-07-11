@@ -42,10 +42,7 @@ export default function RagPage() {
   const classicalIndexFolder = useClassicalIndexFolder();
   const readFile = useReadFile();
 
-  const segments = useMemo(
-    () => prefixToSegments(currentPrefix),
-    [currentPrefix],
-  );
+  const segments = useMemo(() => prefixToSegments(currentPrefix), [currentPrefix]);
 
   const foldersQuery = useFolders(currentPrefix);
   const filesQuery = useFiles(currentPrefix, false);
@@ -83,7 +80,12 @@ export default function RagPage() {
   const handleFileIndexClassical = (objectName: string) => {
     const dir = workingDir || currentPrefix;
     if (!dir) return;
-    classicalIndexFile.mutate({ fileName: objectName, workingDir: dir, chunkSize: DEFAULT_CHUNK_SIZE, chunkOverlap: DEFAULT_CHUNK_OVERLAP });
+    classicalIndexFile.mutate({
+      fileName: objectName,
+      workingDir: dir,
+      chunkSize: DEFAULT_CHUNK_SIZE,
+      chunkOverlap: DEFAULT_CHUNK_OVERLAP,
+    });
   };
 
   const handleFolderIndexLightRAG = (prefix: string) => {
@@ -95,15 +97,18 @@ export default function RagPage() {
   const handleFolderIndexClassical = (prefix: string) => {
     const dir = workingDir || prefix;
     if (!dir) return;
-    classicalIndexFolder.mutate({ workingDir: dir, recursive: true, chunkSize: DEFAULT_CHUNK_SIZE, chunkOverlap: DEFAULT_CHUNK_OVERLAP });
+    classicalIndexFolder.mutate({
+      workingDir: dir,
+      recursive: true,
+      chunkSize: DEFAULT_CHUNK_SIZE,
+      chunkOverlap: DEFAULT_CHUNK_OVERLAP,
+    });
   };
 
   const isLoading = foldersQuery.isLoading || filesQuery.isLoading;
   const error = foldersQuery.error || filesQuery.error;
 
-  const folderSuggestions = (workspaceFoldersQuery.data ?? []).map(
-    (f) => f.prefix,
-  );
+  const folderSuggestions = (workspaceFoldersQuery.data ?? []).map((f) => f.prefix);
 
   return (
     <MainLayout showSidebar={false}>
@@ -111,18 +116,13 @@ export default function RagPage() {
         <div className="max-w-[1440px] mx-auto px-8 py-12">
           <div className="flex items-start justify-between mb-12">
             <div>
-              <h1 className="font-headline text-5xl font-bold text-on-surface mb-3">
-                RAG Storage
-              </h1>
+              <h1 className="font-headline text-5xl font-bold text-on-surface mb-3">RAG Storage</h1>
               <p className="text-on-surface-variant text-sm max-w-md">
                 Browse and manage your RAG knowledge base.
               </p>
             </div>
             {activeTab === "browse" && (
-              <UploadButton
-                prefix={currentPrefix}
-                onUploadComplete={handleUploadComplete}
-              />
+              <UploadButton prefix={currentPrefix} onUploadComplete={handleUploadComplete} />
             )}
           </div>
 
@@ -173,9 +173,7 @@ export default function RagPage() {
                 onChange={setWorkingDir}
                 folders={folderSuggestions}
               />
-              <QueryPanel
-                workingDir={workingDir}
-              />
+              <QueryPanel workingDir={workingDir} />
             </>
           )}
         </div>

@@ -42,9 +42,7 @@ describe("FileContentPanel", () => {
       />,
     );
 
-    expect(
-      screen.getByRole("button", { name: /close/i }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /close/i })).toBeInTheDocument();
   });
 
   it("clicking close calls onClose", async () => {

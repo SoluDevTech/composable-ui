@@ -6,10 +6,7 @@ interface StructuredResponseCardProps {
   className?: string;
 }
 
-export default function StructuredResponseCard({
-  data,
-  className,
-}: StructuredResponseCardProps) {
+export default function StructuredResponseCard({ data, className }: StructuredResponseCardProps) {
   const [copied, setCopied] = useState(false);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -55,24 +52,15 @@ export default function StructuredResponseCard({
           <span className="material-symbols-outlined text-base text-secondary-brand">
             data_object
           </span>
-          <span className="text-xs font-medium text-on-surface-variant">
-            Structured Response
-          </span>
+          <span className="text-xs font-medium text-on-surface-variant">Structured Response</span>
         </div>
         <button
           type="button"
           onClick={handleCopy}
           className="flex items-center gap-1 text-[11px] text-secondary-brand hover:opacity-80 transition-opacity"
-          aria-label={
-            copied
-              ? "Copied to clipboard"
-              : "Copy structured response to clipboard"
-          }
+          aria-label={copied ? "Copied to clipboard" : "Copy structured response to clipboard"}
         >
-          <span
-            className="material-symbols-outlined text-base"
-            aria-hidden="true"
-          >
+          <span className="material-symbols-outlined text-base" aria-hidden="true">
             {copied ? "check" : "content_copy"}
           </span>
           <span aria-live="polite">{copied ? "Copied" : "Copy"}</span>

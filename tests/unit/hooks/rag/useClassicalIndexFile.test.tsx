@@ -48,7 +48,12 @@ describe("useClassicalIndexFile", () => {
     const { result } = renderHook(() => useClassicalIndexFile(), { wrapper });
 
     act(() => {
-      result.current.mutate({ fileName: "report.pdf", workingDir: "/data/docs", chunkSize: 1000, chunkOverlap: 200 });
+      result.current.mutate({
+        fileName: "report.pdf",
+        workingDir: "/data/docs",
+        chunkSize: 1000,
+        chunkOverlap: 200,
+      });
     });
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
@@ -68,7 +73,12 @@ describe("useClassicalIndexFile", () => {
     const { result } = renderHook(() => useClassicalIndexFile(), { wrapper });
 
     act(() => {
-      result.current.mutate({ fileName: "report.pdf", workingDir: "/data/docs", chunkSize: 1000, chunkOverlap: 200 });
+      result.current.mutate({
+        fileName: "report.pdf",
+        workingDir: "/data/docs",
+        chunkSize: 1000,
+        chunkOverlap: 200,
+      });
     });
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
@@ -83,7 +93,12 @@ describe("useClassicalIndexFile", () => {
     const { result } = renderHook(() => useClassicalIndexFile(), { wrapper });
 
     act(() => {
-      result.current.mutate({ fileName: "report.pdf", workingDir: "/data/docs", chunkSize: 1000, chunkOverlap: 200 });
+      result.current.mutate({
+        fileName: "report.pdf",
+        workingDir: "/data/docs",
+        chunkSize: 1000,
+        chunkOverlap: 200,
+      });
     });
 
     await waitFor(() => expect(result.current.isError).toBe(true));
@@ -102,7 +117,12 @@ describe("useClassicalIndexFile", () => {
     expect(result.current.isPending).toBe(false);
 
     act(() => {
-      result.current.mutate({ fileName: "report.pdf", workingDir: "/data/docs", chunkSize: 1000, chunkOverlap: 200 });
+      result.current.mutate({
+        fileName: "report.pdf",
+        workingDir: "/data/docs",
+        chunkSize: 1000,
+        chunkOverlap: 200,
+      });
     });
 
     await waitFor(() => expect(result.current.isPending).toBe(true));

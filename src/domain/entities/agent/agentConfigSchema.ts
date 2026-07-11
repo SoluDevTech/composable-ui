@@ -12,7 +12,12 @@ export const hitlConfigSchema = z.object({
 });
 
 export const backendConfigSchema = z.object({
-  type: z.enum([BackendType.STATE, BackendType.STORE, BackendType.FILESYSTEM, BackendType.COMPOSITE]),
+  type: z.enum([
+    BackendType.STATE,
+    BackendType.STORE,
+    BackendType.FILESYSTEM,
+    BackendType.COMPOSITE,
+  ]),
   root_dir: z.string().nullable().optional(),
 });
 
@@ -39,17 +44,20 @@ export const subAgentConfigSchema = z.object({
 });
 
 export const agentConfigSchema = z.object({
-  name: z.string().min(1, "Agent name is required").max(100, "Agent name must be 100 characters or less").regex(/^[a-zA-Z0-9._-]+$/, "Agent name must contain only alphanumeric characters, dots, hyphens, and underscores"),
+  name: z
+    .string()
+    .min(1, "Agent name is required")
+    .max(100, "Agent name must be 100 characters or less")
+    .regex(
+      /^[a-zA-Z0-9._-]+$/,
+      "Agent name must contain only alphanumeric characters, dots, hyphens, and underscores",
+    ),
   model: z.string().min(1, "Model is required"),
   system_prompt: z.string().nullable().optional(),
   system_prompt_file: z.string().nullable().optional(),
   tools: z.array(z.string()),
   middleware: z
-    .enum([
-      MiddlewareType.TODO_LIST,
-      MiddlewareType.FILESYSTEM,
-      MiddlewareType.SUB_AGENT,
-    ])
+    .enum([MiddlewareType.TODO_LIST, MiddlewareType.FILESYSTEM, MiddlewareType.SUB_AGENT])
     .array(),
   backend: backendConfigSchema,
   hitl: hitlConfigSchema,

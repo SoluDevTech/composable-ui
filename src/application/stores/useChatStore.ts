@@ -52,11 +52,7 @@ export const useChatStore = create<ChatState>((set) => ({
             const msg = JSON.parse(ev.data);
             return { structuredResponse: msg.structured_response ?? null };
           } catch (e) {
-            console.warn(
-              "[ChatStore] Failed to parse message event data:",
-              ev.data,
-              e,
-            );
+            console.warn("[ChatStore] Failed to parse message event data:", ev.data, e);
             return state;
           }
         default:
@@ -75,6 +71,5 @@ export const useChatStore = create<ChatState>((set) => ({
   setStreaming: (streaming) => set({ isStreaming: streaming }),
   setPendingUserMessage: (msg) => set({ pendingUserMessage: msg }),
   setError: (msg) => set({ error: msg }),
-  toggleStreaming: () =>
-    set((state) => ({ useStreaming: !state.useStreaming })),
+  toggleStreaming: () => set((state) => ({ useStreaming: !state.useStreaming })),
 }));

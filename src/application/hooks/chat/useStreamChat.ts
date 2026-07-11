@@ -41,8 +41,7 @@ export function useStreamChat(threadId: string | null) {
               queryKey: ["messages", threadId],
             });
           } finally {
-            const { setPendingUserMessage, setStreaming } =
-              useChatStore.getState();
+            const { setPendingUserMessage, setStreaming } = useChatStore.getState();
             setPendingUserMessage(null);
             setStreaming(false);
           }
@@ -50,9 +49,7 @@ export function useStreamChat(threadId: string | null) {
         (error) => {
           console.error("Stream error:", error);
           useChatStore.getState().setStreaming(false);
-          useChatStore.getState().setError(
-            error.message || "An error occurred while streaming.",
-          );
+          useChatStore.getState().setError(error.message || "An error occurred while streaming.");
         },
       );
     },

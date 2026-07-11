@@ -71,9 +71,7 @@ describe("KeyValueEditor", () => {
       />,
     );
 
-    await user.click(
-      screen.getByRole("button", { name: /remove authorization/i }),
-    );
+    await user.click(screen.getByRole("button", { name: /remove authorization/i }));
 
     expect(onChange).toHaveBeenCalledWith({});
   });

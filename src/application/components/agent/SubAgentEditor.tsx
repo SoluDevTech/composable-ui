@@ -36,10 +36,7 @@ export default function SubAgentEditor({
           onClick={onRemove}
           aria-label="Remove subagent"
         >
-          <span
-            className="material-symbols-outlined text-sm"
-            aria-hidden="true"
-          >
+          <span className="material-symbols-outlined text-sm" aria-hidden="true">
             delete
           </span>
         </Button>
@@ -89,9 +86,7 @@ export default function SubAgentEditor({
         <Textarea
           id={`sub-instr-${index}`}
           value={value.instructions ?? ""}
-          onChange={(e) =>
-            update({ instructions: e.target.value || undefined })
-          }
+          onChange={(e) => update({ instructions: e.target.value || undefined })}
           placeholder="Specific instructions for this subagent (optional)"
           rows={3}
         />

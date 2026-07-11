@@ -6,10 +6,7 @@ interface AgentGridProps {
   onConfigure: (name: string) => void;
 }
 
-export default function AgentGrid({
-  onCreateNew,
-  onConfigure,
-}: Readonly<AgentGridProps>) {
+export default function AgentGrid({ onCreateNew, onConfigure }: Readonly<AgentGridProps>) {
   const { data: agents, isLoading, error } = useAgents();
 
   if (isLoading) {
@@ -25,9 +22,7 @@ export default function AgentGrid({
   if (error) {
     return (
       <div className="flex items-center justify-center py-24">
-        <p className="text-red-600 font-headline text-sm">
-          Failed to load agents: {error.message}
-        </p>
+        <p className="text-red-600 font-headline text-sm">Failed to load agents: {error.message}</p>
       </div>
     );
   }

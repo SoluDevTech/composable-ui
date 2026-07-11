@@ -8,6 +8,10 @@ import type {
 export interface IRagIndexPort {
   indexFile(request: IndexFileRequest): Promise<{ status: string; message: string }>;
   indexFolder(request: IndexFolderRequest): Promise<{ status: string; message: string }>;
-  indexFileClassical(request: ClassicalIndexFileRequest): Promise<{ status: string; message: string }>;
-  indexFolderClassical(request: ClassicalIndexFolderRequest): Promise<{ status: string; message: string }>;
+  indexFileClassical(
+    request: ClassicalIndexFileRequest,
+  ): Promise<{ status: string; message: string }>;
+  indexFolderClassical(
+    request: ClassicalIndexFolderRequest,
+  ): Promise<{ status: string; message: string }>;
 }

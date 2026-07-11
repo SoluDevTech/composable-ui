@@ -4,12 +4,7 @@ import type { QueryMode } from "@/domain/entities/rag/queryRequest";
 
 export function useRagQuery() {
   return useMutation({
-    mutationFn: (request: {
-      workingDir: string;
-      query: string;
-      mode: QueryMode;
-      topK: number;
-    }) =>
+    mutationFn: (request: { workingDir: string; query: string; mode: QueryMode; topK: number }) =>
       ragQueryApi.queryLightRAG({
         working_dir: request.workingDir,
         query: request.query,

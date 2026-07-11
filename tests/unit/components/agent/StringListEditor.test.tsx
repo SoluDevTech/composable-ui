@@ -22,12 +22,7 @@ describe("StringListEditor", () => {
 
   it("renders input with placeholder", () => {
     renderWithProviders(
-      <StringListEditor
-        label="Skills"
-        value={[]}
-        onChange={vi.fn()}
-        placeholder="Add skill..."
-      />,
+      <StringListEditor label="Skills" value={[]} onChange={vi.fn()} placeholder="Add skill..." />,
     );
 
     expect(screen.getByPlaceholderText("Add skill...")).toBeInTheDocument();

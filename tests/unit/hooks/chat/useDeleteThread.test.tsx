@@ -67,9 +67,7 @@ describe("useDeleteThread", () => {
   });
 
   it("returns error state when deletion fails", async () => {
-    vi.mocked(chatApi.deleteThread).mockRejectedValue(
-      new Error("Thread not found"),
-    );
+    vi.mocked(chatApi.deleteThread).mockRejectedValue(new Error("Thread not found"));
     const { wrapper } = createWrapper();
 
     const { result } = renderHook(() => useDeleteThread(), { wrapper });

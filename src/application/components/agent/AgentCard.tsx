@@ -40,10 +40,7 @@ function getAgentIcon(name: string): string {
   return AGENT_ICONS[firstLetter] ?? "smart_toy";
 }
 
-export default function AgentCard({
-  agent,
-  onConfigure,
-}: Readonly<AgentCardProps>) {
+export default function AgentCard({ agent, onConfigure }: Readonly<AgentCardProps>) {
   return (
     <div className="bg-surface-container-lowest rounded-xl p-8 ambient-shadow hover:translate-y-[-2px] transition-transform duration-300">
       {/* Header: icon + status */}
@@ -57,9 +54,7 @@ export default function AgentCard({
       </div>
 
       {/* Name */}
-      <h3 className="font-headline text-2xl font-bold text-on-surface mb-2">
-        {agent.name}
-      </h3>
+      <h3 className="font-headline text-2xl font-bold text-on-surface mb-2">{agent.name}</h3>
 
       {/* Model */}
       <p className="text-sm text-on-surface-variant mb-8">{agent.model}</p>
@@ -70,10 +65,7 @@ export default function AgentCard({
         onClick={() => onConfigure(agent.name)}
         className="flex items-center gap-2 text-secondary-brand font-headline text-xs font-bold uppercase tracking-widest hover:opacity-80 transition-opacity"
       >
-        Configure{" "}
-        <span className="material-symbols-outlined text-base">
-          arrow_forward
-        </span>
+        Configure <span className="material-symbols-outlined text-base">arrow_forward</span>
       </button>
     </div>
   );

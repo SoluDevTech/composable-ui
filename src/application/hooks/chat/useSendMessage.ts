@@ -7,8 +7,7 @@ export function useSendMessage(threadId: string | null) {
 
   return useMutation({
     mutationFn: (request: ChatRequest) => {
-      if (!threadId)
-        throw new Error("Cannot send message without an active thread");
+      if (!threadId) throw new Error("Cannot send message without an active thread");
       return chatApi.sendMessage(threadId, request);
     },
     onSuccess: () => {

@@ -126,23 +126,17 @@ describe("ragFileContentApi", () => {
     });
 
     it("propagates 404 error when file is not found", async () => {
-      vi.mocked(ragApiClient.post).mockRejectedValue(
-        new Error("File not found"),
-      );
+      vi.mocked(ragApiClient.post).mockRejectedValue(new Error("File not found"));
 
-      await expect(
-        ragFileContentApi.readFile("nonexistent/file.md"),
-      ).rejects.toThrow("File not found");
+      await expect(ragFileContentApi.readFile("nonexistent/file.md")).rejects.toThrow(
+        "File not found",
+      );
     });
 
     it("propagates generic axios rejection", async () => {
-      vi.mocked(ragApiClient.post).mockRejectedValue(
-        new Error("Network error"),
-      );
+      vi.mocked(ragApiClient.post).mockRejectedValue(new Error("Network error"));
 
-      await expect(
-        ragFileContentApi.readFile("any/file.txt"),
-      ).rejects.toThrow("Network error");
+      await expect(ragFileContentApi.readFile("any/file.txt")).rejects.toThrow("Network error");
     });
   });
 });

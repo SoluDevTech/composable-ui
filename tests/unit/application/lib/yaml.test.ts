@@ -5,10 +5,7 @@ import {
   agentConfigToYamlFile,
 } from "@/application/lib/yaml";
 import type { AgentConfig } from "@/domain/entities/agent/agentConfig";
-import {
-  BackendType,
-  MiddlewareType,
-} from "@/domain/entities/agent/agentConfig";
+import { BackendType, MiddlewareType } from "@/domain/entities/agent/agentConfig";
 import { McpTransportType } from "@/domain/entities/agent/mcpServerConfig";
 
 const fullConfig: AgentConfig = {

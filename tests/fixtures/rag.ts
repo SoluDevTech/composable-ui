@@ -8,9 +8,7 @@ export interface FolderEntryFixture {
   prefix: string;
 }
 
-export function createFileEntry(
-  overrides: Partial<FileEntryFixture> = {},
-): FileEntryFixture {
+export function createFileEntry(overrides: Partial<FileEntryFixture> = {}): FileEntryFixture {
   return {
     objectName: "docs/readme.md",
     size: 1024,
@@ -19,9 +17,7 @@ export function createFileEntry(
   };
 }
 
-export function createFolderEntry(
-  overrides: Partial<FolderEntryFixture> = {},
-): FolderEntryFixture {
+export function createFolderEntry(overrides: Partial<FolderEntryFixture> = {}): FolderEntryFixture {
   return {
     prefix: "docs/",
     ...overrides,

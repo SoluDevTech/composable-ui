@@ -25,10 +25,9 @@ describe("axiosInstance", () => {
   it("apiClient fetches config and sets baseURL", async () => {
     const { apiClient } = await import("@/infrastructure/api/axiosInstance");
 
-    const requestConfig =
-      await apiClient.interceptors.request.handlers[0].fulfilled({
-        headers: {},
-      });
+    const requestConfig = await apiClient.interceptors.request.handlers[0].fulfilled({
+      headers: {},
+    });
 
     expect(requestConfig.baseURL).toBe("http://test-api:8010");
   });

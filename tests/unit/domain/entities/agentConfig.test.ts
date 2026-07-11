@@ -1,8 +1,5 @@
 import { describe, it, expect } from "vitest";
-import {
-  MiddlewareType,
-  BackendType,
-} from "@/domain/entities/agent/agentConfig";
+import { MiddlewareType, BackendType } from "@/domain/entities/agent/agentConfig";
 import { McpTransportType } from "@/domain/entities/agent/mcpServerConfig";
 
 describe("MiddlewareType", () => {

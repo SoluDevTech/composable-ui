@@ -67,11 +67,12 @@ export default function FileRow({
       >
         {isIndexing ? "progress_activity" : getFileIcon(filename)}
       </span>
-      <span className="font-body text-sm text-on-surface flex-1">
-        {filename}
-      </span>
+      <span className="font-body text-sm text-on-surface flex-1">{filename}</span>
       {isIndexing && (
-        <span className="material-symbols-outlined text-lg animate-spin text-secondary-brand" aria-hidden="true">
+        <span
+          className="material-symbols-outlined text-lg animate-spin text-secondary-brand"
+          aria-hidden="true"
+        >
           progress_activity
         </span>
       )}

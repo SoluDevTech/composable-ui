@@ -6,22 +6,14 @@ import PipelineToggle from "@/application/components/rag/PipelineToggle";
 
 describe("PipelineToggle", () => {
   it("renders 2 toggle options: LightRAG and Classical", () => {
-    renderWithProviders(
-      <PipelineToggle value="lightrag" onChange={vi.fn()} />,
-    );
+    renderWithProviders(<PipelineToggle value="lightrag" onChange={vi.fn()} />);
 
-    expect(
-      screen.getByRole("button", { name: /lightrag/i }),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByRole("button", { name: /classical/i }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /lightrag/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /classical/i })).toBeInTheDocument();
   });
 
   it("shows active value for LightRAG", () => {
-    renderWithProviders(
-      <PipelineToggle value="lightrag" onChange={vi.fn()} />,
-    );
+    renderWithProviders(<PipelineToggle value="lightrag" onChange={vi.fn()} />);
 
     const lightragBtn = screen.getByRole("button", { name: /lightrag/i });
     const classicalBtn = screen.getByRole("button", { name: /classical/i });
@@ -31,9 +23,7 @@ describe("PipelineToggle", () => {
   });
 
   it("shows active value for Classical", () => {
-    renderWithProviders(
-      <PipelineToggle value="classical" onChange={vi.fn()} />,
-    );
+    renderWithProviders(<PipelineToggle value="classical" onChange={vi.fn()} />);
 
     const lightragBtn = screen.getByRole("button", { name: /lightrag/i });
     const classicalBtn = screen.getByRole("button", { name: /classical/i });
@@ -46,9 +36,7 @@ describe("PipelineToggle", () => {
     const user = userEvent.setup();
     const onChange = vi.fn();
 
-    renderWithProviders(
-      <PipelineToggle value="lightrag" onChange={onChange} />,
-    );
+    renderWithProviders(<PipelineToggle value="lightrag" onChange={onChange} />);
 
     await user.click(screen.getByRole("button", { name: /classical/i }));
     expect(onChange).toHaveBeenCalledWith("classical");
@@ -58,9 +46,7 @@ describe("PipelineToggle", () => {
     const user = userEvent.setup();
     const onChange = vi.fn();
 
-    renderWithProviders(
-      <PipelineToggle value="classical" onChange={onChange} />,
-    );
+    renderWithProviders(<PipelineToggle value="classical" onChange={onChange} />);
 
     await user.click(screen.getByRole("button", { name: /lightrag/i }));
     expect(onChange).toHaveBeenCalledWith("lightrag");

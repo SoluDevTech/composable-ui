@@ -2,9 +2,7 @@ import { describe, it, expect } from "vitest";
 
 describe("FileEntry", () => {
   it("has objectName, size, and lastModified fields", async () => {
-    const { FileEntry } = await import(
-      "@/domain/entities/rag/fileEntry"
-    );
+    const { FileEntry } = await import("@/domain/entities/rag/fileEntry");
 
     const entry = new FileEntry({
       objectName: "docs/readme.md",
@@ -18,9 +16,7 @@ describe("FileEntry", () => {
   });
 
   it("allows null lastModified", async () => {
-    const { FileEntry } = await import(
-      "@/domain/entities/rag/fileEntry"
-    );
+    const { FileEntry } = await import("@/domain/entities/rag/fileEntry");
 
     const entry = new FileEntry({
       objectName: "docs/draft.txt",
@@ -32,9 +28,7 @@ describe("FileEntry", () => {
   });
 
   it("extracts filename as the last path segment", async () => {
-    const { FileEntry } = await import(
-      "@/domain/entities/rag/fileEntry"
-    );
+    const { FileEntry } = await import("@/domain/entities/rag/fileEntry");
 
     const entry = new FileEntry({
       objectName: "docs/reports/q1-summary.pdf",
@@ -46,9 +40,7 @@ describe("FileEntry", () => {
   });
 
   it("returns the full objectName as filename when no slashes", async () => {
-    const { FileEntry } = await import(
-      "@/domain/entities/rag/fileEntry"
-    );
+    const { FileEntry } = await import("@/domain/entities/rag/fileEntry");
 
     const entry = new FileEntry({
       objectName: "readme.md",
@@ -62,9 +54,7 @@ describe("FileEntry", () => {
 
 describe("FolderEntry", () => {
   it("has a prefix field ending with slash", async () => {
-    const { FolderEntry } = await import(
-      "@/domain/entities/rag/fileEntry"
-    );
+    const { FolderEntry } = await import("@/domain/entities/rag/fileEntry");
 
     const entry = new FolderEntry({ prefix: "docs/" });
 
@@ -72,9 +62,7 @@ describe("FolderEntry", () => {
   });
 
   it("extracts folder name without trailing slash", async () => {
-    const { FolderEntry } = await import(
-      "@/domain/entities/rag/fileEntry"
-    );
+    const { FolderEntry } = await import("@/domain/entities/rag/fileEntry");
 
     const entry = new FolderEntry({ prefix: "reports/2026/" });
 
@@ -82,9 +70,7 @@ describe("FolderEntry", () => {
   });
 
   it("returns prefix without slash as name for single-level folder", async () => {
-    const { FolderEntry } = await import(
-      "@/domain/entities/rag/fileEntry"
-    );
+    const { FolderEntry } = await import("@/domain/entities/rag/fileEntry");
 
     const entry = new FolderEntry({ prefix: "docs/" });
 

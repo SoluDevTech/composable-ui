@@ -57,12 +57,8 @@ describe("ChatPage", () => {
       { initialEntries: ["/chat"] },
     );
 
-    expect(
-      screen.getByRole("heading", { name: /orchestration console/i }),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByText(/select a thread from the sidebar/i),
-    ).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: /orchestration console/i })).toBeInTheDocument();
+    expect(screen.getByText(/select a thread from the sidebar/i)).toBeInTheDocument();
   });
 
   it("shows message list when threadId is provided", () => {

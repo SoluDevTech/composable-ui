@@ -27,4 +27,3 @@ export interface ClassicalQueryRequest {
   enable_llm_judge: boolean;
   mode: ClassicalQueryMode;
 }
-

@@ -3,32 +3,24 @@ import userEvent from "@testing-library/user-event";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { renderWithProviders } from "../../../utils/render";
 import ThreadSidebar from "@/application/components/layout/ThreadSidebar";
-import {
-  createThread,
-  createAgentConfigMetadata,
-} from "../../../fixtures/external";
+import { createThread, createAgentConfigMetadata } from "../../../fixtures/external";
 
-const {
-  mockThreadsData,
-  mockAgentsData,
-  mockCreateThreadMutate,
-  mockSetActiveThread,
-} = vi.hoisted(() => {
-  return {
-    mockThreadsData: {
-      data: undefined as ReturnType<typeof createThread>[] | undefined,
-      isLoading: false,
-    },
-    mockAgentsData: {
-      data: undefined as
-        | ReturnType<typeof createAgentConfigMetadata>[]
-        | undefined,
-      isLoading: false,
-    },
-    mockCreateThreadMutate: vi.fn(),
-    mockSetActiveThread: vi.fn(),
-  };
-});
+const { mockThreadsData, mockAgentsData, mockCreateThreadMutate, mockSetActiveThread } = vi.hoisted(
+  () => {
+    return {
+      mockThreadsData: {
+        data: undefined as ReturnType<typeof createThread>[] | undefined,
+        isLoading: false,
+      },
+      mockAgentsData: {
+        data: undefined as ReturnType<typeof createAgentConfigMetadata>[] | undefined,
+        isLoading: false,
+      },
+      mockCreateThreadMutate: vi.fn(),
+      mockSetActiveThread: vi.fn(),
+    };
+  },
+);
 
 vi.mock("@/application/hooks/chat/useThreads", () => ({
   useThreads: () => mockThreadsData,
@@ -46,11 +38,7 @@ vi.mock("@/application/hooks/chat/useCreateThread", () => ({
 }));
 
 vi.mock("@/application/stores/useChatStore", () => {
-  const fn = (
-    selector: (state: {
-      setActiveThread: typeof mockSetActiveThread;
-    }) => unknown,
-  ) => {
+  const fn = (selector: (state: { setActiveThread: typeof mockSetActiveThread }) => unknown) => {
     return selector({ setActiveThread: mockSetActiveThread });
   };
   fn.getState = () => ({ setActiveThread: mockSetActiveThread });
@@ -70,15 +58,11 @@ describe("ThreadSidebar", () => {
   it("renders 'New Conversation' button", () => {
     renderWithProviders(<ThreadSidebar />);
 
-    expect(
-      screen.getByRole("button", { name: /new conversation/i }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /new conversation/i })).toBeInTheDocument();
   });
 
   it("clicking 'New Conversation' shows agent selection dialog", async () => {
-    mockAgentsData.data = [
-      createAgentConfigMetadata({ name: "agent-alpha", model: "gpt-4" }),
-    ];
+    mockAgentsData.data = [createAgentConfigMetadata({ name: "agent-alpha", model: "gpt-4" })];
     const user = userEvent.setup();
 
     renderWithProviders(<ThreadSidebar />);
@@ -104,9 +88,7 @@ describe("ThreadSidebar", () => {
   });
 
   it("selecting an agent calls createThread with the agent name", async () => {
-    mockAgentsData.data = [
-      createAgentConfigMetadata({ name: "agent-alpha", model: "gpt-4" }),
-    ];
+    mockAgentsData.data = [createAgentConfigMetadata({ name: "agent-alpha", model: "gpt-4" })];
     const user = userEvent.setup();
 
     renderWithProviders(<ThreadSidebar />);

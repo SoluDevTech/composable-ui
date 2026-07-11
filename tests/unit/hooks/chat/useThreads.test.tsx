@@ -49,9 +49,7 @@ describe("useThreads", () => {
   });
 
   it("returns error state when API call fails", async () => {
-    vi.mocked(chatApi.listThreads).mockRejectedValue(
-      new Error("Network error"),
-    );
+    vi.mocked(chatApi.listThreads).mockRejectedValue(new Error("Network error"));
 
     const { result } = renderHook(() => useThreads(), {
       wrapper: createWrapper(),

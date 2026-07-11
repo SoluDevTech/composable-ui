@@ -33,9 +33,7 @@ describe("FileList", () => {
     );
 
     expect(screen.getByText(/unable to load/i)).toBeInTheDocument();
-    expect(
-      screen.getByRole("button", { name: /retry/i }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /retry/i })).toBeInTheDocument();
   });
 
   it("shows empty state when no files or folders", () => {
@@ -59,7 +57,12 @@ describe("FileList", () => {
       { prefix: "images/", name: "images" },
     ];
     const files = [
-      { objectName: "readme.md", filename: "readme.md", size: 500, lastModified: "2026-04-06T10:00:00Z" },
+      {
+        objectName: "readme.md",
+        filename: "readme.md",
+        size: 500,
+        lastModified: "2026-04-06T10:00:00Z",
+      },
     ];
 
     renderWithProviders(

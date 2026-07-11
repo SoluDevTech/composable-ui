@@ -23,19 +23,13 @@ describe("UploadButton", () => {
   });
 
   it("renders upload button with correct text", () => {
-    renderWithProviders(
-      <UploadButton prefix="documents/" onUploadComplete={vi.fn()} />,
-    );
+    renderWithProviders(<UploadButton prefix="documents/" onUploadComplete={vi.fn()} />);
 
-    expect(
-      screen.getByRole("button", { name: /upload/i }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /upload/i })).toBeInTheDocument();
   });
 
   it("has a hidden file input", () => {
-    renderWithProviders(
-      <UploadButton prefix="documents/" onUploadComplete={vi.fn()} />,
-    );
+    renderWithProviders(<UploadButton prefix="documents/" onUploadComplete={vi.fn()} />);
 
     const fileInput = screen.getByLabelText(/choose file/i);
     expect(fileInput).toBeInTheDocument();
@@ -45,9 +39,7 @@ describe("UploadButton", () => {
   it("clicking button triggers file input click", async () => {
     const user = userEvent.setup();
 
-    renderWithProviders(
-      <UploadButton prefix="documents/" onUploadComplete={vi.fn()} />,
-    );
+    renderWithProviders(<UploadButton prefix="documents/" onUploadComplete={vi.fn()} />);
 
     const fileInput = screen.getByLabelText(/choose file/i);
     const clickSpy = vi.spyOn(fileInput, "click");
@@ -65,9 +57,7 @@ describe("UploadButton", () => {
       options?.onSuccess?.();
     });
 
-    renderWithProviders(
-      <UploadButton prefix="documents/reports/" onUploadComplete={vi.fn()} />,
-    );
+    renderWithProviders(<UploadButton prefix="documents/reports/" onUploadComplete={vi.fn()} />);
 
     const file = new File(["dummy content"], "report.pdf", {
       type: "application/pdf",
@@ -86,14 +76,10 @@ describe("UploadButton", () => {
   it("shows loading indicator during upload", () => {
     mockIsPending.mockReturnValue(true);
 
-    renderWithProviders(
-      <UploadButton prefix="documents/" onUploadComplete={vi.fn()} />,
-    );
+    renderWithProviders(<UploadButton prefix="documents/" onUploadComplete={vi.fn()} />);
 
     expect(screen.getByTestId("upload-spinner")).toBeInTheDocument();
-    expect(
-      screen.getByRole("button", { name: /uploading/i }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /uploading/i })).toBeInTheDocument();
   });
 
   it("calls onUploadComplete on success", async () => {
@@ -104,12 +90,7 @@ describe("UploadButton", () => {
       options?.onSuccess?.();
     });
 
-    renderWithProviders(
-      <UploadButton
-        prefix="documents/"
-        onUploadComplete={onUploadComplete}
-      />,
-    );
+    renderWithProviders(<UploadButton prefix="documents/" onUploadComplete={onUploadComplete} />);
 
     const file = new File(["dummy content"], "report.pdf", {
       type: "application/pdf",

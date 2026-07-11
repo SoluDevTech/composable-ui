@@ -39,7 +39,11 @@ describe("useReadFile", () => {
   });
 
   it("calls ragFileContentApi.readFile with filePath", async () => {
-    const mockContent = { content: "file contents here", metadata: { format_type: "markdown", mime_type: "text/markdown" }, tables: [] };
+    const mockContent = {
+      content: "file contents here",
+      metadata: { format_type: "markdown", mime_type: "text/markdown" },
+      tables: [],
+    };
     vi.mocked(ragFileContentApi.readFile).mockResolvedValue(mockContent);
     const { wrapper } = createWrapper();
 
@@ -86,7 +90,11 @@ describe("useReadFile", () => {
     await waitFor(() => expect(result.current.isPending).toBe(true));
 
     act(() => {
-      resolveMutation({ content: "done", metadata: { format_type: "text", mime_type: "text/plain" }, tables: [] });
+      resolveMutation({
+        content: "done",
+        metadata: { format_type: "text", mime_type: "text/plain" },
+        tables: [],
+      });
     });
 
     await waitFor(() => expect(result.current.isPending).toBe(false));
@@ -94,9 +102,7 @@ describe("useReadFile", () => {
   });
 
   it("sets error state on failure", async () => {
-    vi.mocked(ragFileContentApi.readFile).mockRejectedValue(
-      new Error("File not found"),
-    );
+    vi.mocked(ragFileContentApi.readFile).mockRejectedValue(new Error("File not found"));
     const { wrapper } = createWrapper();
 
     const { result } = renderHook(() => useReadFile(), { wrapper });

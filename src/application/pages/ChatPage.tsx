@@ -38,8 +38,8 @@ export default function ChatPage() {
               Orchestration Console
             </h2>
             <p className="text-on-surface-variant text-sm max-w-sm mx-auto">
-              Select a thread from the sidebar or start a new conversation to
-              begin orchestrating your agents.
+              Select a thread from the sidebar or start a new conversation to begin orchestrating
+              your agents.
             </p>
           </div>
         </div>

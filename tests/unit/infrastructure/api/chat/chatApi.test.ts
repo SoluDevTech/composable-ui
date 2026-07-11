@@ -64,9 +64,7 @@ describe("chatApi", () => {
 
       await chatApi.deleteThread("thread-123");
 
-      expect(apiClient.delete).toHaveBeenCalledWith(
-        "/api/v1/threads/thread-123",
-      );
+      expect(apiClient.delete).toHaveBeenCalledWith("/api/v1/threads/thread-123");
     });
   });
 
@@ -77,9 +75,7 @@ describe("chatApi", () => {
 
       const result = await chatApi.getMessages("thread-123");
 
-      expect(apiClient.get).toHaveBeenCalledWith(
-        "/api/v1/threads/thread-123/messages",
-      );
+      expect(apiClient.get).toHaveBeenCalledWith("/api/v1/threads/thread-123/messages");
       expect(result).toEqual(messages);
     });
   });
@@ -93,9 +89,13 @@ describe("chatApi", () => {
         message: "Hello",
       });
 
-      expect(apiClient.post).toHaveBeenCalledWith("/api/v1/chat/thread-123", {
-        message: "Hello",
-      }, { timeout: 300000 });
+      expect(apiClient.post).toHaveBeenCalledWith(
+        "/api/v1/chat/thread-123",
+        {
+          message: "Hello",
+        },
+        { timeout: 300000 },
+      );
       expect(result).toEqual(message);
     });
   });

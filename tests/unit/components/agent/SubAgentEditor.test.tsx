@@ -16,11 +16,7 @@ const minimalSubAgent: SubAgentConfig = {
 describe("SubAgentEditor", () => {
   it("renders name and description fields", () => {
     renderWithProviders(
-      <SubAgentEditor
-        value={minimalSubAgent}
-        onChange={vi.fn()}
-        onRemove={vi.fn()}
-      />,
+      <SubAgentEditor value={minimalSubAgent} onChange={vi.fn()} onRemove={vi.fn()} />,
     );
 
     expect(screen.getByLabelText(/name/i)).toBeInTheDocument();
@@ -32,11 +28,7 @@ describe("SubAgentEditor", () => {
     const onRemove = vi.fn();
 
     renderWithProviders(
-      <SubAgentEditor
-        value={minimalSubAgent}
-        onChange={vi.fn()}
-        onRemove={onRemove}
-      />,
+      <SubAgentEditor value={minimalSubAgent} onChange={vi.fn()} onRemove={onRemove} />,
     );
 
     await user.click(screen.getByRole("button", { name: /remove subagent/i }));
@@ -45,11 +37,7 @@ describe("SubAgentEditor", () => {
 
   it("renders tools and skills sections", () => {
     renderWithProviders(
-      <SubAgentEditor
-        value={minimalSubAgent}
-        onChange={vi.fn()}
-        onRemove={vi.fn()}
-      />,
+      <SubAgentEditor value={minimalSubAgent} onChange={vi.fn()} onRemove={vi.fn()} />,
     );
 
     expect(screen.getByText("Tools")).toBeInTheDocument();
@@ -63,11 +51,7 @@ describe("SubAgentEditor", () => {
     };
 
     renderWithProviders(
-      <SubAgentEditor
-        value={withInstructions}
-        onChange={vi.fn()}
-        onRemove={vi.fn()}
-      />,
+      <SubAgentEditor value={withInstructions} onChange={vi.fn()} onRemove={vi.fn()} />,
     );
 
     expect(screen.getByLabelText(/instructions/i)).toBeInTheDocument();

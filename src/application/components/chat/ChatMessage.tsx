@@ -2,11 +2,7 @@ import { memo } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { cn } from "@/application/lib/utils";
-import {
-  MessageRole,
-  MessageStatus,
-  type Message,
-} from "@/domain/entities/chat/message";
+import { MessageRole, MessageStatus, type Message } from "@/domain/entities/chat/message";
 import StatusBadge from "@/application/components/shared/StatusBadge";
 import HITLReviewPanel from "@/application/components/chat/HITLReviewPanel";
 import ThinkingBlock from "@/application/components/chat/ThinkingBlock";
@@ -26,11 +22,7 @@ function formatTimestamp(ts: string): string {
   }).format(date);
 }
 
-function ChatMessageImpl({
-  message,
-  agentName,
-  threadId,
-}: Readonly<ChatMessageProps>) {
+function ChatMessageImpl({ message, agentName, threadId }: Readonly<ChatMessageProps>) {
   const isHuman = message.role === MessageRole.HUMAN;
   const isAi = message.role === MessageRole.AI;
   const isAwaitingHitl = message.status === MessageStatus.AWAITING_HITL;
@@ -45,9 +37,7 @@ function ChatMessageImpl({
             </p>
           </div>
           <p className="text-[11px] text-on-surface-variant mt-2 text-right">
-            <time dateTime={message.timestamp}>
-              {formatTimestamp(message.timestamp)}
-            </time>
+            <time dateTime={message.timestamp}>{formatTimestamp(message.timestamp)}</time>
           </p>
         </article>
       </div>
@@ -58,19 +48,14 @@ function ChatMessageImpl({
     return (
       <div className="flex gap-3 max-w-4xl">
         <div className="w-8 h-8 rounded-lg bg-primary-container flex items-center justify-center shrink-0 mt-1">
-          <span
-            className="material-symbols-outlined text-white text-sm"
-            aria-hidden="true"
-          >
+          <span className="material-symbols-outlined text-white text-sm" aria-hidden="true">
             hub
           </span>
         </div>
 
         <article className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-2">
-            <span className="font-headline font-bold text-sm text-on-surface">
-              {agentName}
-            </span>
+            <span className="font-headline font-bold text-sm text-on-surface">{agentName}</span>
             {message.status && <StatusBadge status={message.status} />}
           </div>
 
@@ -85,9 +70,7 @@ function ChatMessageImpl({
                 "prose-a:text-secondary-brand prose-a:no-underline hover:prose-a:underline",
               )}
             >
-              <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                {message.content}
-              </ReactMarkdown>
+              <ReactMarkdown remarkPlugins={[remarkGfm]}>{message.content}</ReactMarkdown>
             </div>
 
             <ThinkingBlock key={message.timestamp} text={message.thinking} />
@@ -95,16 +78,11 @@ function ChatMessageImpl({
           </div>
 
           {isAwaitingHitl && message.tool_calls?.length && threadId && (
-            <HITLReviewPanel
-              toolCalls={message.tool_calls}
-              threadId={threadId}
-            />
+            <HITLReviewPanel toolCalls={message.tool_calls} threadId={threadId} />
           )}
 
           <p className="text-[11px] text-on-surface-variant mt-2">
-            <time dateTime={message.timestamp}>
-              {formatTimestamp(message.timestamp)}
-            </time>
+            <time dateTime={message.timestamp}>{formatTimestamp(message.timestamp)}</time>
           </p>
         </article>
       </div>

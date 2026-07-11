@@ -40,7 +40,10 @@ export default function StringListEditor({
 
   return (
     <div className="space-y-2">
-      <Label htmlFor={inputId} className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">
+      <Label
+        htmlFor={inputId}
+        className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant"
+      >
         {label}
       </Label>
       <div className="flex gap-2">
@@ -51,7 +54,7 @@ export default function StringListEditor({
           onKeyDown={handleKeyDown}
           placeholder={placeholder}
           className="flex-1"
-          name={`${label.toLowerCase().replace(/\s+/g, '-')}-input`}
+          name={`${label.toLowerCase().replace(/\s+/g, "-")}-input`}
         />
         <Button type="button" variant="outline" size="sm" onClick={addItem}>
           Add
@@ -60,11 +63,7 @@ export default function StringListEditor({
       {value.length > 0 && (
         <div className="flex flex-wrap gap-1.5">
           {value.map((item, index) => (
-            <Badge
-              key={item}
-              variant="secondary"
-              className="gap-1 pr-1 font-mono text-xs"
-            >
+            <Badge key={item} variant="secondary" className="gap-1 pr-1 font-mono text-xs">
               {item}
               <button
                 type="button"
@@ -72,10 +71,7 @@ export default function StringListEditor({
                 className="ml-0.5 rounded-full hover:bg-destructive/15 p-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-destructive focus-visible:ring-inset"
                 aria-label={`Remove ${item}`}
               >
-                <span
-                  className="material-symbols-outlined text-xs"
-                  aria-hidden="true"
-                >
+                <span className="material-symbols-outlined text-xs" aria-hidden="true">
                   close
                 </span>
               </button>

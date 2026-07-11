@@ -7,10 +7,7 @@ import BreadcrumbBar from "@/application/components/rag/BreadcrumbBar";
 describe("BreadcrumbBar", () => {
   it("renders path segments as breadcrumbs", () => {
     renderWithProviders(
-      <BreadcrumbBar
-        segments={["docs", "reports", "2026"]}
-        onNavigate={vi.fn()}
-      />,
+      <BreadcrumbBar segments={["docs", "reports", "2026"]} onNavigate={vi.fn()} />,
     );
 
     expect(screen.getByText("docs")).toBeInTheDocument();
@@ -19,20 +16,13 @@ describe("BreadcrumbBar", () => {
   });
 
   it("shows Home icon for root", () => {
-    renderWithProviders(
-      <BreadcrumbBar segments={["docs"]} onNavigate={vi.fn()} />,
-    );
+    renderWithProviders(<BreadcrumbBar segments={["docs"]} onNavigate={vi.fn()} />);
 
     expect(screen.getByLabelText("Home")).toBeInTheDocument();
   });
 
   it("current (last) segment is not clickable — plain text, not a button", () => {
-    renderWithProviders(
-      <BreadcrumbBar
-        segments={["docs", "reports"]}
-        onNavigate={vi.fn()}
-      />,
-    );
+    renderWithProviders(<BreadcrumbBar segments={["docs", "reports"]} onNavigate={vi.fn()} />);
 
     const lastSegment = screen.getByText("reports");
     expect(lastSegment.tagName).not.toBe("BUTTON");
@@ -40,10 +30,7 @@ describe("BreadcrumbBar", () => {
 
   it("other segments are clickable buttons", () => {
     renderWithProviders(
-      <BreadcrumbBar
-        segments={["docs", "reports", "q1"]}
-        onNavigate={vi.fn()}
-      />,
+      <BreadcrumbBar segments={["docs", "reports", "q1"]} onNavigate={vi.fn()} />,
     );
 
     const docsSegment = screen.getByRole("button", { name: "docs" });
@@ -57,10 +44,7 @@ describe("BreadcrumbBar", () => {
     const onNavigate = vi.fn();
 
     renderWithProviders(
-      <BreadcrumbBar
-        segments={["docs", "reports", "q1"]}
-        onNavigate={onNavigate}
-      />,
+      <BreadcrumbBar segments={["docs", "reports", "q1"]} onNavigate={onNavigate} />,
     );
 
     await user.click(screen.getByRole("button", { name: "docs" }));
@@ -74,12 +58,7 @@ describe("BreadcrumbBar", () => {
     const user = userEvent.setup();
     const onNavigate = vi.fn();
 
-    renderWithProviders(
-      <BreadcrumbBar
-        segments={["docs", "reports"]}
-        onNavigate={onNavigate}
-      />,
-    );
+    renderWithProviders(<BreadcrumbBar segments={["docs", "reports"]} onNavigate={onNavigate} />);
 
     await user.click(screen.getByLabelText("Home"));
     expect(onNavigate).toHaveBeenCalledWith(-1);

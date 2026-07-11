@@ -46,18 +46,13 @@ export default function FileContentPanel({
         {/* Metadata bar */}
         <div className="px-6 py-3 border-b border-outline-variant">
           <div className="flex items-center gap-4 text-xs font-body text-on-surface-variant">
-            <span className="bg-surface-container px-2 py-0.5 rounded">
-              {metadata.format_type}
-            </span>
+            <span className="bg-surface-container px-2 py-0.5 rounded">{metadata.format_type}</span>
             <span className="break-all">{metadata.mime_type}</span>
           </div>
         </div>
 
         {/* Body (scrollable) */}
-        <div
-          ref={tablesRef}
-          className="flex-1 overflow-y-auto px-6 py-4 overscroll-contain"
-        >
+        <div ref={tablesRef} className="flex-1 overflow-y-auto px-6 py-4 overscroll-contain">
           <pre className="font-body text-sm text-on-surface whitespace-pre-wrap overflow-wrap-anywhere">
             {content}
           </pre>
@@ -109,8 +104,7 @@ export default function FileContentPanel({
             </div>
           )}
         </div>
-
-        </DialogContent>
+      </DialogContent>
     </Dialog>
   );
 }

@@ -19,8 +19,8 @@ export default function AgentsPage() {
                 Active Agents
               </h1>
               <p className="text-on-surface-variant text-sm max-w-md">
-                Configure and manage your AI agent fleet. Each agent operates
-                with its own tools, middleware, and orchestration rules.
+                Configure and manage your AI agent fleet. Each agent operates with its own tools,
+                middleware, and orchestration rules.
               </p>
             </div>
             <button
@@ -28,8 +28,7 @@ export default function AgentsPage() {
               onClick={() => setCreateDialogOpen(true)}
               className="flex items-center gap-3 bg-primary-container text-white rounded-full px-8 py-4 font-headline text-xs font-bold uppercase tracking-widest hover:opacity-90 transition-opacity shrink-0"
             >
-              <span className="material-symbols-outlined text-lg">add_circle</span>{" "}
-              Create Agent
+              <span className="material-symbols-outlined text-lg">add_circle</span> Create Agent
             </button>
           </div>
 
@@ -42,10 +41,7 @@ export default function AgentsPage() {
       </div>
 
       {/* Dialogs */}
-      <CreateAgentDialog
-        open={createDialogOpen}
-        onOpenChange={setCreateDialogOpen}
-      />
+      <CreateAgentDialog open={createDialogOpen} onOpenChange={setCreateDialogOpen} />
       {viewerAgent && (
         <AgentConfigViewer
           agentName={viewerAgent}
