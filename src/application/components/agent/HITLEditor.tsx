@@ -99,10 +99,15 @@ export default function HITLEditor({
           <button
             type="button"
             onClick={() => removeRule(key)}
-            className="rounded-full hover:bg-destructive/20 p-0.5"
+            className="rounded-full hover:bg-destructive/15 p-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-destructive focus-visible:ring-inset"
             aria-label={`Remove ${key}`}
           >
-            <span className="material-symbols-outlined text-xs">close</span>
+            <span
+              className="material-symbols-outlined text-xs"
+              aria-hidden="true"
+            >
+              close
+            </span>
           </button>
         </div>
       ))}

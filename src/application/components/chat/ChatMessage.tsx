@@ -1,3 +1,4 @@
+import { memo } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { cn } from "@/application/lib/utils";
@@ -19,13 +20,13 @@ interface ChatMessageProps {
 
 function formatTimestamp(ts: string): string {
   const date = new Date(ts);
-  return date.toLocaleTimeString("en-US", {
+  return new Intl.DateTimeFormat("en-US", {
     hour: "2-digit",
     minute: "2-digit",
-  });
+  }).format(date);
 }
 
-export default function ChatMessage({
+function ChatMessageImpl({
   message,
   agentName,
   threadId,
@@ -37,16 +38,18 @@ export default function ChatMessage({
   if (isHuman) {
     return (
       <div className="flex justify-end">
-        <div className="max-w-4xl">
+        <article className="max-w-4xl min-w-0">
           <div className="bg-surface-container-highest p-6 rounded-xl rounded-tr-none">
-            <p className="text-on-surface text-sm leading-relaxed whitespace-pre-wrap">
+            <p className="text-on-surface text-sm leading-relaxed whitespace-pre-wrap break-words">
               {message.content}
             </p>
           </div>
           <p className="text-[11px] text-on-surface-variant mt-2 text-right">
-            {formatTimestamp(message.timestamp)}
+            <time dateTime={message.timestamp}>
+              {formatTimestamp(message.timestamp)}
+            </time>
           </p>
-        </div>
+        </article>
       </div>
     );
   }
@@ -55,12 +58,15 @@ export default function ChatMessage({
     return (
       <div className="flex gap-3 max-w-4xl">
         <div className="w-8 h-8 rounded-lg bg-primary-container flex items-center justify-center shrink-0 mt-1">
-          <span className="material-symbols-outlined text-white text-sm">
+          <span
+            className="material-symbols-outlined text-white text-sm"
+            aria-hidden="true"
+          >
             hub
           </span>
         </div>
 
-        <div className="flex-1 min-w-0">
+        <article className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-2">
             <span className="font-headline font-bold text-sm text-on-surface">
               {agentName}
@@ -96,9 +102,11 @@ export default function ChatMessage({
           )}
 
           <p className="text-[11px] text-on-surface-variant mt-2">
-            {formatTimestamp(message.timestamp)}
+            <time dateTime={message.timestamp}>
+              {formatTimestamp(message.timestamp)}
+            </time>
           </p>
-        </div>
+        </article>
       </div>
     );
   }
@@ -111,3 +119,17 @@ export default function ChatMessage({
     </div>
   );
 }
+
+/**
+ * Memoized message component: parent MessageList re-renders when streaming
+ * state changes, but committed messages don't need to re-render.
+ */
+const ChatMessage = memo(ChatMessageImpl, (prev, next) => {
+  return (
+    prev.agentName === next.agentName &&
+    prev.threadId === next.threadId &&
+    prev.message === next.message
+  );
+});
+
+export default ChatMessage;

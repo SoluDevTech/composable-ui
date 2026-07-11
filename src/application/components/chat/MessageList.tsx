@@ -43,7 +43,9 @@ export default function MessageList({
   if (isLoading) {
     return (
       <div className="flex-1 flex items-center justify-center">
-        <p className="text-on-surface-variant text-sm">Loading messages...</p>
+        <p className="text-on-surface-variant text-sm" aria-live="polite">
+          Loading messages…
+        </p>
       </div>
     );
   }
@@ -54,7 +56,10 @@ export default function MessageList({
     return (
       <div className="flex-1 flex items-center justify-center px-6">
         <div className="text-center">
-          <span className="material-symbols-outlined text-6xl text-outline-variant/40 mb-4 block">
+          <span
+            className="material-symbols-outlined text-6xl text-outline-variant/40 mb-4 block"
+            aria-hidden="true"
+          >
             chat_bubble_outline
           </span>
           <p className="text-on-surface-variant text-sm font-headline">
@@ -99,7 +104,10 @@ export default function MessageList({
         {isStreaming && (
           <div className="flex gap-3 max-w-4xl">
             <div className="w-8 h-8 rounded-lg bg-primary-container flex items-center justify-center shrink-0 mt-1">
-              <span className="material-symbols-outlined text-white text-sm">
+              <span
+                className="material-symbols-outlined text-white text-sm"
+                aria-hidden="true"
+              >
                 hub
               </span>
             </div>
@@ -119,13 +127,17 @@ export default function MessageList({
                 )}
                 <ThinkingBlock text={streamingThinking} />
                 <StructuredResponseCard data={structuredResponse} />
-                <div className="flex items-center gap-2 text-on-surface-variant text-xs mt-2">
-                  <span className="material-symbols-outlined animate-spin text-secondary-brand text-base">
+                <div
+                  className="flex items-center gap-2 text-on-surface-variant text-xs mt-2"
+                  aria-live="polite"
+                >
+                  <span
+                    className="material-symbols-outlined animate-spin text-secondary-brand text-base"
+                    aria-hidden="true"
+                  >
                     progress_activity
                   </span>
-                  <span>
-                    {streamingContent ? "Processing..." : "Thinking..."}
-                  </span>
+                  <span>{streamingContent ? "Processing…" : "Thinking…"}</span>
                 </div>
               </div>
             </div>
@@ -134,8 +146,11 @@ export default function MessageList({
 
         {error && !isStreaming && (
           <div className="flex gap-3 max-w-4xl">
-            <div className="w-8 h-8 rounded-lg bg-error-container flex items-center justify-center shrink-0 mt-1">
-              <span className="material-symbols-outlined text-error text-sm">
+            <div className="w-8 h-8 rounded-lg bg-destructive/10 flex items-center justify-center shrink-0 mt-1">
+              <span
+                className="material-symbols-outlined text-destructive text-sm"
+                aria-hidden="true"
+              >
                 error
               </span>
             </div>
@@ -145,11 +160,11 @@ export default function MessageList({
                   {agentName}
                 </span>
               </div>
-              <div className="bg-error-container/30 p-6 rounded-xl rounded-tl-none border border-error/20">
-                <p className="text-error text-sm font-medium">
+              <div className="bg-destructive/5 p-6 rounded-xl rounded-tl-none border border-destructive/20">
+                <p className="text-destructive text-sm font-medium">
                   Something went wrong
                 </p>
-                <p className="text-error/80 text-xs mt-1">{error}</p>
+                <p className="text-destructive/80 text-xs mt-1">{error}</p>
               </div>
             </div>
           </div>

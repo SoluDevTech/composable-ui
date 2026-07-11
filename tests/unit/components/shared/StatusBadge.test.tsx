@@ -23,7 +23,7 @@ describe("StatusBadge", () => {
   it("applies green classes for 'completed' status", () => {
     renderWithProviders(<StatusBadge status="completed" />);
 
-    const badge = screen.getByText("completed");
+    const badge = screen.getByText("Completed");
     expect(badge).toHaveClass("bg-emerald-100");
     expect(badge).toHaveClass("text-emerald-700");
   });
@@ -31,7 +31,7 @@ describe("StatusBadge", () => {
   it("applies orange classes for 'awaiting_hitl' status", () => {
     renderWithProviders(<StatusBadge status="awaiting_hitl" />);
 
-    const badge = screen.getByText("awaiting_hitl");
+    const badge = screen.getByText("Awaiting Hitl");
     expect(badge).toHaveClass("bg-orange-100");
     expect(badge).toHaveClass("text-orange-700");
   });
@@ -39,8 +39,8 @@ describe("StatusBadge", () => {
   it("applies gray classes for unknown status", () => {
     renderWithProviders(<StatusBadge status="unknown" />);
 
-    const badge = screen.getByText("unknown");
-    expect(badge).toHaveClass("bg-slate-100");
-    expect(badge).toHaveClass("text-slate-600");
+    const badge = screen.getByText("Unknown");
+    expect(badge).toHaveClass("bg-surface-container-high");
+    expect(badge).toHaveClass("text-on-surface-variant");
   });
 });

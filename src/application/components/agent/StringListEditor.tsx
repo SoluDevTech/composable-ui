@@ -15,7 +15,7 @@ export default function StringListEditor({
   label,
   value,
   onChange,
-  placeholder = "Add item...",
+  placeholder = "Add item…",
 }: Readonly<StringListEditorProps>) {
   const [inputValue, setInputValue] = useState("");
   const inputId = useId();
@@ -69,10 +69,15 @@ export default function StringListEditor({
               <button
                 type="button"
                 onClick={() => removeItem(index)}
-                className="ml-0.5 rounded-full hover:bg-destructive/20 p-0.5"
+                className="ml-0.5 rounded-full hover:bg-destructive/15 p-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-destructive focus-visible:ring-inset"
                 aria-label={`Remove ${item}`}
               >
-                <span className="material-symbols-outlined text-xs">close</span>
+                <span
+                  className="material-symbols-outlined text-xs"
+                  aria-hidden="true"
+                >
+                  close
+                </span>
               </button>
             </Badge>
           ))}

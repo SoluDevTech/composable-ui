@@ -113,7 +113,7 @@ describe("AgentConfigViewer", () => {
       />,
     );
 
-    expect(screen.getByText("Loading configuration...")).toBeInTheDocument();
+    expect(screen.getByText("Loading configuration…")).toBeInTheDocument();
   });
 
   it("renders model name from config", () => {
@@ -323,9 +323,9 @@ describe("AgentConfigViewer", () => {
       />,
     );
 
-    expect(screen.getByText(/\.\.\.Show more/)).toBeInTheDocument();
-
-    await user.click(screen.getByText(/\.\.\.Show more/));
+    const showMoreBtn = screen.getByRole("button", { name: /show more/i });
+    expect(showMoreBtn).toBeInTheDocument();
+    await user.click(showMoreBtn);
 
     expect(screen.getByText("Show less")).toBeInTheDocument();
   });

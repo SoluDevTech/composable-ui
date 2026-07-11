@@ -144,7 +144,7 @@ describe("ThreadSidebar", () => {
 
     renderWithProviders(<ThreadSidebar />);
 
-    expect(screen.getByText("Loading threads...")).toBeInTheDocument();
+    expect(screen.getByText("Loading threads…")).toBeInTheDocument();
   });
 
   it("shows loading text while agents are loading in the dialog", async () => {
@@ -154,6 +154,6 @@ describe("ThreadSidebar", () => {
     renderWithProviders(<ThreadSidebar />);
     await user.click(screen.getByRole("button", { name: /new conversation/i }));
 
-    expect(screen.getByText("Loading agents...")).toBeInTheDocument();
+    expect(screen.getByText("Loading agents…")).toBeInTheDocument();
   });
 });

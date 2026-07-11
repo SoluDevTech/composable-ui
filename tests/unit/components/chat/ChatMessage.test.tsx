@@ -45,7 +45,7 @@ describe("ChatMessage", () => {
       <ChatMessage message={message} agentName="test-agent" />,
     );
 
-    expect(screen.getByText("awaiting_hitl")).toBeInTheDocument();
+    expect(screen.getByText("Awaiting Hitl")).toBeInTheDocument();
   });
 
   it("renders markdown content for AI messages", () => {

@@ -26,7 +26,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/application/components/ui/select";
-import { Separator } from "@/application/components/ui/separator";
 import StringListEditor from "./StringListEditor";
 import McpServerEditor from "./McpServerEditor";
 import SubAgentEditor from "./SubAgentEditor";
@@ -35,17 +34,34 @@ import ResponseFormatEditor from "./ResponseFormatEditor";
 
 // ─── Constants ──────────────────────────────────────────────────────────────
 
-const ACCORDION_SECTIONS = [
-  "general",
-  "system-prompt",
-  "tools-middleware",
-  "backend",
-  "hitl",
-  "memory-skills",
-  "mcp-servers",
-  "subagents",
-  "response-format",
-] as const;
+type SectionValue =
+  | "general"
+  | "system-prompt"
+  | "tools-middleware"
+  | "backend"
+  | "hitl"
+  | "memory-skills"
+  | "mcp-servers"
+  | "subagents"
+  | "response-format";
+
+// Only essential sections are open by default, others can be revealed on demand.
+const DEFAULT_OPEN_SECTIONS: SectionValue[] = ["general", "system-prompt"];
+
+const SECTION_META: Record<
+  SectionValue,
+  { label: string; icon: string }
+> = {
+  general: { label: "General", icon: "tune" },
+  "system-prompt": { label: "System Prompt", icon: "description" },
+  "tools-middleware": { label: "Tools & Middleware", icon: "build" },
+  backend: { label: "Backend", icon: "storage" },
+  hitl: { label: "HITL", icon: "verified_user" },
+  "memory-skills": { label: "Memory & Skills", icon: "psychology" },
+  "mcp-servers": { label: "MCP Servers", icon: "hub" },
+  subagents: { label: "Subagents", icon: "group" },
+  "response-format": { label: "Response Format", icon: "data_object" },
+};
 
 const MIDDLEWARE_OPTIONS: { label: string; value: MiddlewareType }[] = [
   { value: MiddlewareType.TODO_LIST, label: "todo_list" },
@@ -121,13 +137,16 @@ function cn(...classes: (string | false | undefined)[]): string {
   return classes.filter(Boolean).join(" ");
 }
 
-function buildAccordionTriggerClass(active?: boolean): string {
+function buildAccordionTriggerClass(): string {
   return cn(
-    "text-xs font-bold font-headline uppercase tracking-widest hover:no-underline",
-    active
-      ? "text-secondary-brand"
-      : "text-on-surface-variant",
+    "text-xs font-bold font-headline uppercase tracking-widest",
+    "text-on-surface hover:text-secondary-brand",
+    "data-[state=open]:text-secondary-brand",
   );
+}
+
+function showRootDir(type: BackendType): boolean {
+  return type === BackendType.FILESYSTEM || type === BackendType.COMPOSITE;
 }
 
 // ─── Props ──────────────────────────────────────────────────────────────────
@@ -141,6 +160,8 @@ interface AgentConfigFormProps {
 }
 
 // ─── Component ────────────────────────────────────────────────────────────
+
+const FORM_ID = "agent-config-form";
 
 export default function AgentConfigForm({
   mode,
@@ -199,267 +220,251 @@ export default function AgentConfigForm({
     }
   }
 
-  function renderSubmitLabel(): string {
-    if (isPending) return "Saving...";
-    return mode === "create" ? "Create" : "Update";
-  }
-
   return (
     <form
+      id={FORM_ID}
       onSubmit={handleSubmit(handleFormSubmit)}
-      className="flex flex-col max-h-[70vh]"
+      // The parent dialog handles the footer; this form is purely the scrollable body.
+      className="flex flex-col"
     >
-      <div className="flex-1 overflow-y-auto pr-4">
-        <div className="space-y-2">
-          <Accordion type="multiple" defaultValue={[...ACCORDION_SECTIONS]}>
-            {/* General */}
-            <AccordionItem value="general">
-              <AccordionTrigger className={buildAccordionTriggerClass()}>
-                General
-              </AccordionTrigger>
-              <AccordionContent className="space-y-4 pt-2">
-                <FormField
-                  id="agent-name"
-                  label="Agent Name"
-                  error={errors.name?.message}
-                >
-                  <Input
-                    id="agent-name"
-                    {...register("name")}
-                    disabled={mode === "edit"}
-                    placeholder="my-agent"
-                    aria-invalid={!!errors.name}
-                  />
-                </FormField>
-                <FormField
-                  id="model"
-                  label="Model"
-                  error={errors.model?.message}
-                >
-                  <Input
-                    id="model"
-                    {...register("model")}
-                    placeholder="openai:anthropic/claude-haiku-4.5:nitro"
-                    aria-invalid={!!errors.model}
-                  />
-                </FormField>
-                <div className="flex items-center gap-3">
-                  <Label htmlFor="debug" className="text-on-surface">
-                    Debug
-                  </Label>
-                  <Switch
-                    id="debug"
-                    checked={watch("debug")}
-                    onCheckedChange={(v) => setValue("debug", v)}
-                  />
-                </div>
-              </AccordionContent>
-            </AccordionItem>
+      <Accordion
+        type="multiple"
+        defaultValue={DEFAULT_OPEN_SECTIONS as never}
+        className="space-y-1"
+      >
+        {/* General */}
+        <AccordionItem value="general">
+          <SectionTrigger value="general" />
+          <AccordionContent className="space-y-4">
+            <FormField
+              id="agent-name"
+              label="Agent Name"
+              error={errors.name?.message}
+            >
+              <Input
+                id="agent-name"
+                {...register("name")}
+                disabled={mode === "edit"}
+                placeholder="my-agent…"
+                autoComplete="off"
+                aria-invalid={!!errors.name}
+              />
+            </FormField>
+            <FormField
+              id="model"
+              label="Model"
+              error={errors.model?.message}
+            >
+              <Input
+                id="model"
+                {...register("model")}
+                placeholder="openai:anthropic/claude-haiku-4.5:nitro"
+                autoComplete="off"
+                spellCheck={false}
+                aria-invalid={!!errors.model}
+              />
+            </FormField>
+            <div className="flex items-center gap-3">
+              <Label htmlFor="debug" className="text-on-surface text-sm">
+                Debug
+              </Label>
+              <Switch
+                id="debug"
+                checked={watch("debug")}
+                onCheckedChange={(v) => setValue("debug", v)}
+              />
+            </div>
+          </AccordionContent>
+        </AccordionItem>
 
-            {/* System Prompt */}
-            <AccordionItem value="system-prompt">
-              <AccordionTrigger className={buildAccordionTriggerClass()}>
-                System Prompt
-              </AccordionTrigger>
-              <AccordionContent className="space-y-4 pt-2">
-                <FormField id="system-prompt" label="System Prompt">
-                  <Textarea
-                    id="system-prompt"
-                    {...register("system_prompt")}
-                    placeholder="You are a helpful assistant..."
-                    rows={6}
-                  />
-                </FormField>
-                <FormField
-                  id="system-prompt-file"
-                  label="System Prompt File"
-                >
-                  <Input
-                    id="system-prompt-file"
-                    {...register("system_prompt_file")}
-                    placeholder="/prompts/system.txt (optional)"
-                  />
-                </FormField>
-              </AccordionContent>
-            </AccordionItem>
+        {/* System Prompt */}
+        <AccordionItem value="system-prompt">
+          <SectionTrigger value="system-prompt" />
+          <AccordionContent className="space-y-4">
+            <FormField id="system-prompt" label="System Prompt">
+              <Textarea
+                id="system-prompt"
+                {...register("system_prompt")}
+                placeholder="You are a helpful assistant…"
+                rows={6}
+                className="font-mono text-xs"
+              />
+            </FormField>
+            <FormField id="system-prompt-file" label="System Prompt File">
+              <Input
+                id="system-prompt-file"
+                {...register("system_prompt_file")}
+                placeholder="/prompts/system.txt (optional)…"
+                autoComplete="off"
+                spellCheck={false}
+              />
+            </FormField>
+          </AccordionContent>
+        </AccordionItem>
 
-            {/* Tools & Middleware */}
-            <AccordionItem value="tools-middleware">
-              <AccordionTrigger className={buildAccordionTriggerClass()}>
-                Tools &amp; Middleware
-              </AccordionTrigger>
-              <AccordionContent className="space-y-4 pt-2">
-                <StringListEditor
-                  label="Tools"
-                  value={watch("tools")}
-                  onChange={(tools) => setValue("tools", tools)}
-                  placeholder="Add tool..."
+        {/* Tools & Middleware */}
+        <AccordionItem value="tools-middleware">
+          <SectionTrigger value="tools-middleware" />
+          <AccordionContent className="space-y-4">
+            <StringListEditor
+              label="Tools"
+              value={watch("tools")}
+              onChange={(tools) => setValue("tools", tools)}
+              placeholder="Add tool…"
+            />
+            <div>
+              <Label className="text-on-surface text-sm">Middleware</Label>
+              <div className="flex flex-wrap gap-2 mt-2">
+                {MIDDLEWARE_OPTIONS.map((opt) => {
+                  const isActive = middlewareValues.includes(opt.value);
+                  return (
+                    <button
+                      key={opt.value}
+                      type="button"
+                      onClick={() =>
+                        toggleMiddleware(opt.value, !isActive)
+                      }
+                      aria-pressed={isActive}
+                      className={cn(
+                        "px-3 py-1.5 rounded-full text-xs font-bold font-headline uppercase tracking-widest border transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary-brand focus-visible:ring-inset",
+                        isActive
+                          ? "bg-secondary-brand text-white border-secondary-brand"
+                          : "bg-surface-container-low text-on-surface-variant border-outline-variant/30 hover:bg-surface-container-high",
+                      )}
+                    >
+                      {opt.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          </AccordionContent>
+        </AccordionItem>
+
+        {/* Backend */}
+        <AccordionItem value="backend">
+          <SectionTrigger value="backend" />
+          <AccordionContent className="space-y-4">
+            <div>
+              <Label className="text-on-surface text-sm">Type</Label>
+              <Select
+                value={backendType}
+                onValueChange={(v) =>
+                  setValue("backend.type", v as BackendType)
+                }
+              >
+                <SelectTrigger className="mt-1.5">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {BACKEND_OPTIONS.map((opt) => (
+                    <SelectItem key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            {showRootDir(backendType) && (
+              <FormField id="backend-root-dir" label="Root Directory">
+                <Input
+                  id="backend-root-dir"
+                  {...register("backend.root_dir")}
+                  placeholder="/data/agents"
+                  autoComplete="off"
+                  spellCheck={false}
                 />
-                <div>
-                  <Label className="text-on-surface">Middleware</Label>
-                  <div className="flex flex-wrap gap-2 mt-2">
-                    {MIDDLEWARE_OPTIONS.map((opt) => {
-                      const isActive = middlewareValues.includes(opt.value);
-                      return (
-                        <button
-                          key={opt.value}
-                          type="button"
-                          onClick={() =>
-                            toggleMiddleware(opt.value, !isActive)
-                          }
-                          aria-pressed={isActive}
-                          className={cn(
-                            "px-3 py-1.5 rounded-full text-xs font-bold font-headline uppercase tracking-widest border transition-colors",
-                            isActive
-                              ? "bg-secondary-brand text-white border-secondary-brand"
-                              : "bg-surface-container-low text-on-surface-variant border-outline-variant/30 hover:bg-surface-container-high",
-                          )}
-                        >
-                          {opt.label}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-              </AccordionContent>
-            </AccordionItem>
+              </FormField>
+            )}
+          </AccordionContent>
+        </AccordionItem>
 
-            {/* Backend */}
-            <AccordionItem value="backend">
-              <AccordionTrigger className={buildAccordionTriggerClass()}>
-                Backend
-              </AccordionTrigger>
-              <AccordionContent className="space-y-4 pt-2">
-                <div>
-                  <Label className="text-on-surface">Type</Label>
-                  <Select
-                    value={backendType}
-                    onValueChange={(v) =>
-                      setValue("backend.type", v as BackendType)
-                    }
-                  >
-                    <SelectTrigger className="mt-1">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {BACKEND_OPTIONS.map((opt) => (
-                        <SelectItem key={opt.value} value={opt.value}>
-                          {opt.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                {showRootDir(backendType) && (
-                  <FormField
-                    id="backend-root-dir"
-                    label="Root Directory"
-                  >
-                    <Input
-                      id="backend-root-dir"
-                      {...register("backend.root_dir")}
-                      placeholder="/data/agents"
-                    />
-                  </FormField>
-                )}
-              </AccordionContent>
-            </AccordionItem>
+        {/* HITL */}
+        <AccordionItem value="hitl">
+          <SectionTrigger value="hitl" />
+          <AccordionContent className="space-y-4">
+            <HITLEditor
+              value={watch("hitl.rules")}
+              onChange={(rules) => setValue("hitl.rules", rules)}
+            />
+          </AccordionContent>
+        </AccordionItem>
 
-            {/* HITL */}
-            <AccordionItem value="hitl">
-              <AccordionTrigger className={buildAccordionTriggerClass()}>
-                HITL
-              </AccordionTrigger>
-              <AccordionContent className="space-y-4 pt-2">
-                <HITLEditor
-                  value={watch("hitl.rules")}
-                  onChange={(rules) => setValue("hitl.rules", rules)}
-                />
-              </AccordionContent>
-            </AccordionItem>
+        {/* Memory & Skills */}
+        <AccordionItem value="memory-skills">
+          <SectionTrigger value="memory-skills" />
+          <AccordionContent className="space-y-4">
+            <StringListEditor
+              label="Memory"
+              value={watch("memory")}
+              onChange={(memory) => setValue("memory", memory)}
+              placeholder="Add memory path…"
+            />
+            <StringListEditor
+              label="Skills"
+              value={watch("skills")}
+              onChange={(skills) => setValue("skills", skills)}
+              placeholder="Add skill…"
+            />
+          </AccordionContent>
+        </AccordionItem>
 
-            {/* Memory & Skills */}
-            <AccordionItem value="memory-skills">
-              <AccordionTrigger className={buildAccordionTriggerClass()}>
-                Memory &amp; Skills
-              </AccordionTrigger>
-              <AccordionContent className="space-y-4 pt-2">
-                <StringListEditor
-                  label="Memory"
-                  value={watch("memory")}
-                  onChange={(memory) => setValue("memory", memory)}
-                  placeholder="Add memory path..."
-                />
-                <StringListEditor
-                  label="Skills"
-                  value={watch("skills")}
-                  onChange={(skills) => setValue("skills", skills)}
-                  placeholder="Add skill..."
-                />
-              </AccordionContent>
-            </AccordionItem>
+        {/* MCP Servers */}
+        <AccordionItem value="mcp-servers">
+          <SectionTrigger value="mcp-servers" />
+          <AccordionContent className="space-y-4">
+            {mcpServersArray.fields.map((field, index) => (
+              <McpServerEditor
+                key={field.id}
+                value={field as unknown as McpServerConfig}
+                onChange={(v) => mcpServersArray.update(index, v)}
+                onRemove={() => mcpServersArray.remove(index)}
+              />
+            ))}
+            <AddButton onClick={addMcpServer} label="Add MCP Server" />
+          </AccordionContent>
+        </AccordionItem>
 
-            {/* MCP Servers */}
-            <AccordionItem value="mcp-servers">
-              <AccordionTrigger className={buildAccordionTriggerClass()}>
-                MCP Servers
-              </AccordionTrigger>
-              <AccordionContent className="space-y-4 pt-2">
-                {mcpServersArray.fields.map((field, index) => (
-                  <McpServerEditor
-                    key={field.id}
-                    value={field as unknown as McpServerConfig}
-                    onChange={(v) => mcpServersArray.update(index, v)}
-                    onRemove={() => mcpServersArray.remove(index)}
-                  />
-                ))}
-                <AddButton onClick={addMcpServer} label="Add MCP Server" />
-              </AccordionContent>
-            </AccordionItem>
+        {/* Subagents */}
+        <AccordionItem value="subagents">
+          <SectionTrigger value="subagents" />
+          <AccordionContent className="space-y-4">
+            {subagentsArray.fields.map((field, index) => (
+              <SubAgentEditor
+                key={field.id}
+                index={index}
+                value={field as unknown as SubAgentConfig}
+                onChange={(v) => subagentsArray.update(index, v)}
+                onRemove={() => subagentsArray.remove(index)}
+              />
+            ))}
+            <AddButton onClick={addSubagent} label="Add Subagent" />
+          </AccordionContent>
+        </AccordionItem>
 
-            {/* Subagents */}
-            <AccordionItem value="subagents">
-              <AccordionTrigger className={buildAccordionTriggerClass()}>
-                Subagents
-              </AccordionTrigger>
-              <AccordionContent className="space-y-4 pt-2">
-                {subagentsArray.fields.map((field, index) => (
-                  <SubAgentEditor
-                    key={field.id}
-                    index={index}
-                    value={field as unknown as SubAgentConfig}
-                    onChange={(v) => subagentsArray.update(index, v)}
-                    onRemove={() => subagentsArray.remove(index)}
-                  />
-                ))}
-                <AddButton onClick={addSubagent} label="Add Subagent" />
-              </AccordionContent>
-            </AccordionItem>
+        {/* Response Format */}
+        <AccordionItem value="response-format">
+          <SectionTrigger value="response-format" />
+          <AccordionContent className="space-y-4">
+            <ResponseFormatEditor
+              value={watch("response_format")}
+              onChange={(v) => setValue("response_format", v)}
+            />
+          </AccordionContent>
+        </AccordionItem>
+      </Accordion>
 
-            {/* Response Format */}
-            <AccordionItem value="response-format">
-              <AccordionTrigger className={buildAccordionTriggerClass()}>
-                Response Format
-              </AccordionTrigger>
-              <AccordionContent className="space-y-4 pt-2">
-                <ResponseFormatEditor
-                  value={watch("response_format")}
-                  onChange={(v) => setValue("response_format", v)}
-                />
-              </AccordionContent>
-            </AccordionItem>
-          </Accordion>
-        </div>
-      </div>
+      {/* Hidden section separator that adds breathing room below last fold */}
+      <div className="h-2" aria-hidden="true" />
 
-      <Separator className="my-4" />
-
-      <div className="flex justify-end gap-3">
+      {/* Local Cancel + Submit (hidden on mobile where dialog footer is used)
+          Kept for embedded usage in AgentConfigViewer where no dialog footer exists. */}
+      <div className="hidden lg:flex items-center justify-end gap-3 mt-6 pt-4 border-t border-outline-variant/30">
         <Button type="button" variant="outline" onClick={onCancel}>
           Cancel
         </Button>
         <Button type="submit" disabled={isPending}>
-          {renderSubmitLabel()}
+          {isPending ? "Saving…" : mode === "create" ? "Create" : "Update"}
         </Button>
       </div>
     </form>
@@ -468,8 +473,21 @@ export default function AgentConfigForm({
 
 // ─── Small helpers ─────────────────────────────────────────────────────────
 
-function showRootDir(type: BackendType): boolean {
-  return type === BackendType.FILESYSTEM || type === BackendType.COMPOSITE;
+function SectionTrigger({ value }: Readonly<{ value: SectionValue }>) {
+  const meta = SECTION_META[value];
+  return (
+    <AccordionTrigger className={buildAccordionTriggerClass()}>
+      <span className="flex items-center gap-2">
+        <span
+          className="material-symbols-outlined text-sm text-secondary-brand"
+          aria-hidden="true"
+        >
+          {meta.icon}
+        </span>
+        {meta.label}
+      </span>
+    </AccordionTrigger>
+  );
 }
 
 interface FormFieldProps {
@@ -483,14 +501,21 @@ function FormField({ id, label, error, children }: Readonly<FormFieldProps>) {
   const errorId = error ? `${id}-error` : undefined;
   return (
     <div>
-      <Label htmlFor={id} className="text-on-surface">
+      <Label
+        htmlFor={id}
+        className="text-[10px] font-bold font-headline uppercase tracking-widest text-on-surface-variant mb-2 block"
+      >
         {label}
       </Label>
       <div aria-invalid={!!error} aria-describedby={errorId}>
         {children}
       </div>
       {error && (
-        <p id={errorId} role="alert" className="text-destructive text-xs mt-1">
+        <p
+          id={errorId}
+          role="alert"
+          className="text-destructive text-xs mt-1.5"
+        >
           {error}
         </p>
       )}
@@ -512,7 +537,12 @@ function AddButton({ onClick, label }: Readonly<AddButtonProps>) {
       onClick={onClick}
       className="w-full"
     >
-      <span className="material-symbols-outlined text-sm mr-1">add</span>
+      <span
+        className="material-symbols-outlined text-sm mr-1"
+        aria-hidden="true"
+      >
+        add
+      </span>
       {label}
     </Button>
   );

@@ -1,7 +1,22 @@
+import { Suspense, lazy } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
-import AgentsPage from "@/application/pages/AgentsPage";
 import ChatPage from "@/application/pages/ChatPage";
-import RagPage from "@/application/pages/RagPage";
+
+// Lazy-load secondary routes for code-splitting / smaller initial bundle.
+const AgentsPage = lazy(() => import("@/application/pages/AgentsPage"));
+const RagPage = lazy(() => import("@/application/pages/RagPage"));
+
+function PageFallback() {
+  return (
+    <div
+      className="flex-1 flex items-center justify-center"
+      role="status"
+      aria-live="polite"
+    >
+      <p className="text-on-surface-variant text-sm">Loading…</p>
+    </div>
+  );
+}
 
 function App() {
   return (
@@ -14,4 +29,10 @@ function App() {
   );
 }
 
-export default App;
+export default function AppRoot() {
+  return (
+    <Suspense fallback={<PageFallback />}>
+      <App />
+    </Suspense>
+  );
+}
