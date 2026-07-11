@@ -31,10 +31,10 @@ describe("IndexActionMenu", () => {
     await user.click(screen.getByRole("button", { name: /index options/i }));
 
     expect(
-      screen.getByRole("button", { name: /index with lightrag/i }),
+      screen.getByRole("menuitem", { name: /index with lightrag/i }),
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("button", { name: /index with classical/i }),
+      screen.getByRole("menuitem", { name: /index with classical/i }),
     ).toBeInTheDocument();
   });
 
@@ -50,7 +50,9 @@ describe("IndexActionMenu", () => {
     );
 
     await user.click(screen.getByRole("button", { name: /index options/i }));
-    await user.click(screen.getByRole("button", { name: /index with lightrag/i }));
+    await user.click(
+      screen.getByRole("menuitem", { name: /index with lightrag/i }),
+    );
 
     expect(onIndexLightRAG).toHaveBeenCalledOnce();
   });
@@ -67,7 +69,9 @@ describe("IndexActionMenu", () => {
     );
 
     await user.click(screen.getByRole("button", { name: /index options/i }));
-    await user.click(screen.getByRole("button", { name: /index with classical/i }));
+    await user.click(
+      screen.getByRole("menuitem", { name: /index with classical/i }),
+    );
 
     expect(onIndexClassical).toHaveBeenCalledOnce();
   });

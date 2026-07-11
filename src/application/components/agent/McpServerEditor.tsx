@@ -45,7 +45,12 @@ export default function McpServerEditor({
           onClick={onRemove}
           aria-label="Remove server"
         >
-          <span className="material-symbols-outlined text-sm">delete</span>
+          <span
+            className="material-symbols-outlined text-sm"
+            aria-hidden="true"
+          >
+            delete
+          </span>
         </Button>
       </div>
 
@@ -96,7 +101,7 @@ export default function McpServerEditor({
             label="Args"
             value={value.args}
             onChange={(args) => update({ args })}
-            placeholder="Add argument..."
+            placeholder="Add argument…"
           />
         </>
       )}

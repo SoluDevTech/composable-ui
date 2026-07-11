@@ -51,7 +51,10 @@ describe("CreateAgentDialog", () => {
       <CreateAgentDialog open={true} onOpenChange={vi.fn()} />,
     );
 
-    expect(screen.getByText("Create Agent")).toBeInTheDocument();
+    // The dialog title is a heading; the visible Submit button also says "Create Agent" so target heading.
+    expect(
+      screen.getByRole("heading", { name: /create agent/i, level: 2 }),
+    ).toBeInTheDocument();
   });
 
   it("has form and yaml tabs", () => {

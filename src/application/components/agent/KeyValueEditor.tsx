@@ -81,10 +81,15 @@ export default function KeyValueEditor({
               <button
                 type="button"
                 onClick={() => removeEntry(k)}
-                className="shrink-0 rounded-full hover:bg-destructive/20 p-0.5"
+                className="shrink-0 rounded-full hover:bg-destructive/15 p-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-destructive focus-visible:ring-inset"
                 aria-label={`Remove ${k}`}
               >
-                <span className="material-symbols-outlined text-xs">close</span>
+                <span
+                  className="material-symbols-outlined text-xs"
+                  aria-hidden="true"
+                >
+                  close
+                </span>
               </button>
             </div>
           ))}

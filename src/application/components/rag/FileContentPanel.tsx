@@ -1,3 +1,12 @@
+import { useEffect, useRef } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/application/components/ui/dialog";
+
 interface FileContentPanelProps {
   content: string;
   metadata: { format_type: string; mime_type: string };
@@ -11,84 +20,97 @@ export default function FileContentPanel({
   tables,
   onClose,
 }: Readonly<FileContentPanelProps>) {
+  const tablesRef = useRef<HTMLDivElement>(null);
+
+  // Close on Escape is handled by Dialog primitives automatically.
+  useEffect(() => {
+    function handleEscape(e: KeyboardEvent) {
+      if (e.key === "Escape") onClose();
+    }
+    document.addEventListener("keydown", handleEscape);
+    return () => document.removeEventListener("keydown", handleEscape);
+  }, [onClose]);
+
   return (
-    <div className="fixed right-0 top-0 h-full w-[480px] bg-surface-container-lowest border-l border-outline-variant shadow-2xl z-50 flex flex-col">
-      <div className="flex items-center justify-between px-6 py-4 border-b border-outline-variant">
-        <h3 className="font-headline text-sm font-semibold text-on-surface">
-          File Content
-        </h3>
-        <button
-          type="button"
-          onClick={onClose}
-          className="flex items-center justify-center w-8 h-8 rounded-lg hover:bg-surface-container transition-colors"
-          aria-label="Close"
-        >
-          <span className="material-symbols-outlined text-lg text-on-surface-variant">
-            close
-          </span>
-        </button>
-      </div>
+    <Dialog open onOpenChange={(open) => !open && onClose()}>
+      <DialogContent className="max-w-3xl w-full sm:w-[480px] sm:max-w-[640px] lg:w-[640px] max-h-[90vh] flex flex-col overflow-hidden p-0">
+        <DialogHeader className="px-6 py-4 border-b border-outline-variant space-y-1.5">
+          <DialogTitle className="font-headline text-sm font-semibold text-on-surface">
+            File Content
+          </DialogTitle>
+          <DialogDescription className="sr-only">
+            Preview of file content and extracted tables
+          </DialogDescription>
+        </DialogHeader>
 
-      <div className="px-6 py-3 border-b border-outline-variant">
-        <div className="flex items-center gap-4 text-xs font-body text-on-surface-variant">
-          <span className="bg-surface-container px-2 py-0.5 rounded">
-            {metadata.format_type}
-          </span>
-          <span>{metadata.mime_type}</span>
+        {/* Metadata bar */}
+        <div className="px-6 py-3 border-b border-outline-variant">
+          <div className="flex items-center gap-4 text-xs font-body text-on-surface-variant">
+            <span className="bg-surface-container px-2 py-0.5 rounded">
+              {metadata.format_type}
+            </span>
+            <span className="break-all">{metadata.mime_type}</span>
+          </div>
         </div>
-      </div>
 
-      <div className="flex-1 overflow-y-auto px-6 py-4 max-h-[calc(100vh-8rem)]">
-        <pre className="font-body text-sm text-on-surface whitespace-pre-wrap overflow-wrap-anywhere">
-          {content}
-        </pre>
+        {/* Body (scrollable) */}
+        <div
+          ref={tablesRef}
+          className="flex-1 overflow-y-auto px-6 py-4 overscroll-contain"
+        >
+          <pre className="font-body text-sm text-on-surface whitespace-pre-wrap overflow-wrap-anywhere">
+            {content}
+          </pre>
 
-        {tables.length > 0 && (
-          <div className="mt-6 space-y-4">
-            <h4 className="font-headline text-sm font-semibold text-on-surface">
-              Tables ({tables.length})
-            </h4>
-            {tables.map((table, tableIdx) => (
-              <div
-                key={`table-${tableIdx}-${table.headers.join("-")}`}
-                className="overflow-x-auto border border-outline-variant rounded-lg"
-              >
-                <table className="min-w-full text-xs font-body">
-                  <thead>
-                    <tr className="bg-surface-container">
-                      {table.headers.map((header) => (
-                        <th
-                          key={header}
-                          className="px-3 py-2 text-left text-on-surface-variant font-semibold"
-                        >
-                          {header}
-                        </th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {table.rows.map((row, rowIdx) => (
-                      <tr
-                        key={`row-${tableIdx}-${rowIdx}`}
-                        className="border-t border-outline-variant"
-                      >
-                        {row.map((cell, cellIdx) => (
-                          <td
-                            key={`cell-${tableIdx}-${rowIdx}-${cellIdx}`}
-                            className="px-3 py-2 text-on-surface"
+          {tables.length > 0 && (
+            <div className="mt-6 space-y-4">
+              <h4 className="font-headline text-sm font-semibold text-on-surface">
+                Tables ({tables.length})
+              </h4>
+              {tables.map((table, tableIdx) => (
+                <div
+                  key={`table-${tableIdx}-${table.headers.join("-")}`}
+                  className="overflow-x-auto border border-outline-variant rounded-lg"
+                >
+                  <table className="min-w-full text-xs font-body">
+                    <thead>
+                      <tr className="bg-surface-container">
+                        {table.headers.map((header) => (
+                          <th
+                            key={header}
+                            scope="col"
+                            className="px-3 py-2 text-left text-on-surface-variant font-semibold"
                           >
-                            {cell}
-                          </td>
+                            {header}
+                          </th>
                         ))}
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-    </div>
+                    </thead>
+                    <tbody>
+                      {table.rows.map((row, rowIdx) => (
+                        <tr
+                          key={`row-${tableIdx}-${rowIdx}`}
+                          className="border-t border-outline-variant"
+                        >
+                          {row.map((cell, cellIdx) => (
+                            <td
+                              key={`cell-${tableIdx}-${rowIdx}-${cellIdx}`}
+                              className="px-3 py-2 text-on-surface"
+                            >
+                              {cell}
+                            </td>
+                          ))}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        </DialogContent>
+    </Dialog>
   );
 }

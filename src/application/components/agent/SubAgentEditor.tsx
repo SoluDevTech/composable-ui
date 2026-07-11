@@ -36,7 +36,12 @@ export default function SubAgentEditor({
           onClick={onRemove}
           aria-label="Remove subagent"
         >
-          <span className="material-symbols-outlined text-sm">delete</span>
+          <span
+            className="material-symbols-outlined text-sm"
+            aria-hidden="true"
+          >
+            delete
+          </span>
         </Button>
       </div>
 
@@ -98,14 +103,14 @@ export default function SubAgentEditor({
         label="Tools"
         value={value.tools}
         onChange={(tools) => update({ tools })}
-        placeholder="Add tool..."
+        placeholder="Add tool…"
       />
 
       <StringListEditor
         label="Skills"
         value={value.skills}
         onChange={(skills) => update({ skills })}
-        placeholder="Add skill..."
+        placeholder="Add skill…"
       />
     </div>
   );
