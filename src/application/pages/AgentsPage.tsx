@@ -1,46 +1,54 @@
 import { useState } from "react";
-import MainLayout from "@/application/components/layout/MainLayout";
+import { Plus } from "lucide-react";
+import AppShell from "@/application/components/layout/AppShell";
 import AgentGrid from "@/application/components/agent/AgentGrid";
 import CreateAgentDialog from "@/application/components/agent/CreateAgentDialog";
 import AgentConfigViewer from "@/application/components/agent/AgentConfigViewer";
+import { useAgents } from "@/application/hooks/agent/useAgents";
+import { Badge } from "@/application/components/ui/badge";
+import { Button } from "@/application/components/ui/button";
 
 export default function AgentsPage() {
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [viewerAgent, setViewerAgent] = useState<string | null>(null);
+  const { data: agents } = useAgents();
+
+  const total = agents?.length ?? 0;
+  const active = agents?.filter((a) => a.is_builtin).length ?? 0;
 
   return (
-    <MainLayout showSidebar={false}>
-      <div className="flex-1 overflow-y-auto">
-        <div className="max-w-[1440px] mx-auto px-8 py-12">
-          {/* Header */}
-          <div className="flex items-start justify-between mb-12">
-            <div>
-              <h1 className="font-headline text-5xl font-bold text-on-surface mb-3">
-                Active Agents
-              </h1>
-              <p className="text-on-surface-variant text-sm max-w-md">
-                Configure and manage your AI agent fleet. Each agent operates with its own tools,
-                middleware, and orchestration rules.
-              </p>
-            </div>
-            <button
+    <AppShell>
+      <div
+        className="agents-view flex flex-1 flex-col gap-6 overflow-y-auto bg-bg p-4 md:p-8"
+        data-od-id="agents-view"
+      >
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <p className="max-w-md font-body text-sm text-muted">
+            Configure and manage your AI agent fleet. Each agent operates with its own tools,
+            middleware, and orchestration rules.
+          </p>
+          <div className="flex items-center gap-3">
+            <Badge variant="default" data-od-id="agent-count">
+              {total} agents · {active} active
+            </Badge>
+            <Button
               type="button"
+              variant="default"
               onClick={() => setCreateDialogOpen(true)}
-              className="flex items-center gap-3 bg-primary-container text-white rounded-full px-8 py-4 font-headline text-xs font-bold uppercase tracking-widest hover:opacity-90 transition-opacity shrink-0"
+              data-od-id="create-agent"
             >
-              <span className="material-symbols-outlined text-lg">add_circle</span> Create Agent
-            </button>
+              <Plus className="h-4 w-4" aria-hidden="true" />
+              Create Agent
+            </Button>
           </div>
-
-          {/* Grid */}
-          <AgentGrid
-            onCreateNew={() => setCreateDialogOpen(true)}
-            onConfigure={(name) => setViewerAgent(name)}
-          />
         </div>
+
+        <AgentGrid
+          onCreateNew={() => setCreateDialogOpen(true)}
+          onConfigure={(name) => setViewerAgent(name)}
+        />
       </div>
 
-      {/* Dialogs */}
       <CreateAgentDialog open={createDialogOpen} onOpenChange={setCreateDialogOpen} />
       {viewerAgent && (
         <AgentConfigViewer
@@ -51,6 +59,6 @@ export default function AgentsPage() {
           }}
         />
       )}
-    </MainLayout>
+    </AppShell>
   );
 }

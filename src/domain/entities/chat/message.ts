@@ -25,4 +25,5 @@ export interface Message {
   status: MessageStatus | null;
   structured_response: unknown;
   thinking: string | null;
+  turn_id: string | null;
 }

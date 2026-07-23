@@ -1,74 +1,69 @@
 import { useState } from "react";
-import PipelineToggle from "@/application/components/rag/PipelineToggle";
+import { Search } from "lucide-react";
+import { Button } from "@/application/components/ui/button";
+import { Textarea } from "@/application/components/ui/textarea";
 import QueryOptions from "@/application/components/rag/QueryOptions";
 import QueryResults from "@/application/components/rag/QueryResults";
-import { useRagQuery } from "@/application/hooks/rag/useRagQuery";
+import WorkspaceSelector from "@/application/components/rag/WorkspaceSelector";
 import { useClassicalQuery } from "@/application/hooks/rag/useClassicalQuery";
-import type { QueryMode, ClassicalQueryMode } from "@/domain/entities/rag/queryRequest";
+import type { ClassicalQueryMode } from "@/domain/entities/rag/queryRequest";
 
 interface QueryPanelProps {
   workingDir: string;
+  onWorkingDirChange?: (value: string) => void;
+  folders?: string[];
 }
 
-export default function QueryPanel({ workingDir }: Readonly<QueryPanelProps>) {
-  const [pipeline, setPipeline] = useState<"lightrag" | "classical">("lightrag");
+export default function QueryPanel({
+  workingDir,
+  onWorkingDirChange = () => {},
+  folders = [],
+}: Readonly<QueryPanelProps>) {
   const [query, setQuery] = useState("");
-  const [mode, setMode] = useState<QueryMode | ClassicalQueryMode>("naive");
+  const [mode, setMode] = useState<ClassicalQueryMode>("vector");
   const [topK, setTopK] = useState(10);
   const [numVariations, setNumVariations] = useState(3);
   const [relevanceThreshold, setRelevanceThreshold] = useState(5);
   const [vectorDistanceThreshold, setVectorDistanceThreshold] = useState(0.5);
   const [enableLlmJudge, setEnableLlmJudge] = useState(true);
 
-  const ragQuery = useRagQuery();
   const classicalQuery = useClassicalQuery();
 
-  const result = pipeline === "lightrag" ? (ragQuery.data ?? null) : (classicalQuery.data ?? null);
-  const isLoading = ragQuery.isPending || classicalQuery.isPending;
-  const error = ragQuery.error || classicalQuery.error;
+  const result = classicalQuery.data ?? null;
+  const isLoading = classicalQuery.isPending;
+  const error = classicalQuery.error;
 
   function handleSearch() {
     if (!workingDir || !query.trim()) return;
-
-    if (pipeline === "lightrag") {
-      ragQuery.mutate({ workingDir, query, mode: mode as QueryMode, topK });
-    } else {
-      classicalQuery.mutate({
-        workingDir,
-        query,
-        topK,
-        numVariations,
-        relevanceThreshold,
-        vectorDistanceThreshold,
-        enableLlmJudge,
-        mode: mode as ClassicalQueryMode,
-      });
-    }
+    classicalQuery.mutate({
+      workingDir,
+      query,
+      topK,
+      numVariations,
+      relevanceThreshold,
+      vectorDistanceThreshold,
+      enableLlmJudge,
+      mode,
+    });
   }
 
   function handleRetry() {
     handleSearch();
   }
 
-  function handlePipelineChange(value: "lightrag" | "classical") {
-    setPipeline(value);
-    setMode(value === "lightrag" ? "naive" : "vector");
-  }
-
   return (
-    <div className="space-y-6">
-      <PipelineToggle value={pipeline} onChange={handlePipelineChange} />
-
-      <textarea
+    <div className="flex flex-col gap-4">
+      <Textarea
         value={query}
         onChange={(e) => setQuery(e.target.value)}
         placeholder="Ask a question about your documents..."
         rows={3}
-        className="w-full bg-surface-container-lowest border border-outline-variant rounded-lg px-4 py-3 font-body text-sm text-on-surface resize-y focus:outline-none focus:ring-2 focus:ring-secondary-brand"
+        data-od-id="rag-query-input"
+        className="min-h-[120px] font-body text-sm text-fg placeholder:text-muted"
+        aria-label="RAG query"
       />
 
       <QueryOptions
-        pipeline={pipeline}
         mode={mode}
         topK={topK}
         numVariations={numVariations}
@@ -83,33 +78,33 @@ export default function QueryPanel({ workingDir }: Readonly<QueryPanelProps>) {
         onEnableLlmJudgeChange={setEnableLlmJudge}
       />
 
-      <div className="flex justify-end">
-        <button
+      <div className="flex items-end gap-3">
+        <div className="flex-1">
+          <WorkspaceSelector value={workingDir} onChange={onWorkingDirChange} folders={folders} />
+        </div>
+        <Button
           type="button"
+          variant="default"
           onClick={handleSearch}
           disabled={!workingDir || isLoading || !query.trim()}
-          className="flex items-center gap-2 bg-primary-container text-white rounded-full px-6 py-3 font-headline text-xs font-bold uppercase tracking-widest hover:opacity-90 transition-opacity disabled:opacity-50"
+          data-od-id="rag-search"
         >
           {isLoading ? (
             <>
-              <span className="material-symbols-outlined text-lg animate-spin" aria-hidden="true">
-                progress_activity
-              </span>
-              {"Searching..."}
+              <span className="spin" aria-hidden="true" data-testid="query-spinner" />
+              Searching...
             </>
           ) : (
             <>
-              <span className="material-symbols-outlined text-lg" aria-hidden="true">
-                search
-              </span>
-              {"Search"}
+              <Search className="h-4 w-4" aria-hidden="true" />
+              Search
             </>
           )}
-        </button>
+        </Button>
       </div>
 
       <div>
-        <h3 className="font-headline text-sm font-semibold text-on-surface mb-3">Results</h3>
+        <h3 className="font-display text-sm text-fg mb-3">Results</h3>
         <QueryResults data={result} error={error} isLoading={isLoading} onRetry={handleRetry} />
       </div>
     </div>

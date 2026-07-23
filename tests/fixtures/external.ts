@@ -3,8 +3,11 @@ import { BackendType } from "@/domain/entities/agent/agentConfig";
 import type { AgentConfigMetadata } from "@/domain/entities/agent/agentConfigMetadata";
 import type { McpServerConfig } from "@/domain/entities/agent/mcpServerConfig";
 import { McpTransportType } from "@/domain/entities/agent/mcpServerConfig";
-import { Thread } from "@/domain/entities/chat/thread";
-import { Message, MessageRole, MessageStatus } from "@/domain/entities/chat/message";
+import type { Thread } from "@/domain/entities/chat/thread";
+import type { Message } from "@/domain/entities/chat/message";
+import { MessageRole, MessageStatus } from "@/domain/entities/chat/message";
+import type { TraceEvent, Turn, ThreadHistory } from "@/domain/entities/chat/traceEvent";
+import { TraceEventType } from "@/domain/entities/chat/traceEvent";
 
 export function createAgentConfigMetadata(
   overrides: Partial<AgentConfigMetadata> = {},
@@ -69,6 +72,42 @@ export function createMessage(overrides: Partial<Message> = {}): Message {
     tool_calls: null,
     status: MessageStatus.COMPLETED,
     structured_response: null,
+    thinking: null,
+    turn_id: null,
+    ...overrides,
+  };
+}
+
+export function createTraceEvent(overrides: Partial<TraceEvent> = {}): TraceEvent {
+  return {
+    id: "evt-1",
+    thread_id: "thread-123",
+    turn_id: "turn-1",
+    type: TraceEventType.CONTENT,
+    source: null,
+    name: null,
+    content: "Hello",
+    metadata: null,
+    timestamp: "2026-04-06T10:00:00Z",
+    sequence: 0,
+    ...overrides,
+  };
+}
+
+export function createTurn(overrides: Partial<Turn> = {}): Turn {
+  return {
+    turn_id: "turn-1",
+    human_message: createMessage({ role: MessageRole.HUMAN, content: "Hi" }),
+    ai_message: createMessage({ role: MessageRole.AI, content: "Hello back" }),
+    events: [],
+    ...overrides,
+  };
+}
+
+export function createThreadHistory(overrides: Partial<ThreadHistory> = {}): ThreadHistory {
+  return {
+    thread: createThread(),
+    turns: [createTurn()],
     ...overrides,
   };
 }

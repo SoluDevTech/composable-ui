@@ -1,3 +1,5 @@
+import { Loader2, AlertCircle, FolderOpen, RefreshCw } from "lucide-react";
+import { Button } from "@/application/components/ui/button";
 import FolderRow from "@/application/components/rag/FolderRow";
 import FileRow from "@/application/components/rag/FileRow";
 import type { FolderEntry, FileEntry } from "@/domain/entities/rag/fileEntry";
@@ -10,10 +12,10 @@ interface FileListProps {
   onFolderClick: (prefix: string) => void;
   onRetry: () => void;
   onFileRead?: (objectName: string) => void;
-  onFileIndexLightRAG?: (objectName: string) => void;
   onFileIndexClassical?: (objectName: string) => void;
-  onFolderIndexLightRAG?: (prefix: string) => void;
   onFolderIndexClassical?: (prefix: string) => void;
+  onFileDelete?: (objectName: string) => void;
+  onFolderDelete?: (prefix: string) => void;
 }
 
 export default function FileList({
@@ -24,74 +26,62 @@ export default function FileList({
   onFolderClick,
   onRetry,
   onFileRead,
-  onFileIndexLightRAG,
   onFileIndexClassical,
-  onFolderIndexLightRAG,
   onFolderIndexClassical,
+  onFileDelete,
+  onFolderDelete,
 }: Readonly<FileListProps>) {
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center py-24">
-        <p className="text-on-surface-variant font-headline text-sm tracking-wide">
-          Loading files...
-        </p>
+      <div
+        data-od-id="file-list"
+        className="flex flex-col border border-border bg-surface items-center justify-center py-24 gap-3"
+      >
+        <Loader2 className="spin h-6 w-6 text-muted" aria-hidden="true" />
+        <p className="text-muted font-mono text-sm">Loading files...</p>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="flex flex-col items-center justify-center py-24 gap-4">
-        <span
-          className="material-symbols-outlined text-4xl text-on-surface-variant"
-          aria-hidden="true"
-        >
-          cloud_off
-        </span>
-        <p className="text-red-600 font-headline text-sm">
-          Unable to load files. Please try again.
-        </p>
-        <button
-          type="button"
-          onClick={onRetry}
-          className="flex items-center gap-2 text-secondary-brand font-headline text-xs font-bold uppercase tracking-widest hover:opacity-80 transition-opacity"
-        >
-          <span className="material-symbols-outlined text-base" aria-hidden="true">
-            refresh
-          </span>
-          {"Retry"}
-        </button>
+      <div
+        data-od-id="file-list"
+        className="flex flex-col border border-border bg-surface items-center justify-center py-24 gap-4"
+      >
+        <AlertCircle className="h-8 w-8 text-danger" aria-hidden="true" />
+        <p className="text-danger font-mono text-sm">Unable to load files. Please try again.</p>
+        <Button type="button" variant="outline" size="sm" onClick={onRetry}>
+          <RefreshCw className="h-3.5 w-3.5" aria-hidden="true" />
+          Retry
+        </Button>
       </div>
     );
   }
 
   if (folders.length === 0 && files.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-24 gap-4">
-        <span
-          className="material-symbols-outlined text-4xl text-on-surface-variant"
-          aria-hidden="true"
-        >
-          folder_off
-        </span>
-        <p className="text-on-surface-variant font-headline text-sm">No files or folders found.</p>
+      <div
+        data-od-id="file-list"
+        className="flex flex-col border border-border bg-surface items-center justify-center py-24 gap-4"
+      >
+        <FolderOpen className="h-8 w-8 text-muted" aria-hidden="true" />
+        <p className="text-muted font-mono text-sm">No files or folders found.</p>
       </div>
     );
   }
 
   return (
-    <div className="space-y-1">
+    <div data-od-id="file-list" className="flex flex-col border border-border bg-surface">
       {folders.map((folder) => (
         <FolderRow
           key={folder.prefix}
           name={folder.name}
           onClick={() => onFolderClick(folder.prefix)}
-          onIndexLightRAG={
-            onFolderIndexLightRAG ? () => onFolderIndexLightRAG(folder.prefix) : undefined
-          }
           onIndexClassical={
             onFolderIndexClassical ? () => onFolderIndexClassical(folder.prefix) : undefined
           }
+          onDelete={onFolderDelete ? () => onFolderDelete(folder.prefix) : undefined}
         />
       ))}
       {files.map((file) => (
@@ -101,12 +91,10 @@ export default function FileList({
           size={file.size}
           lastModified={file.lastModified}
           onRead={onFileRead ? () => onFileRead(file.objectName) : undefined}
-          onIndexLightRAG={
-            onFileIndexLightRAG ? () => onFileIndexLightRAG(file.objectName) : undefined
-          }
           onIndexClassical={
             onFileIndexClassical ? () => onFileIndexClassical(file.objectName) : undefined
           }
+          onDelete={onFileDelete ? () => onFileDelete(file.objectName) : undefined}
         />
       ))}
     </div>

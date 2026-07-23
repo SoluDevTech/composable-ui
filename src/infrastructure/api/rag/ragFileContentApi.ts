@@ -5,19 +5,15 @@ import type { FileContentResponse } from "@/domain/entities/rag/fileContent";
 export const ragFileContentApi: IRagFileContentPort = {
   async readFile(filePath: string): Promise<FileContentResponse> {
     const response = await ragApiClient.post<{
-      content: string;
-      metadata: { format_type: string; mime_type: string };
-      tables: { headers: string[]; rows: string[][] }[];
+      content: { page: number; content: string }[];
+      metadata: { format_type: string; mime_type: string } | null;
+      tables: { markdown: string }[] | null;
     }>("/api/v1/files/read", { file_path: filePath });
 
-    const { content, metadata, tables } = response.data;
     return {
-      content,
-      metadata: {
-        format_type: metadata.format_type,
-        mime_type: metadata.mime_type,
-      },
-      tables,
+      content: response.data.content,
+      metadata: response.data.metadata,
+      tables: response.data.tables,
     };
   },
 };

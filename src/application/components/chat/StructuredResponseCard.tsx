@@ -1,4 +1,6 @@
 import { useRef, useState, useEffect } from "react";
+import { Copy, Check } from "lucide-react";
+import { Button } from "@/application/components/ui/button";
 import { cn } from "@/application/lib/utils";
 
 interface StructuredResponseCardProps {
@@ -6,7 +8,10 @@ interface StructuredResponseCardProps {
   className?: string;
 }
 
-export default function StructuredResponseCard({ data, className }: StructuredResponseCardProps) {
+export default function StructuredResponseCard({
+  data,
+  className,
+}: Readonly<StructuredResponseCardProps>) {
   const [copied, setCopied] = useState(false);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -42,35 +47,31 @@ export default function StructuredResponseCard({ data, className }: StructuredRe
 
   return (
     <div
-      className={cn(
-        "mt-4 rounded-xl border border-secondary-brand/20 bg-surface-container-low/40",
-        className,
-      )}
+      data-od-id="structured-response"
+      className={cn("mt-2 border border-border bg-bg", className)}
     >
-      <div className="flex items-center justify-between px-4 py-2.5">
-        <div className="flex items-center gap-2">
-          <span className="material-symbols-outlined text-base text-secondary-brand">
-            data_object
-          </span>
-          <span className="text-xs font-medium text-on-surface-variant">Structured Response</span>
-        </div>
-        <button
+      <div className="flex items-center justify-between border-b border-border px-3 py-2">
+        <span className="font-mono text-xs uppercase tracking-[0.1em] text-muted">
+          Structured Response
+        </span>
+        <Button
           type="button"
+          variant="ghost"
+          size="sm"
           onClick={handleCopy}
-          className="flex items-center gap-1 text-[11px] text-secondary-brand hover:opacity-80 transition-opacity"
           aria-label={copied ? "Copied to clipboard" : "Copy structured response to clipboard"}
         >
-          <span className="material-symbols-outlined text-base" aria-hidden="true">
-            {copied ? "check" : "content_copy"}
-          </span>
+          {copied ? (
+            <Check className="h-3.5 w-3.5" aria-hidden="true" />
+          ) : (
+            <Copy className="h-3.5 w-3.5" aria-hidden="true" />
+          )}
           <span aria-live="polite">{copied ? "Copied" : "Copy"}</span>
-        </button>
+        </Button>
       </div>
-      <div className="px-4 pb-3">
-        <pre className="font-mono text-[11px] leading-relaxed text-on-surface whitespace-pre-wrap break-words bg-surface-container p-3 rounded-lg overflow-x-auto">
-          {displayText}
-        </pre>
-      </div>
+      <pre className="overflow-x-auto whitespace-pre-wrap px-3 py-2 font-mono text-xs leading-relaxed text-fg-2">
+        {displayText}
+      </pre>
     </div>
   );
 }

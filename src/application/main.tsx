@@ -5,6 +5,7 @@ import { BrowserRouter } from "react-router-dom";
 import { Toaster } from "sonner";
 import App from "./App";
 import "./index.css";
+import { useSettingsStore } from "./stores/useSettingsStore";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -15,12 +16,17 @@ const queryClient = new QueryClient({
   },
 });
 
+function AppToaster() {
+  const theme = useSettingsStore((s) => s.theme);
+  return <Toaster position="bottom-right" theme={theme} duration={2500} />;
+}
+
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
         <App />
-        <Toaster richColors position="top-right" />
+        <AppToaster />
       </BrowserRouter>
     </QueryClientProvider>
   </StrictMode>,

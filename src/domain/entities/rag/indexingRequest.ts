@@ -1,14 +1,3 @@
-export interface IndexFileRequest {
-  file_name: string;
-  working_dir: string;
-}
-
-export interface IndexFolderRequest {
-  working_dir: string;
-  recursive: boolean;
-  file_extensions?: string[];
-}
-
 export interface ClassicalIndexFileRequest {
   file_name: string;
   working_dir: string;

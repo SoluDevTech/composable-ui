@@ -1,12 +1,12 @@
 import { useQuery } from "@tanstack/react-query";
 import { chatApi } from "@/infrastructure/api/chat/chatApi";
 
-export function useMessages(threadId: string | null) {
+export function useThreadHistory(threadId: string | null) {
   return useQuery({
-    queryKey: ["messages", threadId],
+    queryKey: ["history", threadId],
     queryFn: () => {
       if (!threadId) throw new Error("threadId is required");
-      return chatApi.getMessages(threadId);
+      return chatApi.getThreadHistory(threadId);
     },
     enabled: !!threadId,
   });

@@ -1,4 +1,5 @@
 import { useState, useId, type KeyboardEvent } from "react";
+import { Plus, X } from "lucide-react";
 import { Badge } from "@/application/components/ui/badge";
 import { Button } from "@/application/components/ui/button";
 import { Input } from "@/application/components/ui/input";
@@ -39,11 +40,8 @@ export default function StringListEditor({
   }
 
   return (
-    <div className="space-y-2">
-      <Label
-        htmlFor={inputId}
-        className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant"
-      >
+    <div className="flex flex-col gap-2">
+      <Label htmlFor={inputId} className="text-xs uppercase tracking-[0.1em] text-muted">
         {label}
       </Label>
       <div className="flex gap-2">
@@ -57,23 +55,22 @@ export default function StringListEditor({
           name={`${label.toLowerCase().replace(/\s+/g, "-")}-input`}
         />
         <Button type="button" variant="outline" size="sm" onClick={addItem}>
+          <Plus className="h-4 w-4" aria-hidden="true" />
           Add
         </Button>
       </div>
       {value.length > 0 && (
         <div className="flex flex-wrap gap-1.5">
           {value.map((item, index) => (
-            <Badge key={item} variant="secondary" className="gap-1 pr-1 font-mono text-xs">
+            <Badge key={item} variant="outline" className="gap-1 pr-1 font-mono text-xs">
               {item}
               <button
                 type="button"
                 onClick={() => removeItem(index)}
-                className="ml-0.5 rounded-full hover:bg-destructive/15 p-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-destructive focus-visible:ring-inset"
+                className="rounded p-0.5 transition-[background-color,color] duration-fast ease-standard hover:bg-danger/15 hover:text-danger focus-visible:outline-none focus-visible:shadow-focus"
                 aria-label={`Remove ${item}`}
               >
-                <span className="material-symbols-outlined text-xs" aria-hidden="true">
-                  close
-                </span>
+                <X className="h-3 w-3" aria-hidden="true" />
               </button>
             </Badge>
           ))}

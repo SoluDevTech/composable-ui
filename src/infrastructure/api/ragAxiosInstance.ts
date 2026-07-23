@@ -5,9 +5,6 @@ let cachedRagBaseURL: string | null = null;
 
 export const ragApiClient = axios.create({
   timeout: 30000,
-  headers: {
-    "Content-Type": "application/json",
-  },
 });
 
 ragApiClient.interceptors.request.use(async (config) => {

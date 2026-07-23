@@ -1,34 +1,46 @@
 import { useRef } from "react";
 import { toast } from "sonner";
-import { useUploadFile } from "@/application/hooks/rag/useUploadFile";
+import { Upload } from "lucide-react";
+import { Button } from "@/application/components/ui/button";
+import { useUploadFiles } from "@/application/hooks/rag/useUploadFiles";
 
 interface UploadButtonProps {
   prefix: string;
   onUploadComplete?: () => void;
 }
 
+const ACCEPTED_EXTENSIONS =
+  ".pdf,.txt,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.md,.csv,.png,.jpg,.jpeg,.gif,.webp,.svg,.bmp,.html,.xml,.json,.rtf,.odt,.ods";
+
 export default function UploadButton({ prefix, onUploadComplete }: Readonly<UploadButtonProps>) {
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const { mutate, isPending } = useUploadFile();
+  const uploadFiles = useUploadFiles();
 
   function handleButtonClick() {
     fileInputRef.current?.click();
   }
 
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (!file) return;
+    const files = Array.from(e.target.files ?? []);
+    if (files.length === 0) return;
 
-    mutate(
-      { prefix, file },
+    uploadFiles.mutate(
+      { prefix, files },
       {
-        onSuccess: () => {
-          toast.success("File uploaded successfully");
+        onSuccess: (data) => {
+          if (data.kind === "all-ok") {
+            toast.success(
+              `${data.items.length} file${data.items.length > 1 ? "s" : ""} uploaded successfully`,
+            );
+          } else {
+            toast.warning(`${data.succeeded} uploaded, ${data.failed} failed`);
+          }
           onUploadComplete?.();
           if (fileInputRef.current) fileInputRef.current.value = "";
         },
         onError: (error: Error) => {
           toast.error(error.message);
+          if (fileInputRef.current) fileInputRef.current.value = "";
         },
       },
     );
@@ -39,37 +51,31 @@ export default function UploadButton({ prefix, onUploadComplete }: Readonly<Uplo
       <input
         ref={fileInputRef}
         type="file"
-        accept=".pdf,.txt,.docx,.xlsx,.pptx,.md,.csv,.png,.jpg,.jpeg,.gif,.webp,.html,.xml,.json"
-        aria-label="Choose file"
+        multiple
+        accept={ACCEPTED_EXTENSIONS}
+        aria-label="Choose files"
         className="hidden"
         onChange={handleFileChange}
       />
-      <button
+      <Button
         type="button"
+        variant="default"
         onClick={handleButtonClick}
-        disabled={isPending}
-        className="flex items-center gap-2 bg-primary-container text-white rounded-full px-6 py-3 font-headline text-xs font-bold uppercase tracking-widest hover:opacity-90 transition-opacity disabled:opacity-50"
+        disabled={uploadFiles.isPending}
+        data-od-id="upload-file"
       >
-        {isPending ? (
+        {uploadFiles.isPending ? (
           <>
-            <span
-              data-testid="upload-spinner"
-              className="material-symbols-outlined text-lg animate-spin"
-              aria-hidden="true"
-            >
-              progress_activity
-            </span>
-            {"Uploading..."}
+            <span data-testid="upload-spinner" className="spin" aria-hidden="true" />
+            Uploading...
           </>
         ) : (
           <>
-            <span className="material-symbols-outlined text-lg" aria-hidden="true">
-              upload_file
-            </span>
-            {"Upload"}
+            <Upload className="h-4 w-4" aria-hidden="true" />
+            Upload
           </>
         )}
-      </button>
+      </Button>
     </>
   );
 }

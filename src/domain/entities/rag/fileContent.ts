@@ -3,13 +3,17 @@ export interface DocumentMetadata {
   mime_type: string;
 }
 
+export interface PageContent {
+  page: number;
+  content: string;
+}
+
 export interface TableData {
-  headers: string[];
-  rows: string[][];
+  markdown: string;
 }
 
 export interface FileContentResponse {
-  content: string;
-  metadata: DocumentMetadata;
-  tables: TableData[];
+  content: PageContent[];
+  metadata: DocumentMetadata | null;
+  tables: TableData[] | null;
 }

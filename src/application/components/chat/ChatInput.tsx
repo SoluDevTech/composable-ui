@@ -1,9 +1,8 @@
-import { useState, type KeyboardEvent } from "react";
-import { useQueryClient } from "@tanstack/react-query";
-import { toast } from "sonner";
+import { useState, useRef, type KeyboardEvent } from "react";
+import { Send, Square } from "lucide-react";
+import { Button } from "@/application/components/ui/button";
 import { cn } from "@/application/lib/utils";
 import { useStreamChat } from "@/application/hooks/chat/useStreamChat";
-import { useSendMessage } from "@/application/hooks/chat/useSendMessage";
 import { useChatStore } from "@/application/stores/useChatStore";
 
 interface ChatInputProps {
@@ -12,41 +11,16 @@ interface ChatInputProps {
 
 export default function ChatInput({ threadId }: Readonly<ChatInputProps>) {
   const [input, setInput] = useState("");
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
   const { stream } = useStreamChat(threadId);
-  const sendMessage = useSendMessage(threadId);
-  const queryClient = useQueryClient();
   const isStreaming = useChatStore((s) => s.isStreaming);
-  const streamingMode = useChatStore((s) => s.useStreaming);
-  const toggleStreaming = useChatStore((s) => s.toggleStreaming);
 
   function handleSubmit(e?: { preventDefault: () => void }) {
     e?.preventDefault();
     const trimmed = input.trim();
     if (!trimmed || isStreaming) return;
 
-    if (streamingMode) {
-      stream({ message: trimmed });
-    } else {
-      useChatStore.getState().setPendingUserMessage(trimmed);
-      useChatStore.getState().setStreaming(true);
-      sendMessage.mutate(
-        { message: trimmed },
-        {
-          onSuccess: async () => {
-            await queryClient.invalidateQueries({
-              queryKey: ["messages", threadId],
-            });
-            useChatStore.getState().setPendingUserMessage(null);
-            useChatStore.getState().setStreaming(false);
-          },
-          onError: () => {
-            useChatStore.getState().setPendingUserMessage(null);
-            useChatStore.getState().setStreaming(false);
-            toast.error("Failed to send message");
-          },
-        },
-      );
-    }
+    stream({ message: trimmed });
     setInput("");
   }
 
@@ -57,55 +31,52 @@ export default function ChatInput({ threadId }: Readonly<ChatInputProps>) {
     }
   }
 
+  function handleInput() {
+    const el = textareaRef.current;
+    if (!el) return;
+    el.style.height = "auto";
+    el.style.height = `${Math.min(el.scrollHeight, 120)}px`;
+  }
+
+  const canSend = input.trim().length > 0 && !isStreaming;
+
   return (
-    <div className="p-6 md:p-8 lg:px-24 xl:px-48">
+    <div className="shrink-0 border-t border-border bg-surface p-4" data-od-id="chat-input">
       <form onSubmit={handleSubmit}>
-        <div className="glass-panel rounded-full border border-outline-variant/30 ambient-shadow flex items-center gap-3 px-6 py-3">
+        <div className="flex items-end gap-2 border border-border bg-surface-warm p-2">
           <textarea
+            ref={textareaRef}
             value={input}
             onChange={(e) => setInput(e.target.value)}
+            onInput={handleInput}
             onKeyDown={handleKeyDown}
             placeholder="Orchestrate your next move..."
             disabled={isStreaming}
             rows={1}
-            className={cn(
-              "flex-1 bg-transparent text-on-surface text-sm resize-none outline-none placeholder:text-outline",
-              "disabled:opacity-50",
-            )}
+            aria-label="Chat message input"
+            className="flex-1 resize-none border-0 bg-transparent px-1 py-1 text-sm text-fg placeholder:text-muted focus:outline-none focus-visible:shadow-none disabled:opacity-50"
           />
-          <button
-            type="button"
-            onClick={toggleStreaming}
-            title={streamingMode ? "Streaming mode" : "Standard mode"}
-            className={cn(
-              "w-8 h-8 rounded-full flex items-center justify-center shrink-0 transition-colors text-xs",
-              streamingMode
-                ? "bg-secondary-brand/10 text-secondary-brand"
-                : "bg-surface-container text-outline",
-            )}
-          >
-            <span className="material-symbols-outlined text-base">
-              {streamingMode ? "stream" : "chat"}
-            </span>
-          </button>
-          <button
-            type="submit"
-            disabled={isStreaming || !input.trim()}
-            className={cn(
-              "w-10 h-10 rounded-full flex items-center justify-center shrink-0 transition-all duration-200",
-              input.trim() && !isStreaming
-                ? "bg-secondary-brand text-white hover:opacity-90"
-                : "bg-surface-container text-outline",
-            )}
-          >
-            <span className="material-symbols-outlined text-lg">
-              {isStreaming ? "stop" : "send"}
-            </span>
-          </button>
+          <div className="flex items-center gap-1">
+            <Button
+              type="submit"
+              variant="default"
+              size="icon"
+              disabled={!canSend}
+              aria-label="Send"
+              className={cn(isStreaming && "btn-pulse")}
+            >
+              {isStreaming ? (
+                <Square className="h-4 w-4" aria-hidden="true" />
+              ) : (
+                <Send className="h-4 w-4" aria-hidden="true" />
+              )}
+            </Button>
+          </div>
         </div>
       </form>
-      <p className="text-center text-[11px] text-outline mt-3 font-headline tracking-wide">
-        Composables v0.1
+      <p className="mt-2 text-center font-mono text-xs text-muted">
+        <span>Composables v0.1</span>
+        <span aria-hidden="true"> · Enter to send · Shift+Enter for newline</span>
       </p>
     </div>
   );

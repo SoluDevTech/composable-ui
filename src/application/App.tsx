@@ -1,6 +1,7 @@
 import { Suspense, lazy } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import ChatPage from "@/application/pages/ChatPage";
+import SettingsPage from "@/application/pages/SettingsPage";
 
 // Lazy-load secondary routes for code-splitting / smaller initial bundle.
 const AgentsPage = lazy(() => import("@/application/pages/AgentsPage"));
@@ -23,6 +24,7 @@ function App() {
       <Route path="/agents" element={<AgentsPage />} />
       <Route path="/chat/:threadId?" element={<ChatPage />} />
       <Route path="/rag" element={<RagPage />} />
+      <Route path="/settings" element={<SettingsPage />} />
     </Routes>
   );
 }

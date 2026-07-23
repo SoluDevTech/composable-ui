@@ -2,8 +2,9 @@ import { screen } from "@testing-library/react";
 import { describe, it, expect, vi } from "vitest";
 import { renderWithProviders } from "../../../utils/render";
 import ChatMessage from "@/application/components/chat/ChatMessage";
-import { createMessage } from "../../../fixtures/external";
+import { createMessage, createTraceEvent } from "../../../fixtures/external";
 import { MessageRole, MessageStatus } from "@/domain/entities/chat/message";
+import { TraceEventType } from "@/domain/entities/chat/traceEvent";
 
 describe("ChatMessage", () => {
   it("renders AI message with agent name and content", () => {
@@ -127,5 +128,24 @@ describe("ChatMessage", () => {
 
     expect(screen.getByText("agent-two")).toBeInTheDocument();
     expect(screen.queryByText("agent-one")).not.toBeInTheDocument();
+  });
+
+  it("renders intermediate timeline events when events prop is provided", () => {
+    const message = createMessage({
+      role: MessageRole.AI,
+      content: "Final answer",
+    });
+    const subThinking = createTraceEvent({
+      type: TraceEventType.THINKING,
+      source: "security-auditor",
+      content: "Auditing",
+    });
+
+    renderWithProviders(
+      <ChatMessage message={message} agentName="test-agent" events={[subThinking]} />,
+    );
+
+    expect(screen.getByText("Final answer")).toBeInTheDocument();
+    expect(screen.getByText("security-auditor")).toBeInTheDocument();
   });
 });

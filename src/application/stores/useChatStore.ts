@@ -1,69 +1,109 @@
 import { create } from "zustand";
-import type { StreamEvent } from "@/domain/entities/chat/streamEvent";
+import type { TraceEvent, StructuredResponseResult } from "@/domain/entities/chat/traceEvent";
+import {
+  TraceEventType,
+  getStructuredResponseFromAIEvent,
+} from "@/domain/entities/chat/traceEvent";
+
+interface SubagentState {
+  content: string;
+  thinking: string;
+  toolCalls: TraceEvent[];
+  toolResults: TraceEvent[];
+}
+
+interface StreamingTurn {
+  turnId: string;
+  events: TraceEvent[];
+  parentContent: string;
+  parentThinking: string;
+  subagents: Record<string, SubagentState>;
+  currentSource: string | null;
+  structured_response: StructuredResponseResult | null;
+}
 
 interface ChatState {
   activeThreadId: string | null;
-  streamingContent: string;
-  streamingThinking: string;
-  structuredResponse: unknown | null;
+  streamingTurn: StreamingTurn | null;
   isStreaming: boolean;
   pendingUserMessage: string | null;
-  useStreaming: boolean;
   error: string | null;
   setActiveThread: (id: string | null) => void;
-  appendStreamEvent: (event: StreamEvent) => void;
+  initStreamingTurn: (turnId: string) => void;
+  appendTraceEvent: (event: TraceEvent) => void;
   clearStream: () => void;
   setStreaming: (streaming: boolean) => void;
   setPendingUserMessage: (msg: string | null) => void;
   setError: (msg: string | null) => void;
-  toggleStreaming: () => void;
+}
+
+function emptyStreamingTurn(turnId: string): StreamingTurn {
+  return {
+    turnId,
+    events: [],
+    parentContent: "",
+    parentThinking: "",
+    subagents: {},
+    currentSource: null,
+    structured_response: null,
+  };
 }
 
 export const useChatStore = create<ChatState>((set) => ({
   activeThreadId: null,
-  streamingContent: "",
-  streamingThinking: "",
-  structuredResponse: null,
+  streamingTurn: null,
   isStreaming: false,
   pendingUserMessage: null,
-  useStreaming: true,
   error: null,
   setActiveThread: (id) => set({ activeThreadId: id }),
-  appendStreamEvent: (ev: StreamEvent) =>
+  initStreamingTurn: (turnId) => set({ streamingTurn: emptyStreamingTurn(turnId) }),
+  appendTraceEvent: (ev) =>
     set((state) => {
-      if (!ev.type || typeof ev.data !== "string") {
-        console.warn("[ChatStore] Invalid stream event:", ev);
-        return state;
+      if (!state.streamingTurn) return state;
+      const turn: StreamingTurn = {
+        ...state.streamingTurn,
+        events: [...state.streamingTurn.events, ev],
+        currentSource: ev.source,
+      };
+
+      if (ev.source === null) {
+        if (ev.type === TraceEventType.THINKING && ev.content) {
+          turn.parentThinking = state.streamingTurn.parentThinking + ev.content;
+        } else if (ev.type === TraceEventType.CONTENT && ev.content) {
+          turn.parentContent = state.streamingTurn.parentContent + ev.content;
+        }
+      } else {
+        const prev = state.streamingTurn.subagents[ev.source] ?? {
+          content: "",
+          thinking: "",
+          toolCalls: [],
+          toolResults: [],
+        };
+        const sub: SubagentState = { ...prev };
+        if (ev.type === TraceEventType.THINKING && ev.content) {
+          sub.thinking = prev.thinking + ev.content;
+        } else if (ev.type === TraceEventType.CONTENT && ev.content) {
+          sub.content = prev.content + ev.content;
+        } else if (ev.type === TraceEventType.TOOL_CALL) {
+          sub.toolCalls = [...prev.toolCalls, ev];
+        } else if (ev.type === TraceEventType.TOOL_RESULT) {
+          sub.toolResults = [...prev.toolResults, ev];
+        }
+        turn.subagents = { ...state.streamingTurn.subagents, [ev.source]: sub };
       }
-      switch (ev.type) {
-        case "thinking":
-          return { streamingThinking: state.streamingThinking + ev.data };
-        case "content":
-          return { streamingContent: state.streamingContent + ev.data };
-        case "structured":
-          try {
-            return { structuredResponse: JSON.parse(ev.data) };
-          } catch (e) {
-            console.warn("[ChatStore] Failed to parse structured event data:", ev.data, e);
-            return state;
-          }
-        case "message":
-          try {
-            const msg = JSON.parse(ev.data);
-            return { structuredResponse: msg.structured_response ?? null };
-          } catch (e) {
-            console.warn("[ChatStore] Failed to parse message event data:", ev.data, e);
-            return state;
-          }
-        default:
-          return state;
+
+      const isAiMessage = ev.type === TraceEventType.AI_MESSAGE;
+      if (isAiMessage) {
+        turn.structured_response = getStructuredResponseFromAIEvent(ev);
       }
+      return {
+        streamingTurn: turn,
+        isStreaming: !isAiMessage,
+      };
     }),
   clearStream: () =>
     set({
-      streamingContent: "",
-      streamingThinking: "",
-      structuredResponse: null,
+      streamingTurn: null,
       isStreaming: false,
       pendingUserMessage: null,
       error: null,
@@ -71,5 +111,4 @@ export const useChatStore = create<ChatState>((set) => ({
   setStreaming: (streaming) => set({ isStreaming: streaming }),
   setPendingUserMessage: (msg) => set({ pendingUserMessage: msg }),
   setError: (msg) => set({ error: msg }),
-  toggleStreaming: () => set((state) => ({ useStreaming: !state.useStreaming })),
 }));

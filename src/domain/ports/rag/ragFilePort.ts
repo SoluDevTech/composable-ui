@@ -7,4 +7,7 @@ export interface IRagFilePort {
     prefix: string,
     file: File,
   ): Promise<{ object_name: string; size: number; message: string }>;
+  createFolder(prefix: string): Promise<{ message: string }>;
+  deleteFile(objectName: string, workingDir?: string): Promise<{ message: string }>;
+  deleteFolder(prefix: string): Promise<{ message: string }>;
 }

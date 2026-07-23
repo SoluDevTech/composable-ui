@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Label } from "@/application/components/ui/label";
 import { Textarea } from "@/application/components/ui/textarea";
+import { cn } from "@/application/lib/utils";
 
 interface ResponseFormatEditorProps {
   value: Record<string, unknown> | undefined;
@@ -32,7 +33,7 @@ export default function ResponseFormatEditor({
 
   return (
     <div>
-      <Label htmlFor="response-format" className="text-on-surface">
+      <Label htmlFor="response-format" className="mb-1.5 block text-xs uppercase tracking-[0.1em]">
         JSON Schema
       </Label>
       <Textarea
@@ -42,12 +43,15 @@ export default function ResponseFormatEditor({
         rows={6}
         value={text}
         onChange={handleChange}
-        className="font-mono text-xs"
+        className={cn(
+          "font-mono text-xs",
+          parseError && "border-danger text-danger focus-visible:shadow-focus",
+        )}
         aria-invalid={!!parseError}
         aria-describedby={parseError ? "response-format-error" : undefined}
       />
       {parseError && (
-        <p id="response-format-error" role="alert" className="text-destructive text-xs mt-1">
+        <p id="response-format-error" role="alert" className="mt-1 font-mono text-xs text-danger">
           {parseError}
         </p>
       )}

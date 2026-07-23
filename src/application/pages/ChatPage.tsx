@@ -1,10 +1,12 @@
 import { useEffect, useMemo } from "react";
 import { useParams } from "react-router-dom";
-import MainLayout from "@/application/components/layout/MainLayout";
+import AppShell from "@/application/components/layout/AppShell";
+import ThreadSidebar from "@/application/components/layout/ThreadSidebar";
 import MessageList from "@/application/components/chat/MessageList";
 import ChatInput from "@/application/components/chat/ChatInput";
 import { useChatStore } from "@/application/stores/useChatStore";
 import { useThreads } from "@/application/hooks/chat/useThreads";
+import { useAgentConfig } from "@/application/hooks/agent/useAgentConfig";
 
 export default function ChatPage() {
   const { threadId } = useParams<{ threadId?: string }>();
@@ -21,29 +23,41 @@ export default function ChatPage() {
     return thread?.agent_name ?? "Agent";
   }, [threadId, threads]);
 
+  const { data: agentConfig } = useAgentConfig(agentName !== "Agent" ? agentName : null);
+  const agentHasResponseFormat = useMemo(
+    () => !!agentConfig?.response_format && Object.keys(agentConfig.response_format).length > 0,
+    [agentConfig],
+  );
+
   return (
-    <MainLayout showSidebar activeThreadId={threadId}>
-      {threadId ? (
-        <div className="flex flex-col flex-1 overflow-hidden">
-          <MessageList threadId={threadId} agentName={agentName} />
-          <ChatInput threadId={threadId} />
-        </div>
-      ) : (
-        <div className="flex-1 flex items-center justify-center">
-          <div className="text-center">
-            <span className="material-symbols-outlined text-8xl text-outline-variant/30 mb-6 block">
-              forum
-            </span>
-            <h2 className="font-headline text-2xl font-bold text-on-surface mb-2">
-              Orchestration Console
-            </h2>
-            <p className="text-on-surface-variant text-sm max-w-sm mx-auto">
-              Select a thread from the sidebar or start a new conversation to begin orchestrating
-              your agents.
-            </p>
-          </div>
-        </div>
-      )}
-    </MainLayout>
+    <AppShell>
+      <div className="grid h-full min-h-0 grid-cols-1 grid-rows-[minmax(0,1fr)] lg:grid-cols-[260px_1fr]">
+        <aside className="hidden lg:flex">
+          <ThreadSidebar activeThreadId={threadId} />
+        </aside>
+        <section className="chat-main flex h-full min-h-0 min-w-0 flex-col overflow-hidden">
+          {threadId ? (
+            <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+              <MessageList
+                threadId={threadId}
+                agentName={agentName}
+                agentHasResponseFormat={agentHasResponseFormat}
+              />
+              <ChatInput threadId={threadId} />
+            </div>
+          ) : (
+            <div
+              className="flex flex-1 items-center justify-center p-6"
+              data-od-id="chat-empty-state"
+            >
+              <p className="max-w-sm text-center font-body text-sm text-muted">
+                Select a thread from the sidebar or start a new conversation to begin orchestrating
+                your agents.
+              </p>
+            </div>
+          )}
+        </section>
+      </div>
+    </AppShell>
   );
 }

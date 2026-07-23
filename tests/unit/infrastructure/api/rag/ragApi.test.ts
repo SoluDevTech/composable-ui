@@ -130,4 +130,49 @@ describe("ragApi", () => {
       expect(result).toEqual([]);
     });
   });
+
+  describe("createFolder", () => {
+    it("posts prefix to /api/v1/files/folders and returns message", async () => {
+      vi.mocked(ragApiClient.post).mockResolvedValue({
+        data: { message: "Folder created" },
+      });
+
+      const result = await ragApi.createFolder("docs");
+
+      expect(ragApiClient.post).toHaveBeenCalledWith("/api/v1/files/folders", {
+        prefix: "docs",
+      });
+      expect(result).toEqual({ message: "Folder created" });
+    });
+  });
+
+  describe("deleteFile", () => {
+    it("deletes file via /api/v1/files?object_name= and working_dir= and returns message", async () => {
+      vi.mocked(ragApiClient.delete).mockResolvedValue({
+        data: { message: "File deleted" },
+      });
+
+      const result = await ragApi.deleteFile("docs/report.pdf", "docs/");
+
+      expect(ragApiClient.delete).toHaveBeenCalledWith(
+        "/api/v1/files?object_name=docs%2Freport.pdf&working_dir=docs%2F",
+      );
+      expect(result).toEqual({ message: "File deleted" });
+    });
+  });
+
+  describe("deleteFolder", () => {
+    it("deletes folder via /api/v1/files/folders?prefix= and returns message", async () => {
+      vi.mocked(ragApiClient.delete).mockResolvedValue({
+        data: { message: "Folder deleted" },
+      });
+
+      const result = await ragApi.deleteFolder("docs");
+
+      expect(ragApiClient.delete).toHaveBeenCalledWith(
+        "/api/v1/files/folders?prefix=docs",
+      );
+      expect(result).toEqual({ message: "Folder deleted" });
+    });
+  });
 });

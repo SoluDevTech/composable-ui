@@ -6,6 +6,7 @@ import { useAgents } from "@/application/hooks/agent/useAgents";
 import { useCreateThread } from "@/application/hooks/chat/useCreateThread";
 import { useChatStore } from "@/application/stores/useChatStore";
 import type { Thread } from "@/domain/entities/chat/thread";
+import { Button } from "@/application/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -29,7 +30,6 @@ function formatDate(dateStr: string): string {
 }
 
 function getThreadPreview(thread: Thread): string {
-  // Prefer first agent message content if available in the future; for now show a short id-based preview.
   return `Thread · ${thread.id.slice(0, 8)}`;
 }
 
@@ -41,7 +41,6 @@ export default function ThreadSidebar({ activeThreadId }: Readonly<ThreadSidebar
   const navigate = useNavigate();
   const [showAgentDialog, setShowAgentDialog] = useState(false);
 
-  // Close agent dialog when escape is pressed (Dialog handles it, but ensure state sync).
   useEffect(() => {
     if (!showAgentDialog) return;
     function onKey(e: KeyboardEvent) {
@@ -84,48 +83,29 @@ export default function ThreadSidebar({ activeThreadId }: Readonly<ThreadSidebar
 
   return (
     <aside
-      className="w-64 bg-surface-container-low border-r border-outline-variant/30 flex flex-col overflow-hidden shrink-0"
+      data-od-id="thread-sidebar"
+      className="flex w-[260px] flex-col overflow-hidden border-r border-border bg-surface"
       aria-label="Conversation threads"
     >
-      {/* New Conversation */}
-      <div className="p-4">
-        <button
-          type="button"
-          onClick={handleNewConversation}
-          className="w-full flex items-center gap-2 px-4 py-3 rounded-xl bg-primary-container text-white font-headline text-xs font-bold uppercase tracking-widest hover:opacity-90 transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary-brand focus-visible:ring-offset-2"
-        >
-          <span className="material-symbols-outlined text-base" aria-hidden="true">
-            add
-          </span>
+      <div className="border-b border-border p-4">
+        <Button variant="default" className="w-full" onClick={handleNewConversation}>
           New Conversation
-        </button>
+        </Button>
       </div>
 
-      {/* Thread list */}
-      <div className="flex-1 overflow-y-auto px-2 pb-4 overscroll-contain">
+      <div className="flex-1 overflow-y-auto overscroll-contain pb-4">
         {isLoading && (
-          <p className="text-xs text-on-surface-variant px-3 py-2" aria-live="polite">
+          <p className="px-4 py-2 font-mono text-xs text-muted" aria-live="polite">
             Loading threads…
           </p>
         )}
 
         {Array.from(grouped.entries()).map(([agentName, agentThreads]) => (
           <div key={agentName} className="mb-4">
-            {/* Agent group header */}
-            <div className="flex items-center gap-2 px-3 py-2">
-              <span
-                className="material-symbols-outlined text-sm text-on-surface-variant"
-                aria-hidden="true"
-              >
-                hub
-              </span>
-              <span className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">
-                {agentName}
-              </span>
+            <div className="flex items-center gap-2 px-4 py-2 font-mono text-xs uppercase tracking-[0.1em] text-muted">
+              {agentName}
             </div>
-
-            {/* Threads */}
-            <ul className="space-y-1">
+            <ul>
               {agentThreads.map((thread) => {
                 const isActive = thread.id === activeThreadId;
                 return (
@@ -135,16 +115,14 @@ export default function ThreadSidebar({ activeThreadId }: Readonly<ThreadSidebar
                       onClick={() => handleThreadClick(thread.id)}
                       aria-current={isActive ? "page" : undefined}
                       className={cn(
-                        "w-full text-left px-3 py-2.5 rounded-lg transition-colors text-sm min-w-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary-brand focus-visible:ring-inset",
-                        isActive
-                          ? "bg-surface-container-high border-l-4 border-secondary-brand font-medium"
-                          : "hover:bg-surface-container-high/60",
+                        "flex w-full flex-col gap-1 border-l-[3px] border-l-transparent px-4 py-2 text-left transition-[background-color,border-color,color] duration-fast ease-standard hover:bg-surface-warm hover:text-fg focus-visible:outline-none focus-visible:shadow-focus",
+                        isActive && "border-l-accent bg-surface-warm text-accent",
                       )}
                     >
-                      <span className="block text-on-surface text-xs font-medium truncate">
+                      <span className="truncate text-sm font-semibold text-fg">
                         {getThreadPreview(thread)}
                       </span>
-                      <span className="block text-[11px] text-on-surface-variant mt-0.5">
+                      <span className="truncate font-mono text-xs text-muted">
                         {formatDate(thread.created_at)}
                       </span>
                     </button>
@@ -156,31 +134,28 @@ export default function ThreadSidebar({ activeThreadId }: Readonly<ThreadSidebar
         ))}
 
         {!isLoading && (!threads || threads.length === 0) && (
-          <p className="text-xs text-on-surface-variant px-3 py-2 text-center">
-            No conversations yet
-          </p>
+          <p className="px-4 py-2 text-center font-mono text-xs text-muted">No conversations yet</p>
         )}
       </div>
 
-      {/* Agent selection dialog */}
       <Dialog open={showAgentDialog} onOpenChange={(v) => setShowAgentDialog(v)}>
         <DialogContent className="max-w-sm w-full">
           <DialogHeader>
-            <DialogTitle className="font-headline text-lg font-bold">Choose an Agent</DialogTitle>
+            <DialogTitle className="font-display text-base uppercase tracking-[0.06em]">
+              Choose an Agent
+            </DialogTitle>
             <DialogDescription className="sr-only">
               Select an agent to start a new conversation thread
             </DialogDescription>
           </DialogHeader>
           {agentsLoading ? (
-            <p className="text-sm text-on-surface-variant" aria-live="polite">
+            <p className="font-mono text-xs text-muted" aria-live="polite">
               Loading agents…
             </p>
           ) : (
-            <div className="space-y-2 max-h-[60vh] overflow-y-auto overscroll-contain">
+            <div className="max-h-[60vh] space-y-2 overflow-y-auto overscroll-contain">
               {agents?.length === 0 && (
-                <p className="text-sm text-on-surface-variant py-4 text-center">
-                  No agents available
-                </p>
+                <p className="py-4 text-center font-mono text-xs text-muted">No agents available</p>
               )}
               {agents?.map((agent) => (
                 <button
@@ -188,10 +163,10 @@ export default function ThreadSidebar({ activeThreadId }: Readonly<ThreadSidebar
                   type="button"
                   onClick={() => handleSelectAgent(agent.name)}
                   disabled={createThread.isPending}
-                  className="w-full text-left p-3 rounded-lg hover:bg-surface-container-low transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary-brand focus-visible:ring-offset-2 disabled:opacity-50"
+                  className="w-full rounded-none border border-border bg-surface-warm p-3 text-left transition-[background-color,border-color,color] duration-fast ease-standard hover:border-accent hover:text-accent focus-visible:outline-none focus-visible:shadow-focus disabled:opacity-50"
                 >
-                  <span className="block font-medium text-sm">{agent.name}</span>
-                  <span className="block text-xs text-on-surface-variant">{agent.model}</span>
+                  <span className="block text-sm font-semibold text-fg">{agent.name}</span>
+                  <span className="block font-mono text-xs text-muted">{agent.model}</span>
                 </button>
               ))}
             </div>
