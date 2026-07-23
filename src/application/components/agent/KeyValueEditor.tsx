@@ -1,4 +1,5 @@
 import { useState, useId } from "react";
+import { Plus, X } from "lucide-react";
 import { Button } from "@/application/components/ui/button";
 import { Input } from "@/application/components/ui/input";
 import { Label } from "@/application/components/ui/label";
@@ -41,11 +42,8 @@ export default function KeyValueEditor({
   const entries = Object.entries(value);
 
   return (
-    <div className="space-y-2">
-      <Label
-        htmlFor={keyId}
-        className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant"
-      >
+    <div className="flex flex-col gap-2 border border-border bg-surface-warm p-3">
+      <Label htmlFor={keyId} className="text-xs uppercase tracking-[0.1em] text-muted">
         {label}
       </Label>
       <div className="flex gap-2">
@@ -66,29 +64,30 @@ export default function KeyValueEditor({
           aria-label={`${label} value`}
         />
         <Button type="button" variant="outline" size="sm" onClick={addEntry}>
+          <Plus className="h-4 w-4" aria-hidden="true" />
           Add
         </Button>
       </div>
       {entries.length > 0 && (
-        <div className="space-y-1">
+        <div className="flex flex-col gap-1">
           {entries.map(([k, v]) => (
             <div
               key={k}
-              className="flex items-center gap-2 bg-surface-container-low rounded-lg px-3 py-1.5"
+              className="flex items-center gap-2 border border-border-soft bg-surface px-3 py-1.5"
             >
-              <span className="font-mono text-xs text-on-surface">{k}</span>
-              <span className="text-on-surface-variant text-xs">=</span>
-              <span className="font-mono text-xs text-on-surface-variant flex-1 truncate">{v}</span>
-              <button
+              <span className="font-mono text-xs text-fg-2">{k}</span>
+              <span className="font-mono text-xs text-muted">=</span>
+              <span className="flex-1 truncate font-mono text-xs text-fg-2">{v}</span>
+              <Button
                 type="button"
+                variant="ghost"
+                size="icon"
                 onClick={() => removeEntry(k)}
-                className="shrink-0 rounded-full hover:bg-destructive/15 p-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-destructive focus-visible:ring-inset"
                 aria-label={`Remove ${k}`}
+                className="h-6 w-6"
               >
-                <span className="material-symbols-outlined text-xs" aria-hidden="true">
-                  close
-                </span>
-              </button>
+                <X className="h-3 w-3" aria-hidden="true" />
+              </Button>
             </div>
           ))}
         </div>

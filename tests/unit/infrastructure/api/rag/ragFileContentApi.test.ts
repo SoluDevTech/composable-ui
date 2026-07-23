@@ -20,7 +20,7 @@ describe("ragFileContentApi", () => {
     it("sends correct POST to /api/v1/files/read with body", async () => {
       const mockResponse = {
         data: {
-          content: "# Heading\n\nSome paragraph text.",
+          content: [{ page: 1, content: "# Heading\n\nSome paragraph text." }],
           metadata: {
             format_type: "markdown",
             mime_type: "text/markdown",
@@ -36,7 +36,7 @@ describe("ragFileContentApi", () => {
         file_path: "docs/guide.md",
       });
       expect(result).toEqual({
-        content: "# Heading\n\nSome paragraph text.",
+        content: [{ page: 1, content: "# Heading\n\nSome paragraph text." }],
         metadata: {
           format_type: "markdown",
           mime_type: "text/markdown",
@@ -45,72 +45,107 @@ describe("ragFileContentApi", () => {
       });
     });
 
+    it("maps content into list of pages", async () => {
+      const mockResponse = {
+        data: {
+          content: [
+            { page: 1, content: "page one" },
+            { page: 2, content: "page two" },
+          ],
+          metadata: {
+            format_type: "pdf",
+            mime_type: "application/pdf",
+          },
+          tables: null,
+        },
+      };
+      vi.mocked(ragApiClient.post).mockResolvedValue(mockResponse);
+
+      const result = await ragFileContentApi.readFile("doc.pdf");
+
+      expect(Array.isArray(result.content)).toBe(true);
+      expect(result.content).toHaveLength(2);
+      expect(result.content[0]).toEqual({ page: 1, content: "page one" });
+      expect(result.content[1]).toEqual({ page: 2, content: "page two" });
+    });
+
     it("preserves snake_case metadata fields", async () => {
       const mockResponse = {
         data: {
-          content: "plain text content",
+          content: [{ page: 1, content: "plain text content" }],
           metadata: {
             format_type: "text",
             mime_type: "text/plain",
           },
-          tables: [
-            {
-              headers: ["Name", "Value"],
-              rows: [["key1", "val1"]],
-            },
-          ],
+          tables: [{ markdown: "| a | b |" }],
         },
       };
       vi.mocked(ragApiClient.post).mockResolvedValue(mockResponse);
 
       const result = await ragFileContentApi.readFile("notes.txt");
 
-      expect(result.content).toBe("plain text content");
-      expect(result.metadata.format_type).toBe("text");
-      expect(result.metadata.mime_type).toBe("text/plain");
+      expect(result.content[0].content).toBe("plain text content");
+      expect(result.metadata?.format_type).toBe("text");
+      expect(result.metadata?.mime_type).toBe("text/plain");
     });
 
-    it("handles tables array with multiple entries", async () => {
+    it("maps tables to markdown strings", async () => {
       const mockResponse = {
         data: {
-          content: "Report with tables",
+          content: [{ page: 1, content: "Report with tables" }],
           metadata: {
             format_type: "html",
             mime_type: "text/html",
           },
-          tables: [
-            {
-              headers: ["Metric", "Q1", "Q2"],
-              rows: [
-                ["Revenue", "100", "200"],
-                ["Cost", "50", "75"],
-              ],
-            },
-            {
-              headers: ["Item", "Count"],
-              rows: [["Widget", "42"]],
-            },
-          ],
+          tables: [{ markdown: "| Metric | Q1 |\n| --- | --- |\n| Rev | 100 |" }],
         },
       };
       vi.mocked(ragApiClient.post).mockResolvedValue(mockResponse);
 
       const result = await ragFileContentApi.readFile("report.html");
 
-      expect(result.tables).toHaveLength(2);
-      expect(result.tables[0].headers).toEqual(["Metric", "Q1", "Q2"]);
-      expect(result.tables[0].rows).toEqual([
-        ["Revenue", "100", "200"],
-        ["Cost", "50", "75"],
-      ]);
-      expect(result.tables[1].headers).toEqual(["Item", "Count"]);
-      expect(result.tables[1].rows).toEqual([["Widget", "42"]]);
+      expect(result.tables).toHaveLength(1);
+      expect(result.tables?.[0].markdown).toContain("| Metric | Q1 |");
+    });
+
+    it("handles null metadata without crashing", async () => {
+      const mockResponse = {
+        data: {
+          content: [{ page: 1, content: "no metadata" }],
+          metadata: null,
+          tables: null,
+        },
+      };
+      vi.mocked(ragApiClient.post).mockResolvedValue(mockResponse);
+
+      const result = await ragFileContentApi.readFile("unknown.bin");
+
+      expect(result.metadata).toBeNull();
+      expect(result.tables).toBeNull();
+    });
+
+    it("handles null tables without crashing", async () => {
+      const mockResponse = {
+        data: {
+          content: [{ page: 1, content: "no tables" }],
+          metadata: {
+            format_type: "text",
+            mime_type: "text/plain",
+          },
+          tables: null,
+        },
+      };
+      vi.mocked(ragApiClient.post).mockResolvedValue(mockResponse);
+
+      const result = await ragFileContentApi.readFile("notes.txt");
+
+      expect(result.tables).toBeNull();
     });
 
     it("handles empty tables array", async () => {
       const mockResponse = {
         data: {
-          content: "No tables here",
+          content: [{ page: 1, content: "No tables here" }],
           metadata: {
             format_type: "text",
             mime_type: "text/plain",

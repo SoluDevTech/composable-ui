@@ -4,30 +4,18 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { renderWithProviders } from "../../../utils/render";
 import ChatInput from "@/application/components/chat/ChatInput";
 
-const { mockStream, mockSendMessageMutate, mockStoreState } = vi.hoisted(() => {
+const { mockStream, mockStoreState } = vi.hoisted(() => {
   const mockStream = vi.fn();
-  const mockSendMessageMutate = vi.fn();
   const mockStoreState = {
     isStreaming: false,
-    useStreaming: true,
-    toggleStreaming: vi.fn(),
-    setPendingUserMessage: vi.fn(),
-    setStreaming: vi.fn(),
   };
-  return { mockStream, mockSendMessageMutate, mockStoreState };
+  return { mockStream, mockStoreState };
 });
 
 vi.mock("@/application/hooks/chat/useStreamChat", () => ({
   useStreamChat: () => ({
     stream: mockStream,
     cancel: vi.fn(),
-  }),
-}));
-
-vi.mock("@/application/hooks/chat/useSendMessage", () => ({
-  useSendMessage: () => ({
-    mutate: mockSendMessageMutate,
-    isPending: false,
   }),
 }));
 
@@ -42,6 +30,7 @@ vi.mock("@/application/stores/useChatStore", () => {
 describe("ChatInput", () => {
   beforeEach(() => {
     mockStream.mockClear();
+    mockStoreState.isStreaming = false;
   });
 
   it("renders input with correct placeholder", () => {
@@ -98,38 +87,11 @@ describe("ChatInput", () => {
     expect(mockStream).not.toHaveBeenCalled();
   });
 
-  it("does not submit when input is empty", async () => {
-    const user = userEvent.setup();
-
+  it("does not submit when input is empty", () => {
     renderWithProviders(<ChatInput threadId="thread-1" />);
 
     const submitButton = screen.getByRole("button", { name: /send/i });
     expect(submitButton).toBeDisabled();
-  });
-
-  it("uses sendMessage.mutate in standard mode (non-streaming)", async () => {
-    mockStoreState.useStreaming = false;
-    const user = userEvent.setup();
-
-    renderWithProviders(<ChatInput threadId="thread-1" />);
-
-    const textarea = screen.getByPlaceholderText("Orchestrate your next move...");
-    await user.type(textarea, "Standard message");
-    await user.click(screen.getByRole("button", { name: /send/i }));
-
-    await waitFor(() => {
-      expect(textarea).toHaveValue("");
-    });
-    expect(mockSendMessageMutate).toHaveBeenCalledWith(
-      { message: "Standard message" },
-      expect.objectContaining({
-        onSuccess: expect.any(Function),
-        onError: expect.any(Function),
-      }),
-    );
-
-    // Restore
-    mockStoreState.useStreaming = true;
   });
 
   it("disables textarea when isStreaming is true", () => {
@@ -139,8 +101,6 @@ describe("ChatInput", () => {
 
     const textarea = screen.getByPlaceholderText("Orchestrate your next move...");
     expect(textarea).toBeDisabled();
-
-    mockStoreState.isStreaming = false;
   });
 
   it("renders version text", () => {

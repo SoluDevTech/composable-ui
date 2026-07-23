@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { toast } from "sonner";
+import { Download, Pencil, Trash2 } from "lucide-react";
 import { useAgentConfig } from "@/application/hooks/agent/useAgentConfig";
 import { useUpdateAgent } from "@/application/hooks/agent/useUpdateAgent";
 import { useDeleteAgent } from "@/application/hooks/agent/useDeleteAgent";
@@ -109,11 +110,10 @@ export default function AgentConfigViewer({
       }}
     >
       <DialogContent className="max-w-3xl max-h-[90vh] flex flex-col overflow-hidden p-0 sm:p-0">
-        {/* Header */}
-        <div className="px-6 sm:px-8 pt-6 pb-4 border-b border-outline-variant/30 shrink-0">
+        <div className="shrink-0 border-b border-border bg-surface px-6 pb-4 pt-6 sm:px-8">
           <DialogHeader className="space-y-1.5">
-            <DialogTitle className="text-2xl">{agentName}</DialogTitle>
-            <DialogDescription>
+            <DialogTitle className="font-display text-lg">{agentName}</DialogTitle>
+            <DialogDescription className="text-sm text-muted">
               {mode === "edit"
                 ? "Edit the agent configuration below, then save your changes."
                 : "View the agent configuration. Use Edit to modify or Export to download YAML."}
@@ -121,11 +121,8 @@ export default function AgentConfigViewer({
           </DialogHeader>
         </div>
 
-        {/* Body */}
-        <div className="flex-1 overflow-y-auto px-6 sm:px-8 py-6 overscroll-contain">
+        <div className="flex-1 overscroll-contain overflow-y-auto bg-surface px-6 py-6 sm:px-8">
           {mode === "edit" && config ? (
-            // When editing, the form uses its own (hidden lg:flex) footer for Submit/Cancel.
-            // Otherwise we rely on the dialog footer below (mobile view).
             <>
               <AgentConfigForm
                 mode="edit"
@@ -134,8 +131,7 @@ export default function AgentConfigViewer({
                 onCancel={() => setMode("view")}
                 isPending={updateAgent.isPending}
               />
-              {/* Mobile submit footer is rendered by the standalone footer below */}
-              <div className="lg:hidden flex items-center gap-3 mt-4 pt-4 border-t border-outline-variant/30">
+              <div className="mt-4 flex items-center gap-3 border-t border-border-soft pt-4 lg:hidden">
                 <Button
                   type="submit"
                   form={AGENT_CONFIG_FORM_ID}
@@ -149,24 +145,23 @@ export default function AgentConfigViewer({
           ) : (
             <ScrollArea className="max-h-[70vh]">
               {isLoading && (
-                <p className="text-on-surface-variant text-sm py-8 text-center" aria-live="polite">
+                <p className="py-8 text-center font-mono text-sm text-muted" aria-live="polite">
                   Loading configuration…
                 </p>
               )}
 
               {error && (
-                <p className="text-destructive text-sm py-8 text-center">
+                <p className="py-8 text-center font-mono text-sm text-danger">
                   Failed to load configuration: {error.message}
                 </p>
               )}
 
               {config && (
                 <div className="space-y-6">
-                  {/* Model & Debug */}
                   <div className="flex items-center gap-4">
-                    <div className="flex-1 min-w-0">
+                    <div className="min-w-0 flex-1">
                       <SectionLabel>Model</SectionLabel>
-                      <p className="text-on-surface text-sm font-mono break-all">{config.model}</p>
+                      <p className="break-all font-mono text-sm text-fg">{config.model}</p>
                     </div>
                     <div>
                       <SectionLabel>Debug</SectionLabel>
@@ -174,11 +169,10 @@ export default function AgentConfigViewer({
                     </div>
                   </div>
 
-                  {/* System Prompt */}
                   {config.system_prompt && (
                     <div>
                       <SectionLabel>System Prompt</SectionLabel>
-                      <div className="bg-surface-container-low rounded-xl p-4 text-xs text-on-surface font-mono leading-relaxed max-h-60 overflow-y-auto overscroll-contain">
+                      <div className="max-h-60 overscroll-contain overflow-y-auto border border-border-soft bg-surface-warm p-3 font-mono text-xs leading-relaxed text-fg-2">
                         {promptExpanded
                           ? config.system_prompt
                           : `${config.system_prompt.slice(0, 280)}…`}
@@ -186,7 +180,7 @@ export default function AgentConfigViewer({
                           <button
                             type="button"
                             onClick={() => setPromptExpanded((p) => !p)}
-                            className="ml-2 text-secondary-brand font-bold font-headline text-[10px] uppercase tracking-widest hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary-brand focus-visible:ring-offset-2 rounded"
+                            className="ml-2 font-mono text-xs uppercase tracking-[0.1em] text-accent hover:text-accent-hover focus-visible:outline-none focus-visible:shadow-focus"
                           >
                             {promptExpanded ? "Show less" : "Show more"}
                           </button>
@@ -195,11 +189,10 @@ export default function AgentConfigViewer({
                     </div>
                   )}
 
-                  {/* Tools */}
                   {config.tools.length > 0 && (
                     <div>
                       <SectionLabel>Tools ({config.tools.length})</SectionLabel>
-                      <div className="flex flex-wrap gap-2">
+                      <div className="flex flex-wrap gap-1.5">
                         {config.tools.map((tool) => (
                           <ToolTag key={tool} label={tool} />
                         ))}
@@ -207,11 +200,10 @@ export default function AgentConfigViewer({
                     </div>
                   )}
 
-                  {/* Middleware */}
                   {config.middleware.length > 0 && (
                     <div>
                       <SectionLabel>Middleware ({config.middleware.length})</SectionLabel>
-                      <div className="flex flex-wrap gap-2">
+                      <div className="flex flex-wrap gap-1.5">
                         {config.middleware.map((mw) => (
                           <ToolTag key={mw} label={mw} />
                         ))}
@@ -219,30 +211,30 @@ export default function AgentConfigViewer({
                     </div>
                   )}
 
-                  {/* Backend */}
                   <div>
                     <SectionLabel>Backend</SectionLabel>
-                    <p className="text-on-surface text-sm">
-                      Type: <span className="font-mono">{config.backend.type}</span>
+                    <p className="font-mono text-sm text-fg">
+                      Type: <span className="text-accent">{config.backend.type}</span>
                       {config.backend.root_dir && (
                         <>
-                          {" "}
-                          &middot; Root:{" "}
-                          <span className="font-mono">{config.backend.root_dir}</span>
+                          {" · "}Root:{" "}
+                          <span className="text-accent">{config.backend.root_dir}</span>
                         </>
                       )}
                     </p>
                   </div>
 
-                  {/* HITL Rules */}
                   {Object.keys(config.hitl.rules).length > 0 && (
                     <div>
                       <SectionLabel>HITL Rules</SectionLabel>
-                      <div className="bg-surface-container-low rounded-xl p-4 space-y-1">
+                      <div className="space-y-1 border border-border-soft bg-surface-warm p-3">
                         {Object.entries(config.hitl.rules).map(([key, value]) => (
-                          <div key={key} className="flex items-center justify-between text-xs">
-                            <span className="font-mono text-on-surface break-all">{key}</span>
-                            <span className="text-on-surface-variant ml-3 shrink-0">
+                          <div
+                            key={key}
+                            className="flex items-center justify-between font-mono text-xs"
+                          >
+                            <span className="break-all text-fg">{key}</span>
+                            <span className="ml-3 shrink-0 text-muted">
                               {(() => {
                                 if (typeof value === "boolean")
                                   return value ? "Enabled" : "Disabled";
@@ -255,7 +247,6 @@ export default function AgentConfigViewer({
                     </div>
                   )}
 
-                  {/* MCP Servers */}
                   {config.mcp_servers.length > 0 && (
                     <div>
                       <SectionLabel>MCP Servers ({config.mcp_servers.length})</SectionLabel>
@@ -263,11 +254,9 @@ export default function AgentConfigViewer({
                         {config.mcp_servers.map((server) => (
                           <div
                             key={server.name}
-                            className="bg-surface-container-low rounded-xl p-3 flex items-center justify-between"
+                            className="flex items-center justify-between border border-border-soft bg-surface-warm p-3"
                           >
-                            <span className="text-sm font-medium text-on-surface">
-                              {server.name}
-                            </span>
+                            <span className="font-mono text-sm text-fg">{server.name}</span>
                             <ToolTag label={server.transport} />
                           </div>
                         ))}
@@ -275,17 +264,17 @@ export default function AgentConfigViewer({
                     </div>
                   )}
 
-                  {/* Subagents */}
                   {config.subagents.length > 0 && (
                     <div>
                       <SectionLabel>Subagents ({config.subagents.length})</SectionLabel>
                       <div className="space-y-2">
                         {config.subagents.map((sub) => (
-                          <div key={sub.name} className="bg-surface-container-low rounded-xl p-3">
-                            <p className="text-sm font-medium text-on-surface">{sub.name}</p>
-                            <p className="text-xs text-on-surface-variant mt-1">
-                              {sub.description}
-                            </p>
+                          <div
+                            key={sub.name}
+                            className="border border-border-soft bg-surface-warm p-3"
+                          >
+                            <p className="font-mono text-sm text-fg">{sub.name}</p>
+                            <p className="mt-1 font-mono text-xs text-muted">{sub.description}</p>
                           </div>
                         ))}
                       </div>
@@ -297,39 +286,42 @@ export default function AgentConfigViewer({
           )}
         </div>
 
-        {/* Footer — view mode actions */}
         {mode === "view" && (
-          <div className="shrink-0 px-6 sm:px-8 py-4 border-t border-outline-variant/30 bg-surface-container-lowest">
+          <div className="shrink-0 border-t border-border bg-surface px-6 py-4 sm:px-8">
             <div className="flex items-center gap-3">
-              <Button type="button" variant="outline" onClick={handleExportYaml} disabled={!config}>
-                <span className="material-symbols-outlined text-sm mr-1" aria-hidden="true">
-                  download
-                </span>
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={handleExportYaml}
+                disabled={!config}
+              >
+                <Download className="h-4 w-4" aria-hidden="true" />
                 <span className="hidden sm:inline">Export YAML</span>
                 <span className="sm:hidden">Export</span>
               </Button>
-              <Button type="button" onClick={() => setMode("edit")} disabled={!config}>
-                <span className="material-symbols-outlined text-sm mr-1" aria-hidden="true">
-                  edit
-                </span>
+              <Button
+                type="button"
+                variant="default"
+                onClick={() => setMode("edit")}
+                disabled={!config}
+              >
+                <Pencil className="h-4 w-4" aria-hidden="true" />
                 <span className="hidden sm:inline">Edit</span>
                 <span className="sm:hidden">Edit</span>
               </Button>
               <div className="flex-1" />
-              <button
+              <Button
                 type="button"
+                variant="destructive"
                 onClick={handleDelete}
                 disabled={deleteAgent.isPending}
-                className="px-6 py-2.5 h-10 rounded-full bg-destructive text-white font-headline text-xs font-bold uppercase tracking-widest hover:opacity-90 transition-opacity disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-destructive focus-visible:ring-offset-2 inline-flex items-center gap-2"
               >
+                <Trash2 className="h-4 w-4" aria-hidden="true" />
                 {confirmDelete ? "Confirm Delete?" : "Delete"}
-              </button>
+              </Button>
             </div>
           </div>
         )}
-
-        {/* Edit mode footer is rendered by AgentConfigForm itself (desktop)
-            and the inline mobile button above when editing. */}
       </DialogContent>
     </Dialog>
   );
@@ -337,8 +329,6 @@ export default function AgentConfigViewer({
 
 function SectionLabel({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <h4 className="text-[10px] font-bold font-headline uppercase tracking-widest text-on-surface-variant mb-2">
-      {children}
-    </h4>
+    <h4 className="mb-2 font-mono text-xs uppercase tracking-[0.1em] text-muted">{children}</h4>
   );
 }

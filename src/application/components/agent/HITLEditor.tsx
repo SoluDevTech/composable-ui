@@ -1,4 +1,5 @@
 import { useState, useId } from "react";
+import { Plus, X } from "lucide-react";
 import { Button } from "@/application/components/ui/button";
 import { Input } from "@/application/components/ui/input";
 import { Label } from "@/application/components/ui/label";
@@ -34,7 +35,7 @@ export default function HITLEditor({ value, onChange }: Readonly<HITLEditorProps
   }
 
   return (
-    <div className="space-y-3">
+    <div className="flex flex-col gap-2 border border-border bg-surface-warm p-3">
       <div className="flex gap-2">
         <Input
           id={inputId}
@@ -51,32 +52,33 @@ export default function HITLEditor({ value, onChange }: Readonly<HITLEditorProps
           name="hitl-rule-name"
         />
         <Button type="button" variant="outline" size="sm" onClick={addRule}>
+          <Plus className="h-4 w-4" aria-hidden="true" />
           Add
         </Button>
       </div>
       {entries.map(([key, val]) => (
         <div
           key={key}
-          className="flex items-center gap-3 bg-surface-container-low rounded-lg px-3 py-2"
+          className="flex items-center gap-2 border border-border-soft bg-surface px-3 py-2"
         >
-          <span className="font-mono text-xs text-on-surface">{key}</span>
+          <span className="font-mono text-xs text-fg">{key}</span>
           <div className="flex-1" />
           {typeof val === "boolean" ? (
             <div className="flex items-center gap-2">
-              <Label className="text-xs text-on-surface-variant">Enabled</Label>
+              <Label className="text-xs text-muted">Enabled</Label>
               <Switch checked={val} onCheckedChange={(v) => updateRule(key, v)} />
             </div>
           ) : (
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-1">
-                <Label className="text-xs text-on-surface-variant">Before</Label>
+                <Label className="text-xs text-muted">Before</Label>
                 <Switch
                   checked={val.before ?? false}
                   onCheckedChange={(v) => updateRule(key, { ...val, before: v })}
                 />
               </div>
               <div className="flex items-center gap-1">
-                <Label className="text-xs text-on-surface-variant">After</Label>
+                <Label className="text-xs text-muted">After</Label>
                 <Switch
                   checked={val.after ?? false}
                   onCheckedChange={(v) => updateRule(key, { ...val, after: v })}
@@ -84,20 +86,20 @@ export default function HITLEditor({ value, onChange }: Readonly<HITLEditorProps
               </div>
             </div>
           )}
-          <button
+          <Button
             type="button"
+            variant="ghost"
+            size="icon"
             onClick={() => removeRule(key)}
-            className="rounded-full hover:bg-destructive/15 p-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-destructive focus-visible:ring-inset"
             aria-label={`Remove ${key}`}
+            className="h-7 w-7"
           >
-            <span className="material-symbols-outlined text-xs" aria-hidden="true">
-              close
-            </span>
-          </button>
+            <X className="h-3 w-3" aria-hidden="true" />
+          </Button>
         </div>
       ))}
       {entries.length === 0 && (
-        <p className="text-xs text-on-surface-variant italic">No HITL rules configured</p>
+        <p className="font-mono text-xs italic text-muted">No HITL rules configured</p>
       )}
     </div>
   );

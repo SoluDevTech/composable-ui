@@ -9,8 +9,8 @@ const { mockMutate, mockIsPending } = vi.hoisted(() => ({
   mockIsPending: vi.fn().mockReturnValue(false),
 }));
 
-vi.mock("@/application/hooks/rag/useUploadFile", () => ({
-  useUploadFile: () => ({
+vi.mock("@/application/hooks/rag/useUploadFiles", () => ({
+  useUploadFiles: () => ({
     mutate: mockMutate,
     isPending: mockIsPending(),
   }),
@@ -31,7 +31,7 @@ describe("UploadButton", () => {
   it("has a hidden file input", () => {
     renderWithProviders(<UploadButton prefix="documents/" onUploadComplete={vi.fn()} />);
 
-    const fileInput = screen.getByLabelText(/choose file/i);
+    const fileInput = screen.getByLabelText(/choose files/i);
     expect(fileInput).toBeInTheDocument();
     expect(fileInput).toHaveAttribute("type", "file");
   });
@@ -41,7 +41,7 @@ describe("UploadButton", () => {
 
     renderWithProviders(<UploadButton prefix="documents/" onUploadComplete={vi.fn()} />);
 
-    const fileInput = screen.getByLabelText(/choose file/i);
+    const fileInput = screen.getByLabelText(/choose files/i);
     const clickSpy = vi.spyOn(fileInput, "click");
 
     await user.click(screen.getByRole("button", { name: /upload/i }));
@@ -52,9 +52,8 @@ describe("UploadButton", () => {
   it("selecting a file triggers upload with correct prefix", async () => {
     const user = userEvent.setup();
 
-    // Set up the mock mutate to call onSuccess callback
     mockMutate.mockImplementation((_args, options) => {
-      options?.onSuccess?.();
+      options?.onSuccess?.({ kind: "all-ok" as const, items: [{ message: "uploaded" }] });
     });
 
     renderWithProviders(<UploadButton prefix="documents/reports/" onUploadComplete={vi.fn()} />);
@@ -62,11 +61,11 @@ describe("UploadButton", () => {
     const file = new File(["dummy content"], "report.pdf", {
       type: "application/pdf",
     });
-    const fileInput = screen.getByLabelText(/choose file/i);
+    const fileInput = screen.getByLabelText(/choose files/i);
     await user.upload(fileInput, file);
 
     expect(mockMutate).toHaveBeenCalledWith(
-      { prefix: "documents/reports/", file },
+      { prefix: "documents/reports/", files: [file] },
       expect.objectContaining({
         onSuccess: expect.any(Function),
       }),
@@ -87,7 +86,7 @@ describe("UploadButton", () => {
     const onUploadComplete = vi.fn();
 
     mockMutate.mockImplementation((_args, options) => {
-      options?.onSuccess?.();
+      options?.onSuccess?.({ kind: "all-ok" as const, items: [{ message: "uploaded" }] });
     });
 
     renderWithProviders(<UploadButton prefix="documents/" onUploadComplete={onUploadComplete} />);
@@ -95,7 +94,7 @@ describe("UploadButton", () => {
     const file = new File(["dummy content"], "report.pdf", {
       type: "application/pdf",
     });
-    const fileInput = screen.getByLabelText(/choose file/i);
+    const fileInput = screen.getByLabelText(/choose files/i);
     await user.upload(fileInput, file);
 
     await waitFor(() => {

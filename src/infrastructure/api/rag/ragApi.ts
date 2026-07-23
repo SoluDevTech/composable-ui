@@ -38,4 +38,27 @@ export const ragApi: IRagFilePort = {
     const response = await ragApiClient.post("/api/v1/files/upload", formData);
     return response.data;
   },
+
+  async createFolder(prefix: string): Promise<{ message: string }> {
+    const response = await ragApiClient.post<{ message: string }>("/api/v1/files/folders", {
+      prefix,
+    });
+    return response.data;
+  },
+
+  async deleteFile(objectName: string, workingDir?: string): Promise<{ message: string }> {
+    const params = new URLSearchParams({ object_name: objectName });
+    if (workingDir) params.set("working_dir", workingDir);
+    const response = await ragApiClient.delete<{ message: string }>(
+      `/api/v1/files?${params.toString()}`,
+    );
+    return response.data;
+  },
+
+  async deleteFolder(prefix: string): Promise<{ message: string }> {
+    const response = await ragApiClient.delete<{ message: string }>(
+      `/api/v1/files/folders?prefix=${encodeURIComponent(prefix)}`,
+    );
+    return response.data;
+  },
 };

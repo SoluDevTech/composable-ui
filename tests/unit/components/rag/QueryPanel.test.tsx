@@ -4,14 +4,7 @@ import { describe, it, expect, vi } from "vitest";
 import { renderWithProviders } from "../../../utils/render";
 import QueryPanel from "@/application/components/rag/QueryPanel";
 
-const { mockRagQuery, mockClassicalQuery } = vi.hoisted(() => ({
-  mockRagQuery: vi.fn().mockReturnValue({
-    mutate: vi.fn(),
-    data: null,
-    isPending: false,
-    error: null,
-    reset: vi.fn(),
-  }),
+const { mockClassicalQuery } = vi.hoisted(() => ({
   mockClassicalQuery: vi.fn().mockReturnValue({
     mutate: vi.fn(),
     data: null,
@@ -21,22 +14,11 @@ const { mockRagQuery, mockClassicalQuery } = vi.hoisted(() => ({
   }),
 }));
 
-vi.mock("@/application/hooks/rag/useRagQuery", () => ({
-  useRagQuery: mockRagQuery,
-}));
-
 vi.mock("@/application/hooks/rag/useClassicalQuery", () => ({
   useClassicalQuery: mockClassicalQuery,
 }));
 
 describe("QueryPanel", () => {
-  it("renders PipelineToggle", () => {
-    renderWithProviders(<QueryPanel workingDir="/data" />);
-
-    expect(screen.getByRole("button", { name: /lightrag/i })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /classical/i })).toBeInTheDocument();
-  });
-
   it("renders search textarea", () => {
     renderWithProviders(<QueryPanel workingDir="/data" />);
 

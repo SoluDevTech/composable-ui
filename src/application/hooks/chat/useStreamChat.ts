@@ -2,8 +2,14 @@ import { useCallback, useEffect, useRef } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { chatApi } from "@/infrastructure/api/chat/chatApi";
 import { useChatStore } from "@/application/stores/useChatStore";
-import { StreamEventType } from "@/domain/entities/chat/streamEvent";
 import type { ChatRequest } from "@/domain/entities/chat/chatRequest";
+
+function generateTurnId(): string {
+  if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
+    return crypto.randomUUID();
+  }
+  return `turn-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+}
 
 export function useStreamChat(threadId: string | null) {
   const queryClient = useQueryClient();
@@ -13,14 +19,12 @@ export function useStreamChat(threadId: string | null) {
     (request: ChatRequest) => {
       if (!threadId) return;
 
-      const {
-        clearStream,
-        setStreaming,
-        setPendingUserMessage,
-        // setError read via getState() in callbacks
-      } = useChatStore.getState();
+      const { clearStream, setStreaming, setPendingUserMessage, initStreamingTurn } =
+        useChatStore.getState();
 
       clearStream();
+      const turnId = generateTurnId();
+      initStreamingTurn(turnId);
       setStreaming(true);
       setPendingUserMessage(request.message ?? null);
 
@@ -28,17 +32,12 @@ export function useStreamChat(threadId: string | null) {
         threadId,
         request,
         (event) => {
-          if (event.type === StreamEventType.ERROR) {
-            useChatStore.getState().setStreaming(false);
-            useChatStore.getState().setError(event.data);
-            return;
-          }
-          useChatStore.getState().appendStreamEvent(event);
+          useChatStore.getState().appendTraceEvent(event);
         },
         async () => {
           try {
             await queryClient.invalidateQueries({
-              queryKey: ["messages", threadId],
+              queryKey: ["history", threadId],
             });
           } finally {
             const { setPendingUserMessage, setStreaming } = useChatStore.getState();

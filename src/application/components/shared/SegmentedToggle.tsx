@@ -35,14 +35,13 @@ export default function SegmentedToggle<V extends string>({
   const isTab = pattern === "tab";
   const isRadio = pattern === "radio";
 
-  // Parent role varies by pattern.
   const parentRole = isTab ? "tablist" : isRadio ? "radiogroup" : undefined;
 
   return (
     <div
       role={parentRole}
       aria-label={ariaLabel}
-      className={cn("flex items-center gap-1 bg-surface-container rounded-lg p-1", className)}
+      className={cn("inline-flex items-center border border-border bg-surface-warm p-1", className)}
     >
       {options.map((opt) => {
         const selected = opt.value === value;
@@ -60,10 +59,12 @@ export default function SegmentedToggle<V extends string>({
               if (!selected) onChange(opt.value);
             }}
             className={cn(
-              "px-6 py-2 rounded-md font-headline text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary-brand focus-visible:ring-inset",
-              selected
-                ? "bg-surface-container-lowest text-on-surface shadow-sm"
-                : "text-on-surface-variant hover:text-on-surface",
+              "px-3 py-1 font-mono text-xs uppercase tracking-[0.1em] transition-[background-color,border-color,color] duration-fast ease-standard focus-visible:outline-none focus-visible:shadow-focus",
+              isTab && selected
+                ? "border-b-2 border-accent text-accent"
+                : selected
+                  ? "bg-surface text-accent"
+                  : "text-muted hover:text-fg",
               itemClassName,
             )}
           >

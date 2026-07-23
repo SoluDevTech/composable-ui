@@ -18,7 +18,7 @@ describe("FileRow", () => {
       <FileRow filename="report.pdf" size={1536000} lastModified="2026-04-06T10:00:00Z" />,
     );
 
-    expect(screen.getByText("1.5 MB")).toBeInTheDocument();
+    expect(screen.getByText(/1\.5 MB/)).toBeInTheDocument();
   });
 
   it("renders formatted date", () => {
@@ -32,7 +32,7 @@ describe("FileRow", () => {
   it("shows — for null lastModified", () => {
     renderWithProviders(<FileRow filename="draft.txt" size={100} lastModified={null} />);
 
-    expect(screen.getByText("—")).toBeInTheDocument();
+    expect(screen.getByText(/—/)).toBeInTheDocument();
   });
 
   it("shows 0 B for zero size", () => {
@@ -40,7 +40,7 @@ describe("FileRow", () => {
       <FileRow filename="empty.log" size={0} lastModified="2026-04-06T10:00:00Z" />,
     );
 
-    expect(screen.getByText("0 B")).toBeInTheDocument();
+    expect(screen.getByText(/0 B/)).toBeInTheDocument();
   });
 
   it("shows 1.2 MB for large files", () => {
@@ -48,7 +48,7 @@ describe("FileRow", () => {
       <FileRow filename="archive.zip" size={1258291} lastModified="2026-04-06T10:00:00Z" />,
     );
 
-    expect(screen.getByText("1.2 MB")).toBeInTheDocument();
+    expect(screen.getByText(/1\.2 MB/)).toBeInTheDocument();
   });
 
   it("does not render buttons when no callbacks provided", () => {
@@ -89,57 +89,20 @@ describe("FileRow", () => {
     expect(onRead).toHaveBeenCalledOnce();
   });
 
-  it("renders an index action menu when onIndexLightRAG is provided", () => {
+  it("renders an Index button when onIndexClassical is provided", () => {
     renderWithProviders(
       <FileRow
         filename="report.pdf"
         size={1024}
         lastModified="2026-04-06T10:00:00Z"
-        onIndexLightRAG={vi.fn()}
+        onIndexClassical={vi.fn()}
       />,
     );
 
-    expect(screen.getByRole("button", { name: /index options/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /index/i })).toBeInTheDocument();
   });
 
-  it("shows LightRAG option in dropdown when clicked", async () => {
-    const user = userEvent.setup();
-    const onIndexLightRAG = vi.fn();
-
-    renderWithProviders(
-      <FileRow
-        filename="report.pdf"
-        size={1024}
-        lastModified="2026-04-06T10:00:00Z"
-        onIndexLightRAG={onIndexLightRAG}
-      />,
-    );
-
-    await user.click(screen.getByRole("button", { name: /index options/i }));
-
-    expect(screen.getByText("Index with LightRAG")).toBeInTheDocument();
-  });
-
-  it("calls onIndexLightRAG when LightRAG option is clicked", async () => {
-    const user = userEvent.setup();
-    const onIndexLightRAG = vi.fn();
-
-    renderWithProviders(
-      <FileRow
-        filename="report.pdf"
-        size={1024}
-        lastModified="2026-04-06T10:00:00Z"
-        onIndexLightRAG={onIndexLightRAG}
-      />,
-    );
-
-    await user.click(screen.getByRole("button", { name: /index options/i }));
-    await user.click(screen.getByText("Index with LightRAG"));
-
-    expect(onIndexLightRAG).toHaveBeenCalledOnce();
-  });
-
-  it("calls onIndexClassical when Classical option is clicked", async () => {
+  it("calls onIndexClassical when the Index button is clicked", async () => {
     const user = userEvent.setup();
     const onIndexClassical = vi.fn();
 
@@ -152,8 +115,7 @@ describe("FileRow", () => {
       />,
     );
 
-    await user.click(screen.getByRole("button", { name: /index options/i }));
-    await user.click(screen.getByText("Index with Classical"));
+    await user.click(screen.getByRole("button", { name: /index/i }));
 
     expect(onIndexClassical).toHaveBeenCalledOnce();
   });

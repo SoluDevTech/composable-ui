@@ -1,21 +1,4 @@
-export type QueryMode =
-  | "naive"
-  | "local"
-  | "global"
-  | "hybrid"
-  | "hybrid+"
-  | "mix"
-  | "bm25"
-  | "bypass";
-
 export type ClassicalQueryMode = "vector" | "hybrid";
-
-export interface LightRAGQueryRequest {
-  working_dir: string;
-  query: string;
-  mode: QueryMode;
-  top_k: number;
-}
 
 export interface ClassicalQueryRequest {
   working_dir: string;

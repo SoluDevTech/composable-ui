@@ -1,97 +1,471 @@
 @import "tailwindcss";
 
-@theme {
-  --color-border: hsl(var(--border));
-  --color-input: hsl(var(--input));
-  --color-ring: hsl(var(--ring));
-  --color-background: hsl(var(--background));
-  --color-foreground: hsl(var(--foreground));
-  --color-primary: hsl(var(--primary));
-  --color-primary-foreground: hsl(var(--primary-foreground));
-  --color-secondary: hsl(var(--secondary));
-  --color-secondary-foreground: hsl(var(--secondary-foreground));
-  --color-destructive: hsl(var(--destructive));
-  --color-destructive-foreground: hsl(var(--destructive-foreground));
-  --color-muted: hsl(var(--muted));
-  --color-muted-foreground: hsl(var(--muted-foreground));
-  --color-accent: hsl(var(--accent));
-  --color-accent-foreground: hsl(var(--accent-foreground));
-  --color-popover: hsl(var(--popover));
-  --color-popover-foreground: hsl(var(--popover-foreground));
-  --color-card: hsl(var(--card));
-  --color-card-foreground: hsl(var(--card-foreground));
+/* ═════════════════════════════════════════════════════════════════════
+   Composable UI — Tetris design system (Jalon 1: tokens + theme toggle)
+   Source of truth: composable-tokens.css from the Open Design maquette.
+   Dark = Tetris (DEFAULT). Light = accessible variant (same token names).
+   ═════════════════════════════════════════════════════════════════════ */
 
-  --color-surface: #f8f9fa;
-  --color-on-surface: #191c1d;
-  --color-on-surface-variant: #48464d;
-  --color-surface-container: #edeeef;
-  --color-surface-container-low: #f3f4f5;
-  --color-surface-container-high: #e7e8e9;
-  --color-surface-container-highest: #e1e3e4;
-  --color-surface-container-lowest: #ffffff;
-  --color-outline: #79767e;
-  --color-outline-variant: #c9c5ce;
-  --color-primary-container: #1c1835;
-  --color-on-primary-container: #8580a3;
-  --color-secondary-brand: #b3290d;
-  --color-secondary-container: #fe5e3e;
-  --color-on-secondary-container: #5c0b00;
-  --color-primary-fixed: #e5deff;
-  --color-secondary-fixed: #ffdad3;
-  --color-tertiary-fixed: #e1e0ff;
+/* --- Light theme (fallback :root) ----------------------------------------- */
+:root {
+  --bg: #f8fafc;
+  --surface: #ffffff;
+  --surface-warm: #f1f5f9;
+  --fg: #0f172a;
+  --fg-2: #334155;
+  --muted: #64748b;
+  --meta: #cc00cc;
+  --border: #cbd5e1;
+  --border-soft: #e2e8f0;
+  --accent: #cc00cc;
+  --accent-on: #ffffff;
+  --accent-hover: color-mix(in oklab, var(--accent), black 8%);
+  --accent-active: color-mix(in oklab, var(--accent), black 14%);
+  --success: #15803d;
+  --warn: #b45309;
+  --danger: #b91c1c;
 
-  --font-headline: "Space Grotesk", sans-serif;
-  --font-body: "Inter", sans-serif;
+  --font-display: "Press Start 2P", "Arial Black", system-ui, sans-serif;
+  --font-body: "Press Start 2P", "Arial Black", system-ui, sans-serif;
+  --font-mono: "Press Start 2P", ui-monospace, monospace;
 
-  --radius-lg: var(--radius);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-sm: calc(var(--radius) - 4px);
+  /* App-wide typography scale (driven by Settings page font-size slider).
+     Default scale = 1 (12px baseline). --app-font-family overrides body font.
+     --chat-font-size is consumed by chat bubbles. */
+  --app-font-scale: 1;
+  --app-font-family: var(--font-body);
+  --chat-font-size: 12px;
+
+  /* Text scale tokens are scaled by --app-font-scale so every Tailwind
+     text-* utility (text-xs, text-sm, text-base, …) follows the slider. */
+  --text-xs: calc(10px * var(--app-font-scale));
+  --text-sm: calc(12px * var(--app-font-scale));
+  --text-base: calc(14px * var(--app-font-scale));
+  --text-lg: calc(16px * var(--app-font-scale));
+  --text-xl: calc(20px * var(--app-font-scale));
+  --text-2xl: calc(28px * var(--app-font-scale));
+  --text-3xl: calc(40px * var(--app-font-scale));
+  --text-4xl: calc(56px * var(--app-font-scale));
+
+  --leading-body: 1.6;
+  --leading-tight: 1.1;
+  --tracking-display: 0;
+
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-12: 48px;
+
+  --section-y-desktop: 80px;
+  --section-y-tablet: 60px;
+  --section-y-phone: 44px;
+
+  --radius-sm: 0px;
+  --radius-md: 0px;
+  --radius-lg: 4px;
+  --radius-pill: 9999px;
+
+  --elev-flat: none;
+  --elev-ring: 0 0 0 1px var(--border);
+  --elev-raised: 0 18px 0 rgba(15, 23, 42, 0.18);
+  --focus-ring: 0 0 0 4px rgba(204, 0, 204, 0.32);
+
+  --motion-fast: 80ms;
+  --motion-base: 140ms;
+  --ease-standard: steps(2, end);
+
+  --container-max: 1100px;
+  --container-gutter-desktop: 32px;
+  --container-gutter-tablet: 24px;
+  --container-gutter-phone: 16px;
 }
 
-@layer base {
-  :root {
-    --background: 0 0% 98%;
-    --foreground: 200 7% 11%;
-    --card: 0 0% 100%;
-    --card-foreground: 200 7% 11%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 200 7% 11%;
-    --primary: 0 0% 0%;
-    --primary-foreground: 0 0% 100%;
-    --secondary: 10 87% 38%;
-    --secondary-foreground: 0 0% 100%;
-    --muted: 200 5% 94%;
-    --muted-foreground: 260 3% 29%;
-    --accent: 200 5% 94%;
-    --accent-foreground: 200 7% 11%;
-    --destructive: 0 84% 41%;
-    --destructive-foreground: 0 0% 100%;
-    --border: 270 6% 79%;
-    --input: 270 6% 79%;
-    --ring: 0 0% 0%;
-    --radius: 0.5rem;
+/* --- Dark Tetris theme (DEFAULT) ------------------------------------------ */
+:root.dark {
+  --bg: #050816;
+  --surface: #10162a;
+  --surface-warm: #17203a;
+  --fg: #f8fafc;
+  --fg-2: #cbd5e1;
+  --muted: #94a3b8;
+  --meta: #ff00ff;
+  --border: #26324f;
+  --border-soft: #1c2740;
+  --accent: #ff00ff;
+  --accent-on: #0a000a;
+  --accent-hover: color-mix(in oklab, var(--accent), black 8%);
+  --accent-active: color-mix(in oklab, var(--accent), black 14%);
+  --success: #00f000;
+  --warn: #f0f000;
+  --danger: #f00000;
+
+  --elev-raised: 0 18px 0 rgba(0, 0, 0, 0.32);
+  --focus-ring: 0 0 0 4px rgba(255, 0, 255, 0.32);
+}
+
+/* --- Tailwind v4 theme mapping -------------------------------------------- */
+@theme {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-warm: var(--surface-warm);
+  --color-fg: var(--fg);
+  --color-fg-2: var(--fg-2);
+  --color-muted: var(--muted);
+  --color-border: var(--border);
+  --color-border-soft: var(--border-soft);
+  --color-accent: var(--accent);
+  --color-accent-on: var(--accent-on);
+  --color-accent-hover: var(--accent-hover);
+  --color-accent-active: var(--accent-active);
+  --color-success: var(--success);
+  --color-warn: var(--warn);
+  --color-danger: var(--danger);
+
+  --font-display: var(--font-display);
+  --font-body: var(--font-body);
+  --font-mono: var(--font-mono);
+
+  --spacing-1: var(--space-1);
+  --spacing-2: var(--space-2);
+  --spacing-3: var(--space-3);
+  --spacing-4: var(--space-4);
+  --spacing-5: var(--space-5);
+  --spacing-6: var(--space-6);
+  --spacing-8: var(--space-8);
+  --spacing-12: var(--space-12);
+
+  --radius-sm: var(--radius-sm);
+  --radius-md: var(--radius-md);
+  --radius-lg: var(--radius-lg);
+  --radius-pill: var(--radius-pill);
+
+  --shadow-ring: var(--elev-ring);
+  --shadow-raised: var(--elev-raised);
+  --shadow-focus: var(--focus-ring);
+
+  --ease-standard: var(--ease-standard);
+  --duration-fast: var(--motion-fast);
+  --duration-base: var(--motion-base);
+
+  --animate-blink: blink 1s steps(2) infinite;
+  --animate-scan-line: scan-line 3s linear infinite;
+  --animate-spin-step: spin-step 0.6s steps(8) infinite;
+  --animate-pulse-ring: pulse-ring 1.5s steps(3) infinite;
+  --animate-view-enter: view-enter 200ms ease-out;
+  --animate-modal-enter: modal-enter 200ms ease-out;
+  --animate-modal-overlay-enter: modal-overlay-enter 120ms ease-out;
+  --animate-chat-msg-enter: chat-msg-enter 180ms ease-out;
+}
+
+/* --- Keyframes (verbatim from maquette styles.css) ------------------------ */
+@keyframes blink {
+  0%,
+  49% {
+    opacity: 1;
+  }
+  50%,
+  100% {
+    opacity: 0;
   }
 }
 
+@keyframes scan-line {
+  0% {
+    transform: translateY(-100%);
+  }
+  100% {
+    transform: translateY(100vh);
+  }
+}
+
+@keyframes spin-step {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes pulse-ring {
+  0% {
+    opacity: 0.4;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.1);
+  }
+}
+
+@keyframes view-enter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes modal-enter {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes modal-overlay-enter {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes chat-msg-enter {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* --- Base layer ----------------------------------------------------------- */
 @layer base {
   * {
     @apply border-border;
   }
+  /* App-wide font family + scale driven by the Settings page slider.
+     --text-* tokens are already scaled by --app-font-scale in :root, so
+     Tailwind text-* utilities follow the slider automatically. */
   body {
-    @apply bg-background text-foreground font-body antialiased;
+    @apply bg-bg text-fg antialiased;
+    font-family: var(--app-font-family);
+    font-size: var(--text-base);
+  }
+  /* Chat bubbles use the absolute --chat-font-size from the slider. */
+  .chat-msg-bubble,
+  .chat-msg-bubble p,
+  .chat-msg-bubble li,
+  .chat-msg-bubble code,
+  .chat-msg-bubble pre {
+    font-size: var(--chat-font-size);
   }
 }
 
-.glass-panel {
-  background: rgba(255, 255, 255, 0.7);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+/* --- Utilities (Tetris block-shadows, focus ring, effects) ---------------- */
+@layer utilities {
+  .block-shadow {
+    box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.32);
+  }
+  .block-shadow-raised {
+    box-shadow: var(--elev-raised);
+  }
+  .focus-ring {
+    box-shadow: var(--focus-ring);
+  }
+  .cursor-blink::after {
+    content: "_";
+    color: var(--accent);
+    animation: var(--animate-blink);
+  }
+  .scan-effect::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--accent), transparent);
+    opacity: 0.1;
+    animation: var(--animate-scan-line);
+    pointer-events: none;
+  }
+  .spin {
+    animation: var(--animate-spin-step);
+    display: inline-block;
+  }
+  .view-enter {
+    animation: var(--animate-view-enter);
+  }
+  .btn-pulse {
+    position: relative;
+    overflow: visible;
+  }
+  .btn-pulse::before {
+    content: "";
+    position: absolute;
+    inset: -2px;
+    border: 1px solid var(--accent);
+    opacity: 0;
+    animation: var(--animate-pulse-ring);
+    pointer-events: none;
+  }
+  .overflow-wrap-anywhere {
+    overflow-wrap: anywhere;
+  }
+
+  /* --- Settings: color picker + range slider (verbatim from maquette) ------ */
+  .color-picker {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+  }
+  .color-gradient {
+    width: 100%;
+    height: 16px;
+    -webkit-appearance: none;
+    appearance: none;
+    border: 1px solid var(--border);
+    background: linear-gradient(
+      to right,
+      #ff0000,
+      #ffff00,
+      #00ff00,
+      #00ffff,
+      #0000ff,
+      #ff00ff,
+      #ff0000
+    );
+    cursor: pointer;
+    outline: none;
+  }
+  .color-gradient::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 14px;
+    height: 22px;
+    background: var(--fg);
+    border: 1px solid var(--bg);
+    cursor: pointer;
+  }
+  .color-gradient::-moz-range-thumb {
+    width: 14px;
+    height: 22px;
+    background: var(--fg);
+    border: 1px solid var(--bg);
+    cursor: pointer;
+  }
+  .color-picker-row {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+  }
+  .color-preview {
+    width: 32px;
+    height: 32px;
+    border: 2px solid var(--border);
+    flex-shrink: 0;
+  }
+  .color-hex {
+    flex: 1;
+    min-width: 0;
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+    text-transform: uppercase;
+  }
+  .input-range {
+    width: 100%;
+    -webkit-appearance: none;
+    appearance: none;
+    height: 4px;
+    background: var(--border);
+    outline: none;
+    cursor: pointer;
+  }
+  .input-range::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 16px;
+    height: 16px;
+    background: var(--accent);
+    border: 2px solid var(--bg);
+    cursor: pointer;
+  }
+  .input-range::-moz-range-thumb {
+    width: 16px;
+    height: 16px;
+    background: var(--accent);
+    border: 2px solid var(--bg);
+    cursor: pointer;
+  }
+  .input-range-hint {
+    display: flex;
+    justify-content: space-between;
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    color: var(--muted);
+    margin-top: var(--space-2);
+  }
 }
 
-.ambient-shadow {
-  box-shadow: 0px 40px 40px -10px rgba(25, 28, 29, 0.06);
+/* --- Reduced motion (verbatim from maquette) ------------------------------ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  .cursor-blink::after {
+    animation: none;
+  }
+  .spin {
+    animation: none;
+  }
+  .scan-effect::before {
+    animation: none;
+  }
+  .view-enter {
+    animation: none;
+  }
+  .btn-pulse::before {
+    animation: none;
+  }
 }
 
-.overflow-wrap-anywhere {
-  overflow-wrap: anywhere;
+/* --- Sonner toaster overrides (Tetris design system) -------------------- */
+/* Aligns toasts with the maquette: fixed bottom-right, surface bg, accent
+   border/text, font-mono uppercase, block shadow. Error toasts use --danger. */
+[data-sonner-toaster] {
+  font-family: var(--font-mono);
+  --normal-bg: var(--surface);
+  --normal-border: var(--accent);
+  --normal-text: var(--accent);
+  --success-bg: var(--surface);
+  --success-border: var(--success);
+  --success-text: var(--success);
+  --error-bg: var(--surface);
+  --error-border: var(--danger);
+  --error-text: var(--danger);
+}
+[data-sonner-toast] {
+  font-family: var(--font-mono) !important;
+  font-size: var(--text-xs) !important;
+  letter-spacing: 0.08em !important;
+  text-transform: uppercase !important;
+  border-radius: 0 !important;
+  box-shadow: var(--elev-raised) !important;
+  padding: var(--space-3) var(--space-5) !important;
+  border: 1px solid var(--accent) !important;
+  background: var(--surface) !important;
+  color: var(--accent) !important;
+}
+[data-sonner-toast][data-type="success"] {
+  border-color: var(--success) !important;
+  color: var(--success) !important;
+}
+[data-sonner-toast][data-type="error"] {
+  border-color: var(--danger) !important;
+  color: var(--danger) !important;
 }

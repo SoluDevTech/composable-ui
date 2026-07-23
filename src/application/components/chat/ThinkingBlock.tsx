@@ -1,40 +1,39 @@
 import { useState, useId } from "react";
+import { ChevronDown } from "lucide-react";
 import { cn } from "@/application/lib/utils";
 
 interface ThinkingBlockProps {
   text: string | null;
+  source?: string | null;
 }
 
-export default function ThinkingBlock({ text }: ThinkingBlockProps) {
+export default function ThinkingBlock({ text, source = null }: Readonly<ThinkingBlockProps>) {
   const [isExpanded, setIsExpanded] = useState(false);
   const panelId = useId();
 
   if (!text?.trim()) return null;
 
+  const label = source ? `Thinking — ${source}` : "Thinking";
+
   return (
-    <div className="mt-4 rounded-xl border border-outline-variant/10 bg-surface-container-low/50 overflow-hidden">
+    <div className="mt-2 border border-border bg-bg">
       <button
         type="button"
         onClick={() => setIsExpanded((prev) => !prev)}
-        className={cn(
-          "flex w-full items-center gap-2 px-4 py-2.5 text-xs font-medium text-on-surface-variant hover:bg-surface-container-lowest/50 transition-colors",
-          isExpanded ? "rounded-t-xl" : "rounded-xl",
-        )}
+        className="flex w-full items-center justify-between px-3 py-2 font-mono text-xs uppercase tracking-[0.1em] text-muted transition-[color] duration-fast ease-standard hover:text-fg"
         aria-expanded={isExpanded}
         aria-controls={panelId}
+        aria-label={label}
       >
-        <span
-          className="material-symbols-outlined text-base text-secondary-brand transition-transform"
-          style={{ transform: isExpanded ? "rotate(180deg)" : "rotate(0deg)" }}
+        <span>{label}</span>
+        <ChevronDown
+          className={cn("h-3.5 w-3.5 transition-transform", isExpanded && "rotate-180")}
           aria-hidden="true"
-        >
-          expand_more
-        </span>
-        <span>Thinking</span>
+        />
       </button>
       {isExpanded && (
-        <div id={panelId} role="region" aria-label="Thinking content">
-          <pre className="px-4 pb-3 text-xs font-mono text-on-surface-variant/80 whitespace-pre-wrap break-words leading-relaxed">
+        <div id={panelId} role="region" aria-label={`${label} content`}>
+          <pre className="overflow-x-auto whitespace-pre-wrap border-t border-border bg-bg px-3 py-2 font-mono text-xs leading-relaxed text-fg-2">
             {text}
           </pre>
         </div>

@@ -3,7 +3,7 @@ import { describe, it, expect, vi } from "vitest";
 import { renderWithProviders } from "../../utils/render";
 import { Route, Routes } from "react-router-dom";
 import ChatPage from "@/application/pages/ChatPage";
-import { createMessage } from "../../fixtures/external";
+import { createMessage, createThreadHistory, createTurn } from "../../fixtures/external";
 import { MessageRole } from "@/domain/entities/chat/message";
 
 vi.mock("@/application/hooks/chat/useThreads", () => ({
@@ -21,21 +21,26 @@ vi.mock("@/application/hooks/chat/useThreads", () => ({
   }),
 }));
 
-vi.mock("@/application/hooks/chat/useMessages", () => ({
-  useMessages: (threadId: string | null) => {
+vi.mock("@/application/hooks/chat/useThreadHistory", () => ({
+  useThreadHistory: (threadId: string | null) => {
     if (!threadId) return { data: undefined, isLoading: false };
     return {
-      data: [
-        createMessage({
-          role: MessageRole.HUMAN,
-          content: "Hello there",
-          status: null,
-        }),
-        createMessage({
-          role: MessageRole.AI,
-          content: "Hi, how can I help?",
-        }),
-      ],
+      data: createThreadHistory({
+        turns: [
+          createTurn({
+            human_message: createMessage({
+              role: MessageRole.HUMAN,
+              content: "Hello there",
+              status: null,
+            }),
+            ai_message: createMessage({
+              role: MessageRole.AI,
+              content: "Hi, how can I help?",
+            }),
+            events: [],
+          }),
+        ],
+      }),
       isLoading: false,
     };
   },

@@ -12,35 +12,57 @@ describe("StatusBadge", () => {
     expect(badge).toHaveClass("uppercase");
   });
 
-  it("applies green classes for 'Active' status", () => {
+  it("applies success classes for 'Active' status", () => {
     renderWithProviders(<StatusBadge status="Active" />);
 
     const badge = screen.getByText("Active");
-    expect(badge).toHaveClass("bg-emerald-100");
-    expect(badge).toHaveClass("text-emerald-700");
+    expect(badge).toHaveClass("bg-success/10");
+    expect(badge).toHaveClass("text-success");
+    expect(badge).toHaveClass("border-success");
   });
 
-  it("applies green classes for 'completed' status", () => {
+  it("applies success classes for 'completed' status", () => {
     renderWithProviders(<StatusBadge status="completed" />);
 
     const badge = screen.getByText("Completed");
-    expect(badge).toHaveClass("bg-emerald-100");
-    expect(badge).toHaveClass("text-emerald-700");
+    expect(badge).toHaveClass("bg-success/10");
+    expect(badge).toHaveClass("text-success");
+    expect(badge).toHaveClass("border-success");
   });
 
-  it("applies orange classes for 'awaiting_hitl' status", () => {
+  it("applies warn classes for 'awaiting_hitl' status", () => {
     renderWithProviders(<StatusBadge status="awaiting_hitl" />);
 
     const badge = screen.getByText("Awaiting Hitl");
-    expect(badge).toHaveClass("bg-orange-100");
-    expect(badge).toHaveClass("text-orange-700");
+    expect(badge).toHaveClass("bg-warn/10");
+    expect(badge).toHaveClass("text-warn");
+    expect(badge).toHaveClass("border-warn");
   });
 
-  it("applies gray classes for unknown status", () => {
+  it("applies accent classes for 'streaming' status", () => {
+    renderWithProviders(<StatusBadge status="streaming" />);
+
+    const badge = screen.getByText("Streaming");
+    expect(badge).toHaveClass("bg-accent/10");
+    expect(badge).toHaveClass("text-accent");
+    expect(badge).toHaveClass("border-accent");
+  });
+
+  it("applies danger classes for 'error' status", () => {
+    renderWithProviders(<StatusBadge status="error" />);
+
+    const badge = screen.getByText("Error");
+    expect(badge).toHaveClass("bg-danger/10");
+    expect(badge).toHaveClass("text-danger");
+    expect(badge).toHaveClass("border-danger");
+  });
+
+  it("applies default classes for unknown status", () => {
     renderWithProviders(<StatusBadge status="unknown" />);
 
     const badge = screen.getByText("Unknown");
-    expect(badge).toHaveClass("bg-surface-container-high");
-    expect(badge).toHaveClass("text-on-surface-variant");
+    expect(badge).toHaveClass("bg-surface-warm");
+    expect(badge).toHaveClass("text-muted");
+    expect(badge).toHaveClass("border-border");
   });
 });

@@ -1,3 +1,6 @@
+import { FileText, Eye, Trash } from "lucide-react";
+import { Button } from "@/application/components/ui/button";
+import { cn } from "@/application/lib/utils";
 import { formatFileSize } from "@/application/lib/formatFileSize";
 import IndexActionMenu from "@/application/components/rag/IndexActionMenu";
 
@@ -7,8 +10,8 @@ interface FileRowProps {
   lastModified: string | null;
   isIndexing?: boolean;
   onRead?: () => void;
-  onIndexLightRAG?: () => void;
   onIndexClassical?: () => void;
+  onDelete?: () => void;
 }
 
 function formatDate(dateStr: string | null): string {
@@ -22,86 +25,68 @@ function formatDate(dateStr: string | null): string {
   });
 }
 
-function getFileIcon(filename: string): string {
-  const ext = filename.split(".").pop()?.toLowerCase() || "";
-  const icons: Record<string, string> = {
-    pdf: "picture_as_pdf",
-    doc: "description",
-    docx: "description",
-    xls: "table_chart",
-    xlsx: "table_chart",
-    png: "image",
-    jpg: "image",
-    jpeg: "image",
-    gif: "image",
-    svg: "image",
-    md: "article",
-    txt: "article",
-    csv: "table_chart",
-    json: "data_object",
-    yaml: "data_object",
-    yml: "data_object",
-    zip: "folder_zip",
-  };
-  return icons[ext] || "description";
-}
-
 export default function FileRow({
   filename,
   size,
   lastModified,
   isIndexing,
   onRead,
-  onIndexLightRAG,
   onIndexClassical,
+  onDelete,
 }: Readonly<FileRowProps>) {
-  const hasIndexOptions = onIndexLightRAG || onIndexClassical;
+  const sizeText = `${formatFileSize(size)} · ${formatDate(lastModified)}`;
 
   return (
     <div
-      className={`w-full flex items-center gap-4 px-6 py-4 rounded-xl text-left ${isIndexing ? "opacity-60" : ""}`}
-    >
-      <span
-        className="material-symbols-outlined text-2xl text-on-surface-variant"
-        aria-hidden="true"
-      >
-        {isIndexing ? "progress_activity" : getFileIcon(filename)}
-      </span>
-      <span className="font-body text-sm text-on-surface flex-1">{filename}</span>
-      {isIndexing && (
-        <span
-          className="material-symbols-outlined text-lg animate-spin text-secondary-brand"
-          aria-hidden="true"
-        >
-          progress_activity
-        </span>
+      data-od-id={`file-row-${filename}`}
+      className={cn(
+        "grid grid-cols-[40px_1fr_auto] md:grid-cols-[40px_1fr_auto_auto] items-center gap-3 px-3 py-2 border-b border-border-soft transition-[background-color] duration-fast ease-standard hover:bg-surface-warm",
+        isIndexing && "opacity-60",
       )}
-      <span className="font-body text-sm text-on-surface-variant w-24 text-right">
-        {formatFileSize(size)}
+    >
+      <span className="flex h-8 w-8 items-center justify-center text-muted" aria-hidden="true">
+        {isIndexing ? (
+          <span className="spin" data-testid="file-row-spinner" />
+        ) : (
+          <FileText className="h-5 w-5" />
+        )}
       </span>
-      <span className="font-body text-sm text-on-surface-variant w-32 text-right">
-        {formatDate(lastModified)}
-      </span>
-      <div className="flex items-center gap-1">
+      <span className="min-w-0 truncate text-sm text-fg font-body">{filename}</span>
+      <span className="hidden md:block text-xs font-mono text-muted text-right">{sizeText}</span>
+      <div
+        className="flex items-center gap-1"
+        onClick={(e) => e.stopPropagation()}
+        onKeyDown={(e) => e.stopPropagation()}
+      >
         {onRead && (
-          <button
+          <Button
             type="button"
+            variant="ghost"
+            size="sm"
             onClick={onRead}
             disabled={isIndexing}
-            className="flex items-center justify-center w-8 h-8 rounded-lg hover:bg-surface-container transition-colors disabled:opacity-50"
             aria-label={`Read ${filename}`}
           >
-            <span className="material-symbols-outlined text-lg text-on-surface-variant">
-              visibility
-            </span>
-          </button>
+            <Eye className="h-3.5 w-3.5" aria-hidden="true" />
+          </Button>
         )}
-        {hasIndexOptions && (
-          <IndexActionMenu
-            onIndexLightRAG={onIndexLightRAG!}
-            onIndexClassical={onIndexClassical!}
-          />
+        {onDelete && (
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={(e) => {
+              e.stopPropagation();
+              onDelete();
+            }}
+            disabled={isIndexing}
+            aria-label={`Delete ${filename}`}
+            data-od-id={`file-delete-${filename}`}
+          >
+            <Trash className="h-3.5 w-3.5" aria-hidden="true" />
+          </Button>
         )}
+        {onIndexClassical && <IndexActionMenu onIndexClassical={onIndexClassical} />}
       </div>
     </div>
   );

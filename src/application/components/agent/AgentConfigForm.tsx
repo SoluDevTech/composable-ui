@@ -1,5 +1,12 @@
-import { useForm, useFieldArray } from "react-hook-form";
+import { useCallback, memo } from "react";
+import {
+  useForm,
+  useFieldArray,
+  useWatch,
+  type Control,
+} from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Plus } from "lucide-react";
 import type { AgentConfig, SubAgentConfig } from "@/domain/entities/agent/agentConfig";
 import { BackendType, MiddlewareType } from "@/domain/entities/agent/agentConfig";
 import { McpTransportType } from "@/domain/entities/agent/mcpServerConfig";
@@ -32,8 +39,7 @@ import SubAgentEditor from "./SubAgentEditor";
 import HITLEditor from "./HITLEditor";
 import ResponseFormatEditor from "./ResponseFormatEditor";
 import { AGENT_CONFIG_FORM_ID as FORM_ID } from "./formConstants";
-
-// ─── Constants ──────────────────────────────────────────────────────────────
+import { cn } from "@/application/lib/utils";
 
 type SectionValue =
   | "general"
@@ -46,19 +52,18 @@ type SectionValue =
   | "subagents"
   | "response-format";
 
-// Only essential sections are open by default, others can be revealed on demand.
 const DEFAULT_OPEN_SECTIONS: SectionValue[] = ["general", "system-prompt"];
 
-const SECTION_META: Record<SectionValue, { label: string; icon: string }> = {
-  general: { label: "General", icon: "tune" },
-  "system-prompt": { label: "System Prompt", icon: "description" },
-  "tools-middleware": { label: "Tools & Middleware", icon: "build" },
-  backend: { label: "Backend", icon: "storage" },
-  hitl: { label: "HITL", icon: "verified_user" },
-  "memory-skills": { label: "Memory & Skills", icon: "psychology" },
-  "mcp-servers": { label: "MCP Servers", icon: "hub" },
-  subagents: { label: "Subagents", icon: "group" },
-  "response-format": { label: "Response Format", icon: "data_object" },
+const SECTION_META: Record<SectionValue, { label: string }> = {
+  general: { label: "General" },
+  "system-prompt": { label: "System Prompt" },
+  "tools-middleware": { label: "Tools & Middleware" },
+  backend: { label: "Backend" },
+  hitl: { label: "HITL" },
+  "memory-skills": { label: "Memory & Skills" },
+  "mcp-servers": { label: "MCP Servers" },
+  subagents: { label: "Subagents" },
+  "response-format": { label: "Response Format" },
 };
 
 const MIDDLEWARE_OPTIONS: { label: string; value: MiddlewareType }[] = [
@@ -126,25 +131,9 @@ function getDefaultValues(mode: "create" | "edit", initialData?: AgentConfig): A
   return { ...DEFAULT_FORM_VALUES };
 }
 
-// ─── Helpers ────────────────────────────────────────────────────────────────
-
-function cn(...classes: (string | false | undefined)[]): string {
-  return classes.filter(Boolean).join(" ");
-}
-
-function buildAccordionTriggerClass(): string {
-  return cn(
-    "text-xs font-bold font-headline uppercase tracking-widest",
-    "text-on-surface hover:text-secondary-brand",
-    "data-[state=open]:text-secondary-brand",
-  );
-}
-
 function showRootDir(type: BackendType): boolean {
   return type === BackendType.FILESYSTEM || type === BackendType.COMPOSITE;
 }
-
-// ─── Props ──────────────────────────────────────────────────────────────────
 
 interface AgentConfigFormProps {
   mode: "create" | "edit";
@@ -153,8 +142,6 @@ interface AgentConfigFormProps {
   onCancel: () => void;
   isPending?: boolean;
 }
-
-// ─── Component ────────────────────────────────────────────────────────────
 
 export default function AgentConfigForm({
   mode,
@@ -169,19 +156,17 @@ export default function AgentConfigForm({
     control,
     setValue,
     getValues,
-    watch,
     formState: { errors },
   } = useForm<AgentConfigFormData>({
     resolver: zodResolver(agentConfigSchema),
     defaultValues: getDefaultValues(mode, initialData),
   });
 
-  const mcpServersArray = useFieldArray({ control, name: "mcp_servers" });
   const subagentsArray = useFieldArray({ control, name: "subagents" });
 
   // eslint-disable-next-line react-hooks/incompatible-library
-  const backendType = watch("backend.type");
-  const middlewareValues = watch("middleware");
+  const backendType = useWatch({ control, name: "backend.type" });
+  const middlewareValues = useWatch({ control, name: "middleware" });
 
   function handleFormSubmit(data: AgentConfigFormData) {
     const cleaned: AgentConfigFormData = {
@@ -191,10 +176,6 @@ export default function AgentConfigForm({
       response_format: data.response_format ?? undefined,
     };
     onSubmit(cleaned);
-  }
-
-  function addMcpServer() {
-    mcpServersArray.append({ ...EMPTY_MCP_SERVER });
   }
 
   function addSubagent() {
@@ -214,18 +195,12 @@ export default function AgentConfigForm({
   }
 
   return (
-    <form
-      id={FORM_ID}
-      onSubmit={handleSubmit(handleFormSubmit)}
-      // The parent dialog handles the footer; this form is purely the scrollable body.
-      className="flex flex-col"
-    >
+    <form id={FORM_ID} onSubmit={handleSubmit(handleFormSubmit)} className="flex flex-col">
       <Accordion
         type="multiple"
         defaultValue={DEFAULT_OPEN_SECTIONS as never}
         className="space-y-1"
       >
-        {/* General */}
         <AccordionItem value="general">
           <SectionTrigger value="general" />
           <AccordionContent className="space-y-4">
@@ -250,19 +225,18 @@ export default function AgentConfigForm({
               />
             </FormField>
             <div className="flex items-center gap-3">
-              <Label htmlFor="debug" className="text-on-surface text-sm">
+              <Label htmlFor="debug" className="text-xs uppercase tracking-[0.1em]">
                 Debug
               </Label>
               <Switch
                 id="debug"
-                checked={watch("debug")}
+                checked={useWatch({ control, name: "debug" })}
                 onCheckedChange={(v) => setValue("debug", v)}
               />
             </div>
           </AccordionContent>
         </AccordionItem>
 
-        {/* System Prompt */}
         <AccordionItem value="system-prompt">
           <SectionTrigger value="system-prompt" />
           <AccordionContent className="space-y-4">
@@ -287,19 +261,18 @@ export default function AgentConfigForm({
           </AccordionContent>
         </AccordionItem>
 
-        {/* Tools & Middleware */}
         <AccordionItem value="tools-middleware">
           <SectionTrigger value="tools-middleware" />
           <AccordionContent className="space-y-4">
             <StringListEditor
               label="Tools"
-              value={watch("tools")}
+              value={useWatch({ control, name: "tools" })}
               onChange={(tools) => setValue("tools", tools)}
               placeholder="Add tool…"
             />
             <div>
-              <Label className="text-on-surface text-sm">Middleware</Label>
-              <div className="flex flex-wrap gap-2 mt-2">
+              <Label className="text-xs uppercase tracking-[0.1em]">Middleware</Label>
+              <div className="mt-2 flex flex-wrap gap-2">
                 {MIDDLEWARE_OPTIONS.map((opt) => {
                   const isActive = middlewareValues.includes(opt.value);
                   return (
@@ -309,10 +282,10 @@ export default function AgentConfigForm({
                       onClick={() => toggleMiddleware(opt.value, !isActive)}
                       aria-pressed={isActive}
                       className={cn(
-                        "px-3 py-1.5 rounded-full text-xs font-bold font-headline uppercase tracking-widest border transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary-brand focus-visible:ring-inset",
+                        "inline-flex h-8 items-center gap-2 border px-3 font-mono text-xs uppercase tracking-[0.1em] transition-[background-color,border-color,color] duration-fast ease-standard focus-visible:outline-none focus-visible:shadow-focus",
                         isActive
-                          ? "bg-secondary-brand text-white border-secondary-brand"
-                          : "bg-surface-container-low text-on-surface-variant border-outline-variant/30 hover:bg-surface-container-high",
+                          ? "border-accent bg-accent/10 text-accent"
+                          : "border-border bg-transparent text-muted hover:bg-surface-warm hover:text-fg",
                       )}
                     >
                       {opt.label}
@@ -324,12 +297,11 @@ export default function AgentConfigForm({
           </AccordionContent>
         </AccordionItem>
 
-        {/* Backend */}
         <AccordionItem value="backend">
           <SectionTrigger value="backend" />
           <AccordionContent className="space-y-4">
             <div>
-              <Label className="text-on-surface text-sm">Type</Label>
+              <Label className="text-xs uppercase tracking-[0.1em]">Type</Label>
               <Select
                 value={backendType}
                 onValueChange={(v) => setValue("backend.type", v as BackendType)}
@@ -360,53 +332,36 @@ export default function AgentConfigForm({
           </AccordionContent>
         </AccordionItem>
 
-        {/* HITL */}
         <AccordionItem value="hitl">
           <SectionTrigger value="hitl" />
           <AccordionContent className="space-y-4">
             <HITLEditor
-              value={watch("hitl.rules")}
+              value={useWatch({ control, name: "hitl.rules" })}
               onChange={(rules) => setValue("hitl.rules", rules)}
             />
           </AccordionContent>
         </AccordionItem>
 
-        {/* Memory & Skills */}
         <AccordionItem value="memory-skills">
           <SectionTrigger value="memory-skills" />
           <AccordionContent className="space-y-4">
             <StringListEditor
               label="Memory"
-              value={watch("memory")}
+              value={useWatch({ control, name: "memory" })}
               onChange={(memory) => setValue("memory", memory)}
               placeholder="Add memory path…"
             />
             <StringListEditor
               label="Skills"
-              value={watch("skills")}
+              value={useWatch({ control, name: "skills" })}
               onChange={(skills) => setValue("skills", skills)}
               placeholder="Add skill…"
             />
           </AccordionContent>
         </AccordionItem>
 
-        {/* MCP Servers */}
-        <AccordionItem value="mcp-servers">
-          <SectionTrigger value="mcp-servers" />
-          <AccordionContent className="space-y-4">
-            {mcpServersArray.fields.map((field, index) => (
-              <McpServerEditor
-                key={field.id}
-                value={field as unknown as McpServerConfig}
-                onChange={(v) => mcpServersArray.update(index, v)}
-                onRemove={() => mcpServersArray.remove(index)}
-              />
-            ))}
-            <AddButton onClick={addMcpServer} label="Add MCP Server" />
-          </AccordionContent>
-        </AccordionItem>
+        <McpServersAccordionItem control={control} defaultValue={DEFAULT_OPEN_SECTIONS} />
 
-        {/* Subagents */}
         <AccordionItem value="subagents">
           <SectionTrigger value="subagents" />
           <AccordionContent className="space-y-4">
@@ -423,24 +378,20 @@ export default function AgentConfigForm({
           </AccordionContent>
         </AccordionItem>
 
-        {/* Response Format */}
         <AccordionItem value="response-format">
           <SectionTrigger value="response-format" />
           <AccordionContent className="space-y-4">
             <ResponseFormatEditor
-              value={watch("response_format")}
+              value={useWatch({ control, name: "response_format" })}
               onChange={(v) => setValue("response_format", v)}
             />
           </AccordionContent>
         </AccordionItem>
       </Accordion>
 
-      {/* Hidden section separator that adds breathing room below last fold */}
       <div className="h-2" aria-hidden="true" />
 
-      {/* Local Cancel + Submit (hidden on mobile where dialog footer is used)
-          Kept for embedded usage in AgentConfigViewer where no dialog footer exists. */}
-      <div className="hidden lg:flex items-center justify-end gap-3 mt-6 pt-4 border-t border-outline-variant/30">
+      <div className="mt-6 hidden items-center justify-end gap-3 border-t border-border-soft pt-4 lg:flex">
         <Button type="button" variant="outline" onClick={onCancel}>
           Cancel
         </Button>
@@ -452,18 +403,11 @@ export default function AgentConfigForm({
   );
 }
 
-// ─── Small helpers ─────────────────────────────────────────────────────────
-
 function SectionTrigger({ value }: Readonly<{ value: SectionValue }>) {
   const meta = SECTION_META[value];
   return (
-    <AccordionTrigger className={buildAccordionTriggerClass()}>
-      <span className="flex items-center gap-2">
-        <span className="material-symbols-outlined text-sm text-secondary-brand" aria-hidden="true">
-          {meta.icon}
-        </span>
-        {meta.label}
-      </span>
+    <AccordionTrigger className="font-mono text-xs uppercase tracking-[0.1em] text-muted hover:text-accent data-[state=open]:text-accent">
+      {meta.label}
     </AccordionTrigger>
   );
 }
@@ -479,17 +423,14 @@ function FormField({ id, label, error, children }: Readonly<FormFieldProps>) {
   const errorId = error ? `${id}-error` : undefined;
   return (
     <div>
-      <Label
-        htmlFor={id}
-        className="text-[10px] font-bold font-headline uppercase tracking-widest text-on-surface-variant mb-2 block"
-      >
+      <Label htmlFor={id} className="mb-2 block text-xs uppercase tracking-[0.1em]">
         {label}
       </Label>
       <div aria-invalid={!!error} aria-describedby={errorId}>
         {children}
       </div>
       {error && (
-        <p id={errorId} role="alert" className="text-destructive text-xs mt-1.5">
+        <p id={errorId} role="alert" className="mt-1.5 font-mono text-xs text-danger">
           {error}
         </p>
       )}
@@ -505,10 +446,52 @@ interface AddButtonProps {
 function AddButton({ onClick, label }: Readonly<AddButtonProps>) {
   return (
     <Button type="button" variant="outline" size="sm" onClick={onClick} className="w-full">
-      <span className="material-symbols-outlined text-sm mr-1" aria-hidden="true">
-        add
-      </span>
+      <Plus className="h-4 w-4" aria-hidden="true" />
       {label}
     </Button>
   );
 }
+
+// Isolated MCP servers accordion item: owns its useFieldArray AND the
+// AccordionItem so the parent form's re-renders (triggered by useWatch on
+// unrelated fields) do NOT remount the McpServerEditor instances and steal
+// input focus. The whole AccordionItem is memoized so it only re-renders when
+// the MCP servers array itself changes.
+const McpServersAccordionItem = memo(function McpServersAccordionItem({
+  control,
+  defaultValue,
+}: Readonly<{
+  control: Control<AgentConfigFormData>;
+  defaultValue: SectionValue[];
+}>) {
+  const mcpServersArray = useFieldArray({ control, name: "mcp_servers" });
+  const isOpen = defaultValue.includes("mcp-servers");
+  const addMcpServer = useCallback(
+    () => mcpServersArray.append({ ...EMPTY_MCP_SERVER }),
+    [mcpServersArray],
+  );
+  const updateMcpServer = useCallback(
+    (index: number, v: McpServerConfig) => mcpServersArray.update(index, v),
+    [mcpServersArray],
+  );
+  const removeMcpServer = useCallback(
+    (index: number) => mcpServersArray.remove(index),
+    [mcpServersArray],
+  );
+  return (
+    <AccordionItem value="mcp-servers">
+      <SectionTrigger value="mcp-servers" />
+      <AccordionContent className="space-y-4" data-state={isOpen ? "open" : "closed"}>
+        {mcpServersArray.fields.map((field, index) => (
+          <McpServerEditor
+            key={field.id}
+            value={field as unknown as McpServerConfig}
+            onChange={(v) => updateMcpServer(index, v)}
+            onRemove={() => removeMcpServer(index)}
+          />
+        ))}
+        <AddButton onClick={addMcpServer} label="Add MCP Server" />
+      </AccordionContent>
+    </AccordionItem>
+  );
+});

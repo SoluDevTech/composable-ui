@@ -15,6 +15,11 @@ vi.mock("@/application/pages/RagPage", () => ({
   default: () => <div>RagPage</div>,
 }));
 
+vi.mock("@/application/pages/SettingsPage", () => ({
+  default: () => <div>SettingsPage</div>,
+}));
+
+import AppDefault from "@/application/App";
 import { PageFallback } from "@/application/App";
 
 describe("PageFallback — a11y", () => {
@@ -36,5 +41,13 @@ describe("PageFallback — a11y", () => {
     renderWithProviders(<PageFallback />);
 
     expect(screen.getByText(/loading/i)).toBeInTheDocument();
+  });
+});
+
+describe("App routing", () => {
+  it("renders the /settings route", () => {
+    renderWithProviders(<AppDefault />, { initialEntries: ["/settings"] });
+
+    expect(screen.getByText("SettingsPage")).toBeInTheDocument();
   });
 });

@@ -1,72 +1,59 @@
+import { Bot, Settings, Trash2 } from "lucide-react";
 import type { AgentConfigMetadata } from "@/domain/entities/agent/agentConfigMetadata";
 import StatusBadge from "@/application/components/shared/StatusBadge";
+import { Button } from "@/application/components/ui/button";
 
 interface AgentCardProps {
   readonly agent: AgentConfigMetadata;
   readonly onConfigure: (name: string) => void;
+  readonly onDelete?: (name: string) => void;
 }
 
-const AGENT_ICONS: Record<string, string> = {
-  a: "smart_toy",
-  b: "psychology",
-  c: "code",
-  d: "data_object",
-  e: "engineering",
-  f: "functions",
-  g: "generating_tokens",
-  h: "hub",
-  i: "integration_instructions",
-  j: "join",
-  k: "key",
-  l: "lightbulb",
-  m: "model_training",
-  n: "neurology",
-  o: "offline_bolt",
-  p: "precision_manufacturing",
-  q: "query_stats",
-  r: "robot_2",
-  s: "schema",
-  t: "terminal",
-  u: "upgrade",
-  v: "verified",
-  w: "workspaces",
-  x: "extension",
-  y: "yield",
-  z: "zoom_in",
-};
-
-function getAgentIcon(name: string): string {
-  const firstLetter = name.charAt(0).toLowerCase();
-  return AGENT_ICONS[firstLetter] ?? "smart_toy";
-}
-
-export default function AgentCard({ agent, onConfigure }: Readonly<AgentCardProps>) {
+export default function AgentCard({ agent, onConfigure, onDelete }: Readonly<AgentCardProps>) {
   return (
-    <div className="bg-surface-container-lowest rounded-xl p-8 ambient-shadow hover:translate-y-[-2px] transition-transform duration-300">
-      {/* Header: icon + status */}
-      <div className="flex items-center justify-between mb-6">
-        <div className="w-12 h-12 rounded-xl bg-primary-container flex items-center justify-center">
-          <span className="material-symbols-outlined text-white text-2xl">
-            {getAgentIcon(agent.name)}
-          </span>
+    <div
+      data-od-id={`agent-card-${agent.name}`}
+      className="group relative flex flex-col gap-3 border border-border bg-surface p-4 block-shadow-raised transition-[border-color,box-shadow,transform] duration-base ease-standard hover:-translate-y-0.5 hover:border-accent"
+    >
+      <div className="flex items-center justify-between">
+        <div
+          className="flex h-12 w-12 items-center justify-center border border-border bg-surface-warm font-display text-lg text-accent"
+          aria-hidden="true"
+        >
+          <Bot className="h-6 w-6" />
         </div>
         <StatusBadge status={agent.is_builtin ? "Active" : "Standby"} />
       </div>
 
-      {/* Name */}
-      <h3 className="font-headline text-2xl font-bold text-on-surface mb-2">{agent.name}</h3>
+      <h3 className="min-w-0 truncate font-display text-lg uppercase tracking-[0.06em] text-fg">
+        {agent.name}
+      </h3>
+      <p className="font-mono text-xs text-muted">{agent.model}</p>
 
-      {/* Model */}
-      <p className="text-sm text-on-surface-variant mb-8">{agent.model}</p>
-
-      {/* Configure link */}
-      <button
-        type="button"
-        onClick={() => onConfigure(agent.name)}
-        className="flex items-center gap-2 text-secondary-brand font-headline text-xs font-bold uppercase tracking-widest hover:opacity-80 transition-opacity"
-      >
-        Configure <span className="material-symbols-outlined text-base">arrow_forward</span>
-      </button>
+      <div className="mt-auto flex items-center gap-2 border-t border-border-soft pt-2">
+        <Button
+          type="button"
+          variant="secondary"
+          size="sm"
+          onClick={() => onConfigure(agent.name)}
+          data-od-id={`agent-configure-${agent.name}`}
+        >
+          <Settings className="h-4 w-4" aria-hidden="true" />
+          Configure
+        </Button>
+        {onDelete && (
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            onClick={() => onDelete(agent.name)}
+            aria-label={`Delete ${agent.name}`}
+            className="ml-auto h-8 w-8"
+          >
+            <Trash2 className="h-4 w-4" aria-hidden="true" />
+          </Button>
+        )}
+      </div>
     </div>
   );
 }

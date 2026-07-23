@@ -1,3 +1,4 @@
+import { Trash2 } from "lucide-react";
 import type { SubAgentConfig } from "@/domain/entities/agent/agentConfig";
 import { Button } from "@/application/components/ui/button";
 import { Input } from "@/application/components/ui/input";
@@ -24,27 +25,29 @@ export default function SubAgentEditor({
   }
 
   return (
-    <div className="bg-surface-container-low rounded-xl p-4 space-y-4">
+    <div className="space-y-4 border border-border bg-surface p-3">
       <div className="flex items-center justify-between">
-        <h4 className="text-xs font-bold font-headline uppercase tracking-widest text-on-surface-variant">
+        <h4 className="font-mono text-xs uppercase tracking-[0.1em] text-muted">
           {value.name || `Subagent ${index + 1}`}
         </h4>
         <Button
           type="button"
           variant="ghost"
-          size="sm"
+          size="icon"
           onClick={onRemove}
           aria-label="Remove subagent"
+          className="h-7 w-7"
         >
-          <span className="material-symbols-outlined text-sm" aria-hidden="true">
-            delete
-          </span>
+          <Trash2 className="h-4 w-4" aria-hidden="true" />
         </Button>
       </div>
 
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <Label htmlFor={`sub-name-${index}`} className="text-on-surface">
+          <Label
+            htmlFor={`sub-name-${index}`}
+            className="mb-1.5 block text-xs uppercase tracking-[0.1em]"
+          >
             Name
           </Label>
           <Input
@@ -55,7 +58,10 @@ export default function SubAgentEditor({
           />
         </div>
         <div>
-          <Label htmlFor={`sub-model-${index}`} className="text-on-surface">
+          <Label
+            htmlFor={`sub-model-${index}`}
+            className="mb-1.5 block text-xs uppercase tracking-[0.1em]"
+          >
             Model
           </Label>
           <Input
@@ -68,7 +74,10 @@ export default function SubAgentEditor({
       </div>
 
       <div>
-        <Label htmlFor={`sub-desc-${index}`} className="text-on-surface">
+        <Label
+          htmlFor={`sub-desc-${index}`}
+          className="mb-1.5 block text-xs uppercase tracking-[0.1em]"
+        >
           Description
         </Label>
         <Input
@@ -80,7 +89,10 @@ export default function SubAgentEditor({
       </div>
 
       <div>
-        <Label htmlFor={`sub-instr-${index}`} className="text-on-surface">
+        <Label
+          htmlFor={`sub-instr-${index}`}
+          className="mb-1.5 block text-xs uppercase tracking-[0.1em]"
+        >
           Instructions
         </Label>
         <Textarea

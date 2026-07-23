@@ -27,16 +27,6 @@ vi.mock("@/application/hooks/rag/useFiles", () => ({
   }),
 }));
 
-vi.mock("@/application/hooks/rag/useRagQuery", () => ({
-  useRagQuery: () => ({
-    mutate: vi.fn(),
-    data: null,
-    isPending: false,
-    error: null,
-    reset: vi.fn(),
-  }),
-}));
-
 vi.mock("@/application/hooks/rag/useClassicalQuery", () => ({
   useClassicalQuery: () => ({
     mutate: vi.fn(),
@@ -45,14 +35,6 @@ vi.mock("@/application/hooks/rag/useClassicalQuery", () => ({
     error: null,
     reset: vi.fn(),
   }),
-}));
-
-vi.mock("@/application/hooks/rag/useIndexFile", () => ({
-  useIndexFile: () => ({ mutate: vi.fn(), isPending: false }),
-}));
-
-vi.mock("@/application/hooks/rag/useIndexFolder", () => ({
-  useIndexFolder: () => ({ mutate: vi.fn(), isPending: false }),
 }));
 
 vi.mock("@/application/hooks/rag/useClassicalIndexFile", () => ({
@@ -104,13 +86,13 @@ describe("RagPage", () => {
     expect(queryTab).toHaveAttribute("aria-selected", "false");
   });
 
-  it("clicking Query tab shows QueryPanel", async () => {
+  it("clicking Query tab shows QueryPanel with search button", async () => {
     const user = userEvent.setup();
     renderWithProviders(<RagPage />, { initialEntries: ["/rag"] });
 
     await user.click(screen.getByRole("tab", { name: /query/i }));
 
-    expect(screen.getByRole("button", { name: /lightrag/i })).toBeInTheDocument();
+    expect(screen.getByPlaceholderText(/ask a question|search|query/i)).toBeInTheDocument();
   });
 
   it("WorkspaceSelector is visible on Query tab", async () => {

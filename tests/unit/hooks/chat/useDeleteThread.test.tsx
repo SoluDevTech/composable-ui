@@ -11,7 +11,7 @@ vi.mock("@/infrastructure/api/chat/chatApi", () => ({
     createThread: vi.fn(),
     getThread: vi.fn(),
     deleteThread: vi.fn(),
-    getMessages: vi.fn(),
+    getThreadHistory: vi.fn(),
     sendMessage: vi.fn(),
     streamMessage: vi.fn(),
   },

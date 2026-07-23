@@ -1,21 +1,36 @@
 import type { ChatRequest } from "@/domain/entities/chat/chatRequest";
 import type { Message } from "@/domain/entities/chat/message";
-import { StreamEventType } from "@/domain/entities/chat/streamEvent";
-import type { StreamEvent } from "@/domain/entities/chat/streamEvent";
 import type { Thread } from "@/domain/entities/chat/thread";
+import type { TraceEvent, ThreadHistory } from "@/domain/entities/chat/traceEvent";
+import { TraceEventType } from "@/domain/entities/chat/traceEvent";
 import type { IChatPort } from "@/domain/ports/chat/chatPort";
 import { apiClient } from "@/infrastructure/api/axiosInstance";
 import { configRepository } from "@/infrastructure/config/configRepositoryInstance";
 import { fetchEventSource } from "@microsoft/fetch-event-source";
 
-const VALID_EVENT_TYPES: string[] = Object.values(StreamEventType);
+const VALID_EVENT_TYPES: ReadonlySet<string> = new Set(Object.values(TraceEventType));
 
-function isValidStreamEvent(parsed: unknown): parsed is StreamEvent {
-  if (typeof parsed !== "object" || parsed === null) return false;
-  const p = parsed as Record<string, unknown>;
-  if (!VALID_EVENT_TYPES.includes(p.type as string)) return false;
-  if (typeof p.data !== "string") return false;
+function isObject(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null;
+}
+
+function isValidTraceEvent(parsed: unknown): parsed is TraceEvent {
+  if (!isObject(parsed)) return false;
+  if (typeof parsed.type !== "string" || !VALID_EVENT_TYPES.has(parsed.type)) return false;
+  if (typeof parsed.id !== "string") return false;
+  if (typeof parsed.thread_id !== "string") return false;
+  if (typeof parsed.turn_id !== "string") return false;
+  if (typeof parsed.timestamp !== "string") return false;
+  if (typeof parsed.sequence !== "number") return false;
+  if (parsed.source !== null && typeof parsed.source !== "string") return false;
+  if (parsed.name !== null && typeof parsed.name !== "string") return false;
+  if (parsed.content !== null && typeof parsed.content !== "string") return false;
+  if (parsed.metadata !== null && !isObject(parsed.metadata)) return false;
   return true;
+}
+
+function isErrorPayload(parsed: unknown): parsed is { type: "error"; data: string } {
+  return isObject(parsed) && parsed.type === "error" && typeof parsed.data === "string";
 }
 
 export const chatApi: IChatPort = {
@@ -40,8 +55,8 @@ export const chatApi: IChatPort = {
     await apiClient.delete(`/api/v1/threads/${threadId}`);
   },
 
-  async getMessages(threadId: string): Promise<Message[]> {
-    const response = await apiClient.get<Message[]>(`/api/v1/threads/${threadId}/messages`);
+  async getThreadHistory(threadId: string): Promise<ThreadHistory> {
+    const response = await apiClient.get<ThreadHistory>(`/api/v1/threads/${threadId}/history`);
     return response.data;
   },
 
@@ -55,7 +70,7 @@ export const chatApi: IChatPort = {
   streamMessage(
     threadId: string,
     request: ChatRequest,
-    onChunk: (event: StreamEvent) => void,
+    onEvent: (event: TraceEvent) => void,
     onComplete: () => void,
     onError: (err: Error) => void,
   ): AbortController {
@@ -77,19 +92,18 @@ export const chatApi: IChatPort = {
           if (ev.data === "[DONE]") return;
           if (!ev.data) return;
           try {
-            const parsed = JSON.parse(ev.data);
-            if (isValidStreamEvent(parsed)) {
-              onChunk(parsed);
+            const parsed = JSON.parse(ev.data) as unknown;
+            if (isErrorPayload(parsed)) {
+              onError(new Error(parsed.data));
+              return;
+            }
+            if (isValidTraceEvent(parsed)) {
+              onEvent(parsed);
             } else {
               console.warn("[SSE] Unknown event format:", ev.data);
-              onChunk({
-                type: StreamEventType.CONTENT,
-                data: ev.data,
-              });
             }
           } catch {
-            // Fallback: treat raw data as content for backward compatibility
-            onChunk({ type: StreamEventType.CONTENT, data: ev.data });
+            console.warn("[SSE] Failed to parse:", ev.data);
           }
         },
         onclose() {

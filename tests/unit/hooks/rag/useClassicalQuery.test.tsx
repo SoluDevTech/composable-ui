@@ -7,7 +7,6 @@ import type { ReactNode } from "react";
 
 vi.mock("@/infrastructure/api/rag/ragQueryApi", () => ({
   ragQueryApi: {
-    queryLightRAG: vi.fn(),
     queryClassical: vi.fn(),
   },
 }));

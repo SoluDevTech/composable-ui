@@ -5,61 +5,73 @@ interface StatusBadgeProps {
   className?: string;
 }
 
-type BadgeVariant = {
-  bg: string;
-  text: string;
-  label?: string;
+type BadgeVariant = "success" | "warn" | "accent" | "danger" | "default";
+
+const VARIANT_CLASSES: Record<BadgeVariant, string> = {
+  success: "bg-success/10 text-success border-success",
+  warn: "bg-warn/10 text-warn border-warn",
+  accent: "bg-accent/10 text-accent border-accent",
+  danger: "bg-danger/10 text-danger border-danger",
+  default: "bg-surface-warm text-muted border-border",
 };
 
 function resolveVariant(status: string): BadgeVariant {
   const normalized = status.toLowerCase();
 
-  if (normalized === "active" || normalized === "completed" || normalized === "approved") {
-    return { bg: "bg-emerald-100", text: "text-emerald-700" };
+  if (
+    normalized === "active" ||
+    normalized === "completed" ||
+    normalized === "approved" ||
+    normalized === "success" ||
+    normalized === "enabled"
+  ) {
+    return "success";
   }
 
   if (
     normalized === "awaiting_hitl" ||
     normalized === "awaiting review" ||
-    normalized === "pending"
+    normalized === "pending" ||
+    normalized === "waiting" ||
+    normalized === "warn"
   ) {
-    return { bg: "bg-orange-100", text: "text-orange-700" };
+    return "warn";
   }
 
   if (
     normalized === "streaming" ||
     normalized === "in_progress" ||
     normalized === "in progress" ||
-    normalized === "processing"
+    normalized === "processing" ||
+    normalized === "accent"
   ) {
-    return { bg: "bg-blue-100", text: "text-blue-700" };
+    return "accent";
   }
 
-  if (normalized === "rejected" || normalized === "error" || normalized === "failed") {
-    return { bg: "bg-red-100", text: "text-red-700" };
+  if (
+    normalized === "rejected" ||
+    normalized === "error" ||
+    normalized === "failed" ||
+    normalized === "danger"
+  ) {
+    return "danger";
   }
 
-  if (normalized === "standby" || normalized === "off") {
-    return { bg: "bg-slate-100", text: "text-slate-500" };
-  }
-
-  return { bg: "bg-surface-container-high", text: "text-on-surface-variant" };
+  return "default";
 }
 
-/** Format display label from a raw status string. */
 function formatLabel(status: string): string {
   return status.replace(/_/g, " ").replace(/\b\w/g, (m) => m.toUpperCase());
 }
 
 export default function StatusBadge({ status, className }: Readonly<StatusBadgeProps>) {
-  const { bg, text } = resolveVariant(status);
+  const variant = resolveVariant(status);
 
   return (
     <span
       className={cn(
-        "inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-widest select-none",
-        bg,
-        text,
+        "inline-flex items-center border px-2 py-0.5 font-mono text-xs uppercase tracking-[0.1em] select-none rounded-none",
+        VARIANT_CLASSES[variant],
         className,
       )}
     >
