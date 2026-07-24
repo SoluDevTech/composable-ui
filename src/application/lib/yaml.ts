@@ -43,7 +43,6 @@ export function serializeAgentConfig(config: AgentConfig): string {
     name: config.name,
     model: config.model,
     tools: config.tools,
-    middleware: config.middleware,
     backend: config.backend,
     hitl: config.hitl,
     memory: config.memory,

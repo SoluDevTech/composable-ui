@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { NavLink } from "react-router-dom";
-import { Bot, Database, MessagesSquare, Settings, X } from "lucide-react";
+import { BookOpen, Bot, Database, MessagesSquare, Settings, Sparkles, X } from "lucide-react";
 import { cn } from "@/application/lib/utils";
 import { useSidebarStore } from "@/application/stores/useSidebarStore";
 
@@ -14,6 +14,8 @@ interface NavItem {
 const NAV_ITEMS: readonly NavItem[] = [
   { to: "/chat", label: "Orchestration", icon: MessagesSquare, odId: "nav-orchestration" },
   { to: "/agents", label: "Agents", icon: Bot, odId: "nav-agents" },
+  { to: "/skills", label: "Skills", icon: Sparkles, odId: "nav-skills" },
+  { to: "/memories", label: "Memories", icon: BookOpen, odId: "nav-memories" },
   { to: "/rag", label: "RAG Storage", icon: Database, odId: "nav-rag" },
 ] as const;
 

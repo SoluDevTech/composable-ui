@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { BackendType, MiddlewareType } from "./agentConfig";
+import { BackendType } from "./agentConfig";
 import { McpTransportType } from "./mcpServerConfig";
 
 export const interruptRuleSchema = z.object({
@@ -11,15 +11,12 @@ export const hitlConfigSchema = z.object({
   rules: z.record(z.string(), z.union([z.boolean(), interruptRuleSchema])),
 });
 
-export const backendConfigSchema = z.object({
-  type: z.enum([
-    BackendType.STATE,
-    BackendType.STORE,
-    BackendType.FILESYSTEM,
-    BackendType.COMPOSITE,
-  ]),
-  root_dir: z.string().nullable().optional(),
-});
+export const backendConfigSchema = z
+  .object({
+    type: z.enum([BackendType.STORE]),
+    checkpoint_backend: z.enum(["memory", "postgres"]).default("memory"),
+  })
+  .strict();
 
 export const mcpServerConfigSchema = z.object({
   name: z.string().min(1, "MCP server name is required"),
@@ -43,30 +40,30 @@ export const subAgentConfigSchema = z.object({
   response_format: z.record(z.string(), z.unknown()).nullable().optional(),
 });
 
-export const agentConfigSchema = z.object({
-  name: z
-    .string()
-    .min(1, "Agent name is required")
-    .max(100, "Agent name must be 100 characters or less")
-    .regex(
-      /^[a-zA-Z0-9._-]+$/,
-      "Agent name must contain only alphanumeric characters, dots, hyphens, and underscores",
-    ),
-  model: z.string().min(1, "Model is required"),
-  system_prompt: z.string().nullable().optional(),
-  system_prompt_file: z.string().nullable().optional(),
-  tools: z.array(z.string()),
-  middleware: z
-    .enum([MiddlewareType.TODO_LIST, MiddlewareType.FILESYSTEM, MiddlewareType.SUB_AGENT])
-    .array(),
-  backend: backendConfigSchema,
-  hitl: hitlConfigSchema,
-  memory: z.array(z.string()),
-  skills: z.array(z.string()),
-  subagents: z.array(subAgentConfigSchema),
-  mcp_servers: z.array(mcpServerConfigSchema),
-  response_format: z.record(z.string(), z.unknown()).nullable().optional(),
-  debug: z.boolean(),
-});
+export const agentConfigSchema = z
+  .object({
+    name: z
+      .string()
+      .min(1, "Agent name is required")
+      .max(100, "Agent name must be 100 characters or less")
+      .regex(
+        /^[a-zA-Z0-9._-]+$/,
+        "Agent name must contain only alphanumeric characters, dots, hyphens, and underscores",
+      ),
+    model: z.string().min(1, "Model is required"),
+    system_prompt: z.string().nullable().optional(),
+    system_prompt_file: z.string().nullable().optional(),
+    tools: z.array(z.string()),
+    backend: backendConfigSchema,
+    hitl: hitlConfigSchema,
+    memory: z.array(z.string()),
+    skills: z.array(z.string()),
+    subagents: z.array(subAgentConfigSchema),
+    mcp_servers: z.array(mcpServerConfigSchema),
+    response_format: z.record(z.string(), z.unknown()).nullable().optional(),
+    debug: z.boolean(),
+  })
+  .strict();
 
 export type AgentConfigFormData = z.infer<typeof agentConfigSchema>;
+export type AgentConfigFormInput = z.input<typeof agentConfigSchema>;

@@ -6,6 +6,8 @@ import SettingsPage from "@/application/pages/SettingsPage";
 // Lazy-load secondary routes for code-splitting / smaller initial bundle.
 const AgentsPage = lazy(() => import("@/application/pages/AgentsPage"));
 const RagPage = lazy(() => import("@/application/pages/RagPage"));
+const SkillsPage = lazy(() => import("@/application/pages/SkillsPage"));
+const MemoriesPage = lazy(() => import("@/application/pages/MemoriesPage"));
 
 function PageFallback() {
   return (
@@ -24,6 +26,8 @@ function App() {
       <Route path="/agents" element={<AgentsPage />} />
       <Route path="/chat/:threadId?" element={<ChatPage />} />
       <Route path="/rag" element={<RagPage />} />
+      <Route path="/skills" element={<SkillsPage />} />
+      <Route path="/memories" element={<MemoriesPage />} />
       <Route path="/settings" element={<SettingsPage />} />
     </Routes>
   );

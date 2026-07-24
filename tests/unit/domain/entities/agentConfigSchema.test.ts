@@ -7,7 +7,7 @@ import {
   mcpServerConfigSchema,
   subAgentConfigSchema,
 } from "@/domain/entities/agent/agentConfigSchema";
-import { BackendType, MiddlewareType } from "@/domain/entities/agent/agentConfig";
+import { BackendType } from "@/domain/entities/agent/agentConfig";
 import { McpTransportType } from "@/domain/entities/agent/mcpServerConfig";
 
 describe("interruptRuleSchema", () => {
@@ -49,31 +49,80 @@ describe("hitlConfigSchema", () => {
 });
 
 describe("backendConfigSchema", () => {
-  it("accepts state type without root_dir", () => {
-    expect(backendConfigSchema.parse({ type: BackendType.STATE })).toEqual({
-      type: BackendType.STATE,
-    });
+  it("accepts store type without root_dir", () => {
+    const parsed = backendConfigSchema.parse({ type: BackendType.STORE });
+    expect(parsed.type).toBe(BackendType.STORE);
+    expect(parsed).not.toHaveProperty("root_dir");
   });
 
-  it("accepts filesystem type with root_dir", () => {
-    expect(
-      backendConfigSchema.parse({
-        type: BackendType.FILESYSTEM,
-        root_dir: "/data",
-      }),
-    ).toEqual({ type: BackendType.FILESYSTEM, root_dir: "/data" });
+  it("rejects state backend type", () => {
+    expect(() => backendConfigSchema.parse({ type: "state" })).toThrow();
+  });
+
+  it("accepts store type with checkpoint_backend", () => {
+    const parsed = backendConfigSchema.parse({
+      type: BackendType.STORE,
+      checkpoint_backend: "postgres",
+    });
+    expect(parsed).toHaveProperty("checkpoint_backend", "postgres");
+  });
+
+  it("defaults checkpoint_backend to 'memory' when omitted", () => {
+    const parsed = backendConfigSchema.parse({ type: BackendType.STORE });
+    expect(parsed).toHaveProperty("checkpoint_backend", "memory");
   });
 
   it("rejects invalid backend type", () => {
     expect(() => backendConfigSchema.parse({ type: "invalid" })).toThrow();
   });
 
-  it("accepts null root_dir", () => {
-    const result = backendConfigSchema.parse({
-      type: BackendType.STATE,
-      root_dir: null,
-    });
-    expect(result.root_dir).toBeNull();
+  it("rejects filesystem backend type", () => {
+    // Arrange — filesystem must no longer be a valid backend type
+    // Act & Assert — parsing should throw
+    expect(() =>
+      backendConfigSchema.parse({ type: "filesystem" }),
+    ).toThrow();
+  });
+
+  it("rejects composite backend type", () => {
+    // Arrange — composite must no longer be a valid backend type
+    // Act & Assert — parsing should throw
+    expect(() =>
+      backendConfigSchema.parse({ type: "composite" }),
+    ).toThrow();
+  });
+
+  it("rejects root_dir field", () => {
+    // Arrange — root_dir must no longer be accepted by the schema
+    // Act & Assert — parsing with root_dir should throw (strict mode rejects unknown keys)
+    expect(() =>
+      backendConfigSchema.parse({
+        type: BackendType.STORE,
+        root_dir: "/data",
+      }),
+    ).toThrow();
+  });
+
+  it("rejects invalid store_backend value", () => {
+    // Arrange — store_backend is no longer a valid field, so providing it should throw
+    // Act & Assert — an invalid (now unknown) key should throw
+    expect(() =>
+      backendConfigSchema.parse({
+        type: BackendType.STORE,
+        store_backend: "redis",
+      }),
+    ).toThrow();
+  });
+
+  it("rejects invalid checkpoint_backend value", () => {
+    // Arrange — only "memory" and "postgres" are valid
+    // Act & Assert — an invalid value should throw
+    expect(() =>
+      backendConfigSchema.parse({
+        type: BackendType.STORE,
+        checkpoint_backend: "redis",
+      }),
+    ).toThrow();
   });
 });
 
@@ -154,63 +203,125 @@ describe("subAgentConfigSchema", () => {
 });
 
 describe("agentConfigSchema", () => {
-  it("accepts minimal valid config", () => {
-    const result = agentConfigSchema.parse({
-      name: "test-agent",
-      model: "openai:gpt-4o",
-      tools: [],
-      middleware: [],
-      backend: { type: BackendType.STATE },
-      hitl: { rules: {} },
-      memory: [],
-      skills: [],
-      subagents: [],
-      mcp_servers: [],
-      debug: false,
-    });
+  const baseConfig = {
+    name: "test-agent",
+    model: "openai:gpt-4o",
+    tools: [],
+    backend: {
+      type: BackendType.STORE,
+      checkpoint_backend: "memory",
+    },
+    hitl: { rules: {} },
+    memory: [],
+    skills: [],
+    subagents: [],
+    mcp_servers: [],
+    debug: false,
+  };
+
+  it("accepts minimal valid config without middleware", () => {
+    // Arrange — omit middleware entirely
+    // Act
+    const result = agentConfigSchema.parse(baseConfig);
+    // Assert
     expect(result.name).toBe("test-agent");
+    expect(result).not.toHaveProperty("middleware");
   });
 
-  it("accepts full valid config", () => {
-    const config = {
-      name: "full-agent",
-      model: "openai:claude-haiku-4.5",
-      system_prompt: "You are helpful",
-      tools: ["search", "calculator"],
-      middleware: [MiddlewareType.TODO_LIST, MiddlewareType.FILESYSTEM],
-      backend: { type: BackendType.FILESYSTEM, root_dir: "/data" },
-      hitl: {
-        rules: {
-          create_file: true,
-          delete_file: { before: true, after: false },
-        },
-      },
-      memory: ["/mem/1"],
-      skills: ["web-search"],
-      subagents: [
-        {
-          name: "sub",
-          description: "Sub agent",
-          tools: [],
-          skills: [],
-          mcp_servers: [],
-        },
-      ],
-      mcp_servers: [
-        {
-          name: "mcp",
-          transport: McpTransportType.STDIO,
-          command: "npx",
-          args: ["mcp"],
-          headers: {},
-          env: {},
-        },
-      ],
-      debug: true,
+  it("rejects middleware field", () => {
+    // Arrange — middleware must no longer be a valid field
+    const configWithMiddleware = {
+      ...baseConfig,
+      middleware: [],
     };
-    const result = agentConfigSchema.parse(config);
-    expect(result.name).toBe("full-agent");
-    expect(result.debug).toBe(true);
+    // Act & Assert — strict schema should reject unknown key "middleware"
+    expect(() => agentConfigSchema.parse(configWithMiddleware)).toThrow();
+  });
+
+  it("rejects middleware field with values", () => {
+    // Arrange — even with valid-looking values, middleware must be rejected
+    const configWithMiddleware = {
+      ...baseConfig,
+      middleware: ["todo_list"],
+    };
+    // Act & Assert
+    expect(() => agentConfigSchema.parse(configWithMiddleware)).toThrow();
+  });
+
+  it("rejects filesystem backend type", () => {
+    // Arrange
+    const configWithFilesystem = {
+      ...baseConfig,
+      backend: { type: "filesystem", root_dir: "/data" },
+    };
+    // Act & Assert
+    expect(() => agentConfigSchema.parse(configWithFilesystem)).toThrow();
+  });
+
+  it("rejects composite backend type", () => {
+    // Arrange
+    const configWithComposite = {
+      ...baseConfig,
+      backend: { type: "composite", root_dir: "/data" },
+    };
+    // Act & Assert
+    expect(() => agentConfigSchema.parse(configWithComposite)).toThrow();
+  });
+
+  it("rejects root_dir in backend", () => {
+    // Arrange
+    const configWithRootDir = {
+      ...baseConfig,
+      backend: {
+        type: BackendType.STORE,
+        checkpoint_backend: "memory",
+        root_dir: "/data",
+      },
+    };
+    // Act & Assert — root_dir must no longer be accepted
+    expect(() => agentConfigSchema.parse(configWithRootDir)).toThrow();
+  });
+
+  it("accepts checkpoint_backend set to postgres", () => {
+    // Arrange
+    const configWithPostgres = {
+      ...baseConfig,
+      backend: {
+        type: BackendType.STORE,
+        checkpoint_backend: "postgres",
+      },
+    };
+    // Act
+    const result = agentConfigSchema.parse(configWithPostgres);
+    // Assert
+    expect(result.backend).toHaveProperty("checkpoint_backend", "postgres");
+  });
+
+  it("rejects store_backend field (removed)", () => {
+    // Arrange — store_backend is no longer a valid field
+    const configWithStoreBackend = {
+      ...baseConfig,
+      backend: {
+        type: BackendType.STORE,
+        store_backend: "memory",
+        checkpoint_backend: "memory",
+      },
+    };
+    // Act & Assert — strict schema should reject unknown key "store_backend"
+    expect(() => agentConfigSchema.parse(configWithStoreBackend)).toThrow();
+  });
+
+  it("rejects invalid checkpoint_backend value", () => {
+    // Arrange
+    const configWithInvalidCheckpoint = {
+      ...baseConfig,
+      backend: {
+        type: BackendType.STORE,
+        checkpoint_backend: "redis",
+      },
+    };
+    // Act & Assert
+    expect(() => agentConfigSchema.parse(configWithInvalidCheckpoint)).toThrow();
   });
 
   it("rejects missing required fields", () => {
@@ -220,17 +331,8 @@ describe("agentConfigSchema", () => {
   it("rejects whitespace-only name", () => {
     expect(() =>
       agentConfigSchema.parse({
+        ...baseConfig,
         name: "   ",
-        model: "gpt-4",
-        tools: [],
-        middleware: [],
-        backend: { type: BackendType.STATE },
-        hitl: { rules: {} },
-        memory: [],
-        skills: [],
-        subagents: [],
-        mcp_servers: [],
-        debug: false,
       }),
     ).toThrow();
   });
@@ -238,17 +340,8 @@ describe("agentConfigSchema", () => {
   it("rejects name over 100 characters", () => {
     expect(() =>
       agentConfigSchema.parse({
+        ...baseConfig,
         name: "a".repeat(101),
-        model: "gpt-4",
-        tools: [],
-        middleware: [],
-        backend: { type: BackendType.STATE },
-        hitl: { rules: {} },
-        memory: [],
-        skills: [],
-        subagents: [],
-        mcp_servers: [],
-        debug: false,
       }),
     ).toThrow();
   });
@@ -256,53 +349,16 @@ describe("agentConfigSchema", () => {
   it("rejects name with special characters", () => {
     expect(() =>
       agentConfigSchema.parse({
+        ...baseConfig,
         name: "my agent!",
-        model: "gpt-4",
-        tools: [],
-        middleware: [],
-        backend: { type: BackendType.STATE },
-        hitl: { rules: {} },
-        memory: [],
-        skills: [],
-        subagents: [],
-        mcp_servers: [],
-        debug: false,
-      }),
-    ).toThrow();
-  });
-
-  it("rejects invalid middleware value", () => {
-    expect(() =>
-      agentConfigSchema.parse({
-        name: "bad",
-        model: "gpt-4",
-        tools: [],
-        middleware: ["invalid"],
-        backend: { type: BackendType.STATE },
-        hitl: { rules: {} },
-        memory: [],
-        skills: [],
-        subagents: [],
-        mcp_servers: [],
-        debug: false,
       }),
     ).toThrow();
   });
 
   it("accepts optional system_prompt_file", () => {
     const result = agentConfigSchema.parse({
-      name: "agent",
-      model: "gpt-4",
+      ...baseConfig,
       system_prompt_file: "/prompts/system.txt",
-      tools: [],
-      middleware: [],
-      backend: { type: BackendType.STATE },
-      hitl: { rules: {} },
-      memory: [],
-      skills: [],
-      subagents: [],
-      mcp_servers: [],
-      debug: false,
     });
     expect(result.system_prompt_file).toBe("/prompts/system.txt");
   });
