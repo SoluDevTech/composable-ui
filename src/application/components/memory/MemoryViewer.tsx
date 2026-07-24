@@ -6,6 +6,7 @@ import remarkGfm from "remark-gfm";
 import { useStoreFile } from "@/application/hooks/store/useStoreFile";
 import { usePutStoreFile } from "@/application/hooks/store/usePutStoreFile";
 import { useDeleteStoreFile } from "@/application/hooks/store/useDeleteStoreFile";
+import { extractApiMessage } from "@/infrastructure/api/store/storeApi";
 import {
   Dialog,
   DialogContent,
@@ -107,7 +108,7 @@ export default function MemoryViewer({
           toast.success("Memory saved successfully");
           setMode("view");
         },
-        onError: (err) => toast.error(err.message),
+        onError: (err) => toast.error(extractApiMessage(err)),
       },
     );
   }
@@ -124,7 +125,7 @@ export default function MemoryViewer({
         setConfirmDelete(false);
       },
       onError: (err) => {
-        toast.error(err.message);
+        toast.error(extractApiMessage(err));
         setConfirmDelete(false);
       },
     });

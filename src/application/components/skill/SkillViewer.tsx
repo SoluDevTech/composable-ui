@@ -7,6 +7,7 @@ import { useStoreFile } from "@/application/hooks/store/useStoreFile";
 import { usePutStoreFile } from "@/application/hooks/store/usePutStoreFile";
 import { useDeleteStoreFile } from "@/application/hooks/store/useDeleteStoreFile";
 import { buildFrontmatter, parseFrontmatter } from "@/application/lib/frontmatter";
+import { extractApiMessage } from "@/infrastructure/api/store/storeApi";
 import {
   Dialog,
   DialogContent,
@@ -138,7 +139,7 @@ export default function SkillViewer({ skillPath, open, onOpenChange }: Readonly<
           toast.success("Skill saved successfully");
           setMode("view");
         },
-        onError: (err) => toast.error(err.message),
+        onError: (err) => toast.error(extractApiMessage(err)),
       },
     );
   }
@@ -155,7 +156,7 @@ export default function SkillViewer({ skillPath, open, onOpenChange }: Readonly<
         setConfirmDelete(false);
       },
       onError: (err) => {
-        toast.error(err.message);
+        toast.error(extractApiMessage(err));
         setConfirmDelete(false);
       },
     });

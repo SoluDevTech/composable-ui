@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from "react";
 import { toast } from "sonner";
 import { useCreateSkill } from "@/application/hooks/skill/useCreateSkill";
+import { extractApiMessage } from "@/infrastructure/api/store/storeApi";
 import {
   Dialog,
   DialogContent,
@@ -58,7 +59,7 @@ export function CreateSkillDialog({ open, onOpenChange }: Readonly<CreateSkillDi
           handleClose();
         },
         onError: (error) => {
-          toast.error(error.message);
+          toast.error(extractApiMessage(error));
         },
       },
     );

@@ -30,14 +30,31 @@ export function parseFrontmatter(content: string): { data: SkillFrontmatter; bod
   }
 
   const rest = afterOpening.slice(newlineAfterOpen + 1);
-  // Match a line that is exactly `---` (allowing trailing whitespace).
-  const closeMatch = rest.match(/^---\s*(\r?\n|$)/m);
-  if (!closeMatch) {
+  // Find the closing delimiter: a line that is exactly `---` (with optional
+  // trailing whitespace). The closing delimiter must be on its own line —
+  // search for `\n---` (or `---` at the start of rest) to avoid matching a
+  // `---` horizontal rule inside the body.
+  let closeMatchIndex = -1;
+  let closeMatchLength = 0;
+  // Check if rest starts with the closing delimiter immediately
+  if (/^---\s*(\r?\n|$)/.test(rest)) {
+    closeMatchIndex = 0;
+    closeMatchLength = rest.match(/^---\s*(\r?\n|$)/)![0].length;
+  } else {
+    // Search for `\n---` on its own line
+    const closeRegex = /\n---\s*(\r?\n|$)/g;
+    const match = closeRegex.exec(rest);
+    if (match) {
+      closeMatchIndex = match.index + 1; // +1 to skip the \n
+      closeMatchLength = match[0].length - 1; // exclude the leading \n
+    }
+  }
+  if (closeMatchIndex === -1) {
     return { data: {}, body: content };
   }
 
-  const yamlBlock = rest.slice(0, closeMatch.index ?? 0);
-  const bodyStart = (closeMatch.index ?? 0) + closeMatch[0].length;
+  const yamlBlock = rest.slice(0, closeMatchIndex);
+  const bodyStart = closeMatchIndex + closeMatchLength;
   const body = rest.slice(bodyStart);
 
   let data: SkillFrontmatter = {};

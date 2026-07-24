@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from "react";
 import { toast } from "sonner";
 import { useCreateMemory } from "@/application/hooks/memory/useCreateMemory";
+import { extractApiMessage } from "@/infrastructure/api/store/storeApi";
 import {
   Dialog,
   DialogContent,
@@ -24,10 +25,7 @@ const MEMORY_FORM_ID = "memory-create-form";
  * Dialog to create a new memory file: a name (becomes
  * `/memories/{name}.md`) and a markdown body. No frontmatter for memories.
  */
-export function CreateMemoryDialog({
-  open,
-  onOpenChange,
-}: Readonly<CreateMemoryDialogProps>) {
+export function CreateMemoryDialog({ open, onOpenChange }: Readonly<CreateMemoryDialogProps>) {
   const [name, setName] = useState("");
   const [content, setContent] = useState("");
   const createMemory = useCreateMemory();
@@ -53,7 +51,7 @@ export function CreateMemoryDialog({
           handleClose();
         },
         onError: (error) => {
-          toast.error(error.message);
+          toast.error(extractApiMessage(error));
         },
       },
     );
@@ -80,7 +78,10 @@ export function CreateMemoryDialog({
         <div className="flex-1 overscroll-contain overflow-y-auto bg-surface px-6 py-6 sm:px-8">
           <form id={MEMORY_FORM_ID} onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <Label htmlFor="memory-name" className="mb-2 block text-xs uppercase tracking-[0.1em]">
+              <Label
+                htmlFor="memory-name"
+                className="mb-2 block text-xs uppercase tracking-[0.1em]"
+              >
                 Name
               </Label>
               <Input

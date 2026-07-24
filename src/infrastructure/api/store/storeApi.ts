@@ -44,3 +44,19 @@ function isNotFound(error: unknown): boolean {
   }
   return false;
 }
+
+/**
+ * Extract a human-readable error message from an axios error. The backend's
+ * actual error body (`detail` or `message`) is preferred over axios's generic
+ * "Request failed with status code N" message.
+ */
+export function extractApiMessage(error: unknown): string {
+  if (error && typeof error === "object" && "response" in error) {
+    const data = (error as { response?: { data?: { detail?: unknown; message?: unknown } } })
+      .response?.data;
+    if (typeof data?.detail === "string" && data.detail) return data.detail;
+    if (typeof data?.message === "string" && data.message) return data.message;
+  }
+  if (error instanceof Error) return error.message;
+  return "Unknown error";
+}

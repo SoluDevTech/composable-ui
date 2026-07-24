@@ -56,6 +56,22 @@ describe("parseFrontmatter", () => {
     expect(result.data).toHaveProperty("description", 'RAG: "queries & accents" — éàç');
     expect(result.body).toBe("# Body");
   });
+
+  it("does NOT truncate body containing a horizontal rule", () => {
+    // Arrange — body contains a `---` line (markdown horizontal rule) after
+    // the frontmatter. The closing delimiter regex with the `m` flag would
+    // incorrectly match this line and truncate the body.
+    const input =
+      "---\nname: rag\ndescription: RAG queries\n---\n# Title\n---\nsome content after hr";
+
+    // Act
+    const result = parseFrontmatter(input);
+
+    // Assert — the body must include everything after the frontmatter,
+    // including the horizontal rule line and the content after it.
+    expect(result.data).toEqual({ name: "rag", description: "RAG queries" });
+    expect(result.body).toBe("# Title\n---\nsome content after hr");
+  });
 });
 
 describe("buildFrontmatter", () => {
