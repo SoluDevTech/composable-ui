@@ -1,7 +1,6 @@
 import { useMemo } from "react";
 import { Plus } from "lucide-react";
-import { useStoreFiles } from "@/application/hooks/store/useStoreFiles";
-import { useStoreFile } from "@/application/hooks/store/useStoreFile";
+import { useStoreFilePreviews } from "@/application/hooks/store/useStoreFilePreviews";
 import { parseFrontmatter } from "@/application/lib/frontmatter";
 import SkillCard from "@/application/components/skill/SkillCard";
 
@@ -11,16 +10,22 @@ interface SkillGridProps {
 }
 
 const SKILLS_PREFIX = "/skills/";
+const PREVIEW_CHARS = 1000;
 
 export default function SkillGrid({ onCreateNew, onConfigure }: Readonly<SkillGridProps>) {
-  const { data: files, isLoading, error } = useStoreFiles(SKILLS_PREFIX);
+  const { data: previews, isLoading, error } = useStoreFilePreviews(SKILLS_PREFIX, PREVIEW_CHARS);
 
-  const skillPaths = useMemo(() => {
-    return (files ?? [])
-      .map((f) => f.path)
-      .filter((p) => p.endsWith("SKILL.md"))
-      .sort();
-  }, [files]);
+  const skillCards = useMemo(() => {
+    return (previews ?? [])
+      .filter((p) => p.path.endsWith("SKILL.md"))
+      .sort((a, b) => a.path.localeCompare(b.path))
+      .map((item) => {
+        const { data } = parseFrontmatter(item.preview);
+        const name = data.name ?? deriveNameFromPath(item.path);
+        const description = data.description ?? "";
+        return { path: item.path, name, description };
+      });
+  }, [previews]);
 
   if (isLoading) {
     return (
@@ -42,7 +47,7 @@ export default function SkillGrid({ onCreateNew, onConfigure }: Readonly<SkillGr
     );
   }
 
-  if (skillPaths.length === 0) {
+  if (skillCards.length === 0) {
     return (
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3" data-od-id="skill-grid">
         <SkillCreateButton onClick={onCreateNew} />
@@ -52,39 +57,18 @@ export default function SkillGrid({ onCreateNew, onConfigure }: Readonly<SkillGr
 
   return (
     <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3" data-od-id="skill-grid">
-      {skillPaths.map((path) => (
-        <SkillGridItem key={path} path={path} onConfigure={onConfigure} />
+      {skillCards.map((card) => (
+        <div key={card.path} className="min-w-0">
+          <SkillCard name={card.name} description={card.description} onConfigure={onConfigure} />
+        </div>
       ))}
       <SkillCreateButton onClick={onCreateNew} />
     </div>
   );
 }
 
-function SkillGridItem({
-  path,
-  onConfigure,
-}: Readonly<{ path: string; onConfigure: (name: string) => void }>) {
-  const { data: file } = useStoreFile(path);
-  const { name, description } = useMemo(() => {
-    if (!file) return { name: deriveNameFromPath(path), description: "" };
-    const { data } = parseFrontmatter(file.content);
-    return {
-      name: data.name ?? deriveNameFromPath(path),
-      description: data.description ?? "",
-    };
-  }, [file, path]);
-
-  return (
-    <div className="min-w-0">
-      <SkillCard name={name} description={description} onConfigure={onConfigure} />
-    </div>
-  );
-}
-
 function deriveNameFromPath(path: string): string {
-  // /skills/rag/SKILL.md -> rag
   const parts = path.split("/").filter(Boolean);
-  // parts[0] === "skills", parts[1] === "<name>", parts[2] === "SKILL.md"
   return parts.length >= 2 ? parts[1] : path;
 }
 
@@ -94,6 +78,7 @@ function SkillCreateButton({ onClick }: Readonly<{ onClick: () => void }>) {
       type="button"
       onClick={onClick}
       data-od-id="skill-card-new"
+      aria-label="Create a new skill"
       className="group flex min-h-[200px] cursor-pointer flex-col items-center justify-center gap-2 border-2 border-dashed border-border bg-surface/50 text-muted transition-[border-color,color] duration-base ease-standard hover:border-accent hover:text-accent focus-visible:outline-none focus-visible:shadow-focus"
     >
       <span

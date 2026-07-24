@@ -8,6 +8,8 @@ export interface CreateSkillInput {
   content: string;
 }
 
+const NAME_PATTERN = /^[a-zA-Z0-9._-]+$/;
+
 /**
  * Create a new skill by writing `skills/{name}/SKILL.md` with a YAML
  * frontmatter block (name + description) followed by the markdown body.
@@ -20,13 +22,19 @@ export function useCreateSkill() {
 
   return useMutation({
     mutationFn: async ({ name, description, content }: CreateSkillInput) => {
-      const path = `/skills/${name}/SKILL.md`;
+      const trimmedName = name.trim();
+      if (!NAME_PATTERN.test(trimmedName)) {
+        throw new Error(
+          `Invalid skill name "${trimmedName}": only letters, digits, dots, hyphens, and underscores allowed`,
+        );
+      }
+      const path = `/skills/${trimmedName}/SKILL.md`;
       const existing = await storeApi.getFile(path);
       if (existing !== null) {
-        throw new Error(`A skill named "${name}" already exists`);
+        throw new Error(`A skill named "${trimmedName}" already exists`);
       }
       const body = content ?? "";
-      const markdown = buildFrontmatter({ name, description }, body);
+      const markdown = buildFrontmatter({ name: trimmedName, description }, body);
       return storeApi.putFile(path, markdown);
     },
     onSuccess: () => {

@@ -6,6 +6,8 @@ export interface CreateMemoryInput {
   content: string;
 }
 
+const NAME_PATTERN = /^[a-zA-Z0-9._-]+$/;
+
 /**
  * Create a new memory file at `/memories/{name}.md` containing the provided
  * markdown content (no frontmatter for memories).
@@ -18,10 +20,16 @@ export function useCreateMemory() {
 
   return useMutation({
     mutationFn: async ({ name, content }: CreateMemoryInput) => {
-      const path = `/memories/${name}.md`;
+      const trimmedName = name.trim().replace(/\.md$/, "");
+      if (!NAME_PATTERN.test(trimmedName)) {
+        throw new Error(
+          `Invalid memory name "${trimmedName}": only letters, digits, dots, hyphens, and underscores allowed`,
+        );
+      }
+      const path = `/memories/${trimmedName}.md`;
       const existing = await storeApi.getFile(path);
       if (existing !== null) {
-        throw new Error(`A memory named "${name}" already exists`);
+        throw new Error(`A memory named "${trimmedName}" already exists`);
       }
       return storeApi.putFile(path, content ?? "");
     },

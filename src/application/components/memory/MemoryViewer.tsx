@@ -29,8 +29,8 @@ interface MemoryViewerProps {
 function resolveMemoryStorePath(memoryPath: string): string {
   const trimmed = memoryPath.trim();
   if (trimmed.startsWith("/memories/")) return trimmed;
-  const name = trimmed.replace(/^\/?memories\/?/, "");
-  return `/memories/${name}`;
+  const name = trimmed.replace(/^\/?memories\/?/, "").replace(/\.md$/, "");
+  return `/memories/${name}.md`;
 }
 
 interface MemoryEditFormProps {

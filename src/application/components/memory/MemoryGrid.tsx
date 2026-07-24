@@ -1,7 +1,6 @@
 import { useMemo } from "react";
 import { Plus } from "lucide-react";
-import { useStoreFiles } from "@/application/hooks/store/useStoreFiles";
-import { useStoreFile } from "@/application/hooks/store/useStoreFile";
+import { useStoreFilePreviews } from "@/application/hooks/store/useStoreFilePreviews";
 import MemoryCard from "@/application/components/memory/MemoryCard";
 
 interface MemoryGridProps {
@@ -10,13 +9,14 @@ interface MemoryGridProps {
 }
 
 const MEMORIES_PREFIX = "/memories/";
+const PREVIEW_CHARS = 300;
 
 export default function MemoryGrid({ onCreateNew, onConfigure }: Readonly<MemoryGridProps>) {
-  const { data: files, isLoading, error } = useStoreFiles(MEMORIES_PREFIX);
+  const { data: previews, isLoading, error } = useStoreFilePreviews(MEMORIES_PREFIX, PREVIEW_CHARS);
 
-  const memoryPaths = useMemo(
-    () => (files ?? []).map((f) => f.path).sort(),
-    [files],
+  const sortedPreviews = useMemo(
+    () => (previews ?? []).slice().sort((a, b) => a.path.localeCompare(b.path)),
+    [previews],
   );
 
   if (isLoading) {
@@ -39,9 +39,12 @@ export default function MemoryGrid({ onCreateNew, onConfigure }: Readonly<Memory
     );
   }
 
-  if (memoryPaths.length === 0) {
+  if (sortedPreviews.length === 0) {
     return (
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3" data-od-id="memory-grid">
+      <div
+        className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3"
+        data-od-id="memory-grid"
+      >
         <MemoryCreateButton onClick={onCreateNew} />
       </div>
     );
@@ -49,35 +52,24 @@ export default function MemoryGrid({ onCreateNew, onConfigure }: Readonly<Memory
 
   return (
     <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3" data-od-id="memory-grid">
-      {memoryPaths.map((path) => (
-        <MemoryGridItem key={path} path={path} onConfigure={onConfigure} />
-      ))}
+      {sortedPreviews.map((item) => {
+        const name = deriveNameFromPath(item.path);
+        const preview =
+          item.preview.length > PREVIEW_CHARS
+            ? `${item.preview.slice(0, PREVIEW_CHARS)}…`
+            : item.preview;
+        return (
+          <div key={item.path} className="min-w-0">
+            <MemoryCard name={name} preview={preview} onConfigure={onConfigure} />
+          </div>
+        );
+      })}
       <MemoryCreateButton onClick={onCreateNew} />
     </div>
   );
 }
 
-function MemoryGridItem({
-  path,
-  onConfigure,
-}: Readonly<{ path: string; onConfigure: (name: string) => void }>) {
-  const { data: file } = useStoreFile(path);
-  const name = deriveNameFromPath(path);
-  const preview = useMemo(() => {
-    if (!file) return "";
-    const truncated = file.content.slice(0, 100);
-    return file.content.length > 100 ? `${truncated}…` : truncated;
-  }, [file]);
-
-  return (
-    <div className="min-w-0">
-      <MemoryCard name={name} preview={preview} onConfigure={onConfigure} />
-    </div>
-  );
-}
-
 function deriveNameFromPath(path: string): string {
-  // /memories/AGENTS.md -> AGENTS.md
   const parts = path.split("/").filter(Boolean);
   return parts.length > 0 ? parts[parts.length - 1] : path;
 }
@@ -88,6 +80,7 @@ function MemoryCreateButton({ onClick }: Readonly<{ onClick: () => void }>) {
       type="button"
       onClick={onClick}
       data-od-id="memory-card-new"
+      aria-label="Create a new memory"
       className="group flex min-h-[200px] cursor-pointer flex-col items-center justify-center gap-2 border-2 border-dashed border-border bg-surface/50 text-muted transition-[border-color,color] duration-base ease-standard hover:border-accent hover:text-accent focus-visible:outline-none focus-visible:shadow-focus"
     >
       <span

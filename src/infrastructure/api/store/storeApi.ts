@@ -2,6 +2,11 @@ import type { StoreFile, StoreFileMetadata } from "@/domain/entities/store/store
 import type { IStorePort } from "@/domain/ports/store/storePort";
 import { apiClient } from "@/infrastructure/api/axiosInstance";
 
+export interface StoreFilePreview {
+  path: string;
+  preview: string;
+}
+
 /**
  * Axios-based implementation of {@link IStorePort}. The backend returns a list
  * of path strings for `listFiles`; we map each to a `StoreFileMetadata`
@@ -11,6 +16,13 @@ export const storeApi: IStorePort = {
   async listFiles(prefix: string): Promise<StoreFileMetadata[]> {
     const response = await apiClient.get<string[]>("/api/v1/store/files", { params: { prefix } });
     return response.data.map((path) => ({ path }));
+  },
+
+  async listFilePreviews(prefix: string, chars: number): Promise<StoreFilePreview[]> {
+    const response = await apiClient.get<StoreFilePreview[]>("/api/v1/store/files/previews", {
+      params: { prefix, chars },
+    });
+    return response.data;
   },
 
   async getFile(path: string): Promise<StoreFile | null> {
