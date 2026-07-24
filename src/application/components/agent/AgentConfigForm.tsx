@@ -1,19 +1,15 @@
 import { useCallback, memo } from "react";
-import {
-  useForm,
-  useFieldArray,
-  useWatch,
-  type Control,
-} from "react-hook-form";
+import { useForm, useFieldArray, useWatch, type Control } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Plus } from "lucide-react";
 import type { AgentConfig, SubAgentConfig } from "@/domain/entities/agent/agentConfig";
-import { BackendType, MiddlewareType } from "@/domain/entities/agent/agentConfig";
+import { BackendType } from "@/domain/entities/agent/agentConfig";
 import { McpTransportType } from "@/domain/entities/agent/mcpServerConfig";
 import type { McpServerConfig } from "@/domain/entities/agent/mcpServerConfig";
 import {
   agentConfigSchema,
   type AgentConfigFormData,
+  type AgentConfigFormInput,
 } from "@/domain/entities/agent/agentConfigSchema";
 import { Button } from "@/application/components/ui/button";
 import { Input } from "@/application/components/ui/input";
@@ -34,17 +30,17 @@ import {
   SelectValue,
 } from "@/application/components/ui/select";
 import StringListEditor from "./StringListEditor";
+import { SkillPillMultiSelect, MemoryPillMultiSelect } from "./SkillMemorySelects";
 import McpServerEditor from "./McpServerEditor";
 import SubAgentEditor from "./SubAgentEditor";
 import HITLEditor from "./HITLEditor";
 import ResponseFormatEditor from "./ResponseFormatEditor";
 import { AGENT_CONFIG_FORM_ID as FORM_ID } from "./formConstants";
-import { cn } from "@/application/lib/utils";
 
 type SectionValue =
   | "general"
   | "system-prompt"
-  | "tools-middleware"
+  | "tools"
   | "backend"
   | "hitl"
   | "memory-skills"
@@ -57,7 +53,7 @@ const DEFAULT_OPEN_SECTIONS: SectionValue[] = ["general", "system-prompt"];
 const SECTION_META: Record<SectionValue, { label: string }> = {
   general: { label: "General" },
   "system-prompt": { label: "System Prompt" },
-  "tools-middleware": { label: "Tools & Middleware" },
+  tools: { label: "Tools" },
   backend: { label: "Backend" },
   hitl: { label: "HITL" },
   "memory-skills": { label: "Memory & Skills" },
@@ -66,17 +62,9 @@ const SECTION_META: Record<SectionValue, { label: string }> = {
   "response-format": { label: "Response Format" },
 };
 
-const MIDDLEWARE_OPTIONS: { label: string; value: MiddlewareType }[] = [
-  { value: MiddlewareType.TODO_LIST, label: "todo_list" },
-  { value: MiddlewareType.FILESYSTEM, label: "filesystem" },
-  { value: MiddlewareType.SUB_AGENT, label: "sub_agent" },
-];
-
-const BACKEND_OPTIONS: { label: string; value: BackendType }[] = [
-  { value: BackendType.STATE, label: "state" },
-  { value: BackendType.STORE, label: "store" },
-  { value: BackendType.FILESYSTEM, label: "filesystem" },
-  { value: BackendType.COMPOSITE, label: "composite" },
+const BACKEND_STORAGE_OPTIONS: { label: string; value: "memory" | "postgres" }[] = [
+  { value: "memory", label: "memory" },
+  { value: "postgres", label: "postgres" },
 ];
 
 const EMPTY_MCP_SERVER: McpServerConfig = {
@@ -107,8 +95,10 @@ const DEFAULT_FORM_VALUES: AgentConfigFormData = {
   system_prompt: "",
   system_prompt_file: "",
   tools: [],
-  middleware: [],
-  backend: { type: BackendType.STATE },
+  backend: {
+    type: BackendType.STORE,
+    checkpoint_backend: "memory",
+  },
   hitl: { rules: {} },
   memory: [],
   skills: [],
@@ -131,10 +121,6 @@ function getDefaultValues(mode: "create" | "edit", initialData?: AgentConfig): A
   return { ...DEFAULT_FORM_VALUES };
 }
 
-function showRootDir(type: BackendType): boolean {
-  return type === BackendType.FILESYSTEM || type === BackendType.COMPOSITE;
-}
-
 interface AgentConfigFormProps {
   mode: "create" | "edit";
   initialData?: AgentConfig;
@@ -155,18 +141,15 @@ export default function AgentConfigForm({
     handleSubmit,
     control,
     setValue,
-    getValues,
     formState: { errors },
-  } = useForm<AgentConfigFormData>({
+  } = useForm<AgentConfigFormInput, unknown, AgentConfigFormData>({
     resolver: zodResolver(agentConfigSchema),
     defaultValues: getDefaultValues(mode, initialData),
   });
 
   const subagentsArray = useFieldArray({ control, name: "subagents" });
 
-  // eslint-disable-next-line react-hooks/incompatible-library
-  const backendType = useWatch({ control, name: "backend.type" });
-  const middlewareValues = useWatch({ control, name: "middleware" });
+  const checkpointBackend = useWatch({ control, name: "backend.checkpoint_backend" });
 
   function handleFormSubmit(data: AgentConfigFormData) {
     const cleaned: AgentConfigFormData = {
@@ -180,18 +163,6 @@ export default function AgentConfigForm({
 
   function addSubagent() {
     subagentsArray.append({ ...EMPTY_SUBAGENT });
-  }
-
-  function toggleMiddleware(mw: MiddlewareType, isChecked: boolean) {
-    const current = getValues("middleware");
-    if (isChecked) {
-      setValue("middleware", [...current, mw]);
-    } else {
-      setValue(
-        "middleware",
-        current.filter((m) => m !== mw),
-      );
-    }
   }
 
   return (
@@ -261,8 +232,8 @@ export default function AgentConfigForm({
           </AccordionContent>
         </AccordionItem>
 
-        <AccordionItem value="tools-middleware">
-          <SectionTrigger value="tools-middleware" />
+        <AccordionItem value="tools">
+          <SectionTrigger value="tools" />
           <AccordionContent className="space-y-4">
             <StringListEditor
               label="Tools"
@@ -270,30 +241,6 @@ export default function AgentConfigForm({
               onChange={(tools) => setValue("tools", tools)}
               placeholder="Add tool…"
             />
-            <div>
-              <Label className="text-xs uppercase tracking-[0.1em]">Middleware</Label>
-              <div className="mt-2 flex flex-wrap gap-2">
-                {MIDDLEWARE_OPTIONS.map((opt) => {
-                  const isActive = middlewareValues.includes(opt.value);
-                  return (
-                    <button
-                      key={opt.value}
-                      type="button"
-                      onClick={() => toggleMiddleware(opt.value, !isActive)}
-                      aria-pressed={isActive}
-                      className={cn(
-                        "inline-flex h-8 items-center gap-2 border px-3 font-mono text-xs uppercase tracking-[0.1em] transition-[background-color,border-color,color] duration-fast ease-standard focus-visible:outline-none focus-visible:shadow-focus",
-                        isActive
-                          ? "border-accent bg-accent/10 text-accent"
-                          : "border-border bg-transparent text-muted hover:bg-surface-warm hover:text-fg",
-                      )}
-                    >
-                      {opt.label}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
           </AccordionContent>
         </AccordionItem>
 
@@ -301,16 +248,22 @@ export default function AgentConfigForm({
           <SectionTrigger value="backend" />
           <AccordionContent className="space-y-4">
             <div>
-              <Label className="text-xs uppercase tracking-[0.1em]">Type</Label>
+              <Label className="text-xs uppercase tracking-[0.1em]">Backend Type</Label>
+              <p className="mt-1.5 font-mono text-sm text-accent">store</p>
+            </div>
+            <div>
+              <Label className="text-xs uppercase tracking-[0.1em]">Checkpoint Backend</Label>
               <Select
-                value={backendType}
-                onValueChange={(v) => setValue("backend.type", v as BackendType)}
+                value={checkpointBackend}
+                onValueChange={(v) =>
+                  setValue("backend.checkpoint_backend", v as "memory" | "postgres")
+                }
               >
                 <SelectTrigger className="mt-1.5">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {BACKEND_OPTIONS.map((opt) => (
+                  {BACKEND_STORAGE_OPTIONS.map((opt) => (
                     <SelectItem key={opt.value} value={opt.value}>
                       {opt.label}
                     </SelectItem>
@@ -318,17 +271,6 @@ export default function AgentConfigForm({
                 </SelectContent>
               </Select>
             </div>
-            {showRootDir(backendType) && (
-              <FormField id="backend-root-dir" label="Root Directory">
-                <Input
-                  id="backend-root-dir"
-                  {...register("backend.root_dir")}
-                  placeholder="/data/agents"
-                  autoComplete="off"
-                  spellCheck={false}
-                />
-              </FormField>
-            )}
           </AccordionContent>
         </AccordionItem>
 
@@ -345,18 +287,20 @@ export default function AgentConfigForm({
         <AccordionItem value="memory-skills">
           <SectionTrigger value="memory-skills" />
           <AccordionContent className="space-y-4">
-            <StringListEditor
-              label="Memory"
-              value={useWatch({ control, name: "memory" })}
-              onChange={(memory) => setValue("memory", memory)}
-              placeholder="Add memory path…"
-            />
-            <StringListEditor
-              label="Skills"
-              value={useWatch({ control, name: "skills" })}
-              onChange={(skills) => setValue("skills", skills)}
-              placeholder="Add skill…"
-            />
+            <div className="space-y-2">
+              <Label className="text-xs uppercase tracking-[0.1em] text-muted">Memory</Label>
+              <MemoryPillMultiSelect
+                selected={useWatch({ control, name: "memory" })}
+                onChange={(memory) => setValue("memory", memory)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label className="text-xs uppercase tracking-[0.1em] text-muted">Skills</Label>
+              <SkillPillMultiSelect
+                selected={useWatch({ control, name: "skills" })}
+                onChange={(skills) => setValue("skills", skills)}
+              />
+            </div>
           </AccordionContent>
         </AccordionItem>
 
@@ -461,7 +405,7 @@ const McpServersAccordionItem = memo(function McpServersAccordionItem({
   control,
   defaultValue,
 }: Readonly<{
-  control: Control<AgentConfigFormData>;
+  control: Control<AgentConfigFormInput>;
   defaultValue: SectionValue[];
 }>) {
   const mcpServersArray = useFieldArray({ control, name: "mcp_servers" });

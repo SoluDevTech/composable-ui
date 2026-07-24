@@ -11,11 +11,13 @@ import { useAgentConfig } from "@/application/hooks/agent/useAgentConfig";
 export default function ChatPage() {
   const { threadId } = useParams<{ threadId?: string }>();
   const setActiveThread = useChatStore((s) => s.setActiveThread);
+  const clearStream = useChatStore((s) => s.clearStream);
   const { data: threads } = useThreads();
 
   useEffect(() => {
     setActiveThread(threadId ?? null);
-  }, [threadId, setActiveThread]);
+    clearStream();
+  }, [threadId, setActiveThread, clearStream]);
 
   const agentName = useMemo(() => {
     if (!threadId || !threads) return "Agent";

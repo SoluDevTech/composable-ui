@@ -17,8 +17,102 @@ describe("AgentConfigForm", () => {
       );
 
       expect(screen.getByText("General")).toBeInTheDocument();
-      expect(screen.getByText("Tools & Middleware")).toBeInTheDocument();
+      // After the change the section is renamed to just "Tools".
+      expect(screen.getByText("Tools")).toBeInTheDocument();
       expect(screen.getByText("Backend")).toBeInTheDocument();
+    });
+
+    it("does NOT render a 'Tools & Middleware' section label", () => {
+      renderWithProviders(
+        <AgentConfigForm mode="create" onSubmit={mockSubmit} onCancel={mockCancel} />,
+      );
+
+      // After the change, the label must be "Tools" only, not "Tools & Middleware".
+      expect(screen.queryByText("Tools & Middleware")).not.toBeInTheDocument();
+    });
+
+    it("does NOT render a middleware section", () => {
+      renderWithProviders(
+        <AgentConfigForm mode="create" onSubmit={mockSubmit} onCancel={mockCancel} />,
+      );
+
+      // After the change, the Middleware label and toggle buttons must be gone.
+      expect(screen.queryByText("Middleware")).not.toBeInTheDocument();
+      // The middleware toggle buttons (todo_list, filesystem, sub_agent) must
+      // not appear as toggle buttons.
+      expect(
+        screen.queryByRole("button", { name: /^todo_list$/i }),
+      ).not.toBeInTheDocument();
+      expect(
+        screen.queryByRole("button", { name: /^filesystem$/i }),
+      ).not.toBeInTheDocument();
+      expect(
+        screen.queryByRole("button", { name: /^sub_agent$/i }),
+      ).not.toBeInTheDocument();
+    });
+
+    it("does NOT render filesystem in the backend type dropdown", async () => {
+      const user = userEvent.setup();
+      renderWithProviders(
+        <AgentConfigForm mode="create" onSubmit={mockSubmit} onCancel={mockCancel} />,
+      );
+
+      // Expand the Backend accordion so the Type Select trigger is rendered.
+      await user.click(screen.getByRole("button", { name: "Backend" }));
+
+      // Act — open the backend type select dropdown.
+      await user.click(screen.getByRole("combobox"));
+
+      // Assert — filesystem must not be a selectable option.
+      await waitFor(() => {
+        expect(
+          screen.queryByRole("option", { name: "filesystem" }),
+        ).not.toBeInTheDocument();
+      });
+    });
+
+    it("does NOT render composite in the backend type dropdown", async () => {
+      const user = userEvent.setup();
+      renderWithProviders(
+        <AgentConfigForm mode="create" onSubmit={mockSubmit} onCancel={mockCancel} />,
+      );
+
+      await user.click(screen.getByRole("button", { name: "Backend" }));
+      await user.click(screen.getByRole("combobox"));
+
+      await waitFor(() => {
+        expect(
+          screen.queryByRole("option", { name: "composite" }),
+        ).not.toBeInTheDocument();
+      });
+    });
+
+    it("does NOT render a root_dir input field", () => {
+      renderWithProviders(
+        <AgentConfigForm mode="create" onSubmit={mockSubmit} onCancel={mockCancel} />,
+      );
+
+      // After the change, root_dir input must not be rendered for any backend.
+      expect(screen.queryByLabelText(/root directory/i)).not.toBeInTheDocument();
+      expect(screen.queryByText("Root Directory")).not.toBeInTheDocument();
+    });
+
+    it("renders checkpoint_backend select when backend type is store", async () => {
+      const user = userEvent.setup();
+      renderWithProviders(
+        <AgentConfigForm mode="create" onSubmit={mockSubmit} onCancel={mockCancel} />,
+      );
+
+      // Expand the Backend accordion.
+      await user.click(screen.getByRole("button", { name: "Backend" }));
+
+      // Assert — backend type is shown as static text "store".
+      expect(screen.getByText("store")).toBeInTheDocument();
+
+      // Assert — checkpoint_backend select must appear.
+      await waitFor(() => {
+        expect(screen.getByText(/checkpoint backend/i)).toBeInTheDocument();
+      });
     });
 
     it("renders name field enabled in create mode", () => {
@@ -73,8 +167,10 @@ describe("AgentConfigForm", () => {
       model: "openai:gpt-4o",
       system_prompt: "You are helpful",
       tools: ["search"],
-      middleware: [],
-      backend: { type: BackendType.STATE },
+      backend: {
+        type: BackendType.STORE,
+        checkpoint_backend: "memory",
+      },
       hitl: { rules: {} },
       memory: [],
       skills: [],

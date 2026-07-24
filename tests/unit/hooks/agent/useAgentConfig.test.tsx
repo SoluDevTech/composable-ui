@@ -3,7 +3,8 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { vi, describe, it, expect, beforeEach } from "vitest";
 import { useAgentConfig } from "@/application/hooks/agent/useAgentConfig";
 import { agentApi } from "@/infrastructure/api/agent/agentApi";
-import type { AgentConfig, BackendType } from "@/domain/entities/agent/agentConfig";
+import type { AgentConfig } from "@/domain/entities/agent/agentConfig";
+import { BackendType } from "@/domain/entities/agent/agentConfig";
 import type { ReactNode } from "react";
 
 vi.mock("@/infrastructure/api/agent/agentApi", () => ({
@@ -30,8 +31,7 @@ const mockAgentConfig: AgentConfig = {
   model: "openai:gpt-4o",
   system_prompt: "You are a helpful assistant.",
   tools: ["search", "calculator"],
-  middleware: [],
-  backend: { type: "state" as BackendType },
+  backend: { type: BackendType.STORE, checkpoint_backend: "memory" },
   hitl: { rules: {} },
   memory: [],
   skills: [],

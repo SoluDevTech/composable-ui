@@ -1,21 +1,12 @@
 import type { McpServerConfig } from "./mcpServerConfig";
 
-export enum MiddlewareType {
-  TODO_LIST = "todo_list",
-  FILESYSTEM = "filesystem",
-  SUB_AGENT = "sub_agent",
-}
-
 export enum BackendType {
-  STATE = "state",
   STORE = "store",
-  FILESYSTEM = "filesystem",
-  COMPOSITE = "composite",
 }
 
 export interface BackendConfig {
   type: BackendType;
-  root_dir?: string;
+  checkpoint_backend: "memory" | "postgres";
 }
 
 export interface InterruptRule {
@@ -44,7 +35,6 @@ export interface AgentConfig {
   system_prompt?: string;
   system_prompt_file?: string;
   tools: string[];
-  middleware: MiddlewareType[];
   backend: BackendConfig;
   hitl: HITLConfig;
   memory: string[];

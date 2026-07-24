@@ -24,8 +24,8 @@ export default function AgentsPage() {
       >
         <div className="flex flex-wrap items-start justify-between gap-4">
           <p className="max-w-md font-body text-sm text-muted">
-            Configure and manage your AI agent fleet. Each agent operates with its own tools,
-            middleware, and orchestration rules.
+            Configure and manage your AI agent fleet. Each agent operates with its own tools and
+            orchestration rules.
           </p>
           <div className="flex items-center gap-3">
             <Badge variant="default" data-od-id="agent-count">

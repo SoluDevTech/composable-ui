@@ -9,6 +9,7 @@ import type { AgentConfig } from "@/domain/entities/agent/agentConfig";
 import type { AgentConfigFormData } from "@/domain/entities/agent/agentConfigSchema";
 import StatusBadge from "@/application/components/shared/StatusBadge";
 import ToolTag from "@/application/components/shared/ToolTag";
+import { SkillPillMultiSelect, MemoryPillMultiSelect } from "./SkillMemorySelects";
 import {
   Dialog,
   DialogContent,
@@ -200,29 +201,29 @@ export default function AgentConfigViewer({
                     </div>
                   )}
 
-                  {config.middleware.length > 0 && (
+                  <div>
+                    <SectionLabel>Backend</SectionLabel>
+                    <div className="space-y-1 font-mono text-sm text-fg">
+                      <p>
+                        checkpoint_backend:{" "}
+                        <span className="text-accent">{config.backend.checkpoint_backend}</span>
+                      </p>
+                    </div>
+                  </div>
+
+                  {config.skills.length > 0 && (
                     <div>
-                      <SectionLabel>Middleware ({config.middleware.length})</SectionLabel>
-                      <div className="flex flex-wrap gap-1.5">
-                        {config.middleware.map((mw) => (
-                          <ToolTag key={mw} label={mw} />
-                        ))}
-                      </div>
+                      <SectionLabel>Skills ({config.skills.length})</SectionLabel>
+                      <SkillPillMultiSelect selected={config.skills} readOnly />
                     </div>
                   )}
 
-                  <div>
-                    <SectionLabel>Backend</SectionLabel>
-                    <p className="font-mono text-sm text-fg">
-                      Type: <span className="text-accent">{config.backend.type}</span>
-                      {config.backend.root_dir && (
-                        <>
-                          {" · "}Root:{" "}
-                          <span className="text-accent">{config.backend.root_dir}</span>
-                        </>
-                      )}
-                    </p>
-                  </div>
+                  {config.memory.length > 0 && (
+                    <div>
+                      <SectionLabel>Memories ({config.memory.length})</SectionLabel>
+                      <MemoryPillMultiSelect selected={config.memory} readOnly />
+                    </div>
+                  )}
 
                   {Object.keys(config.hitl.rules).length > 0 && (
                     <div>

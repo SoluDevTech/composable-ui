@@ -4,7 +4,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { renderWithProviders } from "../../../utils/render";
 import AgentConfigViewer from "@/application/components/agent/AgentConfigViewer";
 import type { AgentConfig } from "@/domain/entities/agent/agentConfig";
-import { BackendType, MiddlewareType } from "@/domain/entities/agent/agentConfig";
+import { BackendType } from "@/domain/entities/agent/agentConfig";
 
 const { mockAgentConfigData, mockDeleteMutate, mockUpdateMutate } = vi.hoisted(() => {
   return {
@@ -47,19 +47,51 @@ vi.mock("@/application/lib/yaml", () => ({
   agentConfigToYamlFile: vi.fn(() => new File(["yaml"], "test.yaml")),
 }));
 
+vi.mock("@/infrastructure/api/store/storeApi", () => ({
+  storeApi: {
+    listFiles: vi.fn().mockResolvedValue([]),
+    getFile: vi.fn().mockResolvedValue(null),
+    putFile: vi.fn().mockResolvedValue(undefined),
+    deleteFile: vi.fn().mockResolvedValue(undefined),
+  },
+}));
+
+vi.mock("@/application/hooks/store/useStoreFiles", () => ({
+  useStoreFiles: (prefix: string) => ({
+    data:
+      prefix === "/skills/"
+        ? [{ path: "/skills/mcp/SKILL.md" }, { path: "/skills/rag/SKILL.md" }]
+        : prefix === "/memories/"
+          ? [{ path: "/memories/AGENTS.md" }, { path: "/memories/coding.md" }]
+          : [],
+  }),
+}));
+
+// Fixture for the AgentConfig type after the source change.
 const fullConfig: AgentConfig = {
   name: "test-agent",
   model: "openai:gpt-4o",
   system_prompt: "You are a helpful assistant that provides accurate information.",
   tools: ["search", "calculator"],
-  middleware: [],
-  backend: { type: "state" as BackendType },
+  backend: {
+    type: BackendType.STORE,
+    checkpoint_backend: "memory",
+  },
   hitl: { rules: {} },
   memory: [],
   skills: [],
   subagents: [],
   mcp_servers: [],
   debug: false,
+};
+
+const postgresBackendConfig: AgentConfig = {
+  ...fullConfig,
+  name: "postgres-agent",
+  backend: {
+    type: BackendType.STORE,
+    checkpoint_backend: "postgres",
+  },
 };
 
 describe("AgentConfigViewer", () => {
@@ -120,14 +152,14 @@ describe("AgentConfigViewer", () => {
     expect(screen.getByText("Tools (2)")).toBeInTheDocument();
   });
 
-  it("renders backend type", () => {
+  it("renders backend checkpoint_backend", () => {
     mockAgentConfigData.data = fullConfig;
 
     renderWithProviders(
       <AgentConfigViewer agentName="test-agent" open={true} onOpenChange={vi.fn()} />,
     );
 
-    expect(screen.getByText(/state/)).toBeInTheDocument();
+    expect(screen.getByText("memory")).toBeInTheDocument();
   });
 
   it("shows delete button and requires confirmation", async () => {
@@ -156,19 +188,45 @@ describe("AgentConfigViewer", () => {
     expect(screen.getByText("Off")).toBeInTheDocument();
   });
 
-  it("renders middleware list when present", () => {
-    mockAgentConfigData.data = {
-      ...fullConfig,
-      middleware: [MiddlewareType.TODO_LIST, MiddlewareType.FILESYSTEM],
-    };
+  it("does NOT render a middleware section", () => {
+    // Arrange — after the change, the viewer must not render any middleware heading/label.
+    mockAgentConfigData.data = fullConfig;
 
     renderWithProviders(
       <AgentConfigViewer agentName="test-agent" open={true} onOpenChange={vi.fn()} />,
     );
 
-    expect(screen.getByText("Middleware (2)")).toBeInTheDocument();
-    expect(screen.getByText("todo_list")).toBeInTheDocument();
-    expect(screen.getByText("filesystem")).toBeInTheDocument();
+    // Assert — no "Middleware" section label or middleware tags.
+    expect(screen.queryByText(/^Middleware \(\d+\)$/)).not.toBeInTheDocument();
+    expect(screen.queryByText("Middleware")).not.toBeInTheDocument();
+    expect(screen.queryByText("todo_list")).not.toBeInTheDocument();
+    expect(screen.queryByText("filesystem")).not.toBeInTheDocument();
+  });
+
+  it("does NOT render root_dir", () => {
+    // Arrange — a config whose backend has no root_dir.
+    mockAgentConfigData.data = fullConfig;
+
+    renderWithProviders(
+      <AgentConfigViewer agentName="test-agent" open={true} onOpenChange={vi.fn()} />,
+    );
+
+    // Assert — the root_dir value must not appear, and "Root:" label must be gone.
+    expect(screen.queryByText(/\/data\/agents/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Root:/)).not.toBeInTheDocument();
+  });
+
+  it("renders checkpoint_backend", () => {
+    // Arrange
+    mockAgentConfigData.data = postgresBackendConfig;
+
+    renderWithProviders(
+      <AgentConfigViewer agentName="test-agent" open={true} onOpenChange={vi.fn()} />,
+    );
+
+    // Assert — checkpoint_backend label must be rendered.
+    expect(screen.getByText(/checkpoint_backend/i)).toBeInTheDocument();
+    expect(screen.getByText("postgres")).toBeInTheDocument();
   });
 
   it("renders HITL rules when present", () => {
@@ -232,19 +290,6 @@ describe("AgentConfigViewer", () => {
     expect(screen.getByText("Subagents (1)")).toBeInTheDocument();
     expect(screen.getByText("research-sub")).toBeInTheDocument();
     expect(screen.getByText("Research subagent")).toBeInTheDocument();
-  });
-
-  it("renders backend root_dir when present", () => {
-    mockAgentConfigData.data = {
-      ...fullConfig,
-      backend: { type: BackendType.FILESYSTEM, root_dir: "/data/agents" },
-    };
-
-    renderWithProviders(
-      <AgentConfigViewer agentName="test-agent" open={true} onOpenChange={vi.fn()} />,
-    );
-
-    expect(screen.getByText(/\/data\/agents/)).toBeInTheDocument();
   });
 
   it("expands and collapses long system prompt", async () => {
@@ -314,5 +359,63 @@ describe("AgentConfigViewer", () => {
     );
 
     expect(screen.getByRole("button", { name: /export yaml/i })).toBeInTheDocument();
+  });
+
+  it("renders skills list when present", () => {
+    // Arrange — a config with two skills paths.
+    mockAgentConfigData.data = {
+      ...fullConfig,
+      skills: ["/skills/mcp/", "/skills/rag/"],
+    };
+
+    renderWithProviders(
+      <AgentConfigViewer agentName="test-agent" open={true} onOpenChange={vi.fn()} />,
+    );
+
+    // Assert — the Skills section label with count and skill names as pills.
+    expect(screen.getByText("Skills (2)")).toBeInTheDocument();
+    expect(screen.getByText(/^mcp$/i)).toBeInTheDocument();
+    expect(screen.getByText(/^rag$/i)).toBeInTheDocument();
+  });
+
+  it("renders memories list when present", () => {
+    // Arrange — a config with two memory paths.
+    mockAgentConfigData.data = {
+      ...fullConfig,
+      memory: ["/memories/AGENTS.md", "/memories/coding.md"],
+    };
+
+    renderWithProviders(
+      <AgentConfigViewer agentName="test-agent" open={true} onOpenChange={vi.fn()} />,
+    );
+
+    // Assert — the Memories section label with count and filenames as pills.
+    expect(screen.getByText("Memories (2)")).toBeInTheDocument();
+    expect(screen.getByText(/^agents\.md$/i)).toBeInTheDocument();
+    expect(screen.getByText(/^coding\.md$/i)).toBeInTheDocument();
+  });
+
+  it("does NOT render skills section when empty", () => {
+    // Arrange — a config with an empty skills array.
+    mockAgentConfigData.data = { ...fullConfig, skills: [] };
+
+    renderWithProviders(
+      <AgentConfigViewer agentName="test-agent" open={true} onOpenChange={vi.fn()} />,
+    );
+
+    // Assert — no Skills section label is rendered.
+    expect(screen.queryByText(/Skills \(/)).not.toBeInTheDocument();
+  });
+
+  it("does NOT render memories section when empty", () => {
+    // Arrange — a config with an empty memory array.
+    mockAgentConfigData.data = { ...fullConfig, memory: [] };
+
+    renderWithProviders(
+      <AgentConfigViewer agentName="test-agent" open={true} onOpenChange={vi.fn()} />,
+    );
+
+    // Assert — no Memories section label is rendered.
+    expect(screen.queryByText(/Memories \(/)).not.toBeInTheDocument();
   });
 });

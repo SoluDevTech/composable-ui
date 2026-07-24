@@ -5,7 +5,7 @@ import {
   agentConfigToYamlFile,
 } from "@/application/lib/yaml";
 import type { AgentConfig } from "@/domain/entities/agent/agentConfig";
-import { BackendType, MiddlewareType } from "@/domain/entities/agent/agentConfig";
+import { BackendType } from "@/domain/entities/agent/agentConfig";
 import { McpTransportType } from "@/domain/entities/agent/mcpServerConfig";
 
 const fullConfig: AgentConfig = {
@@ -13,8 +13,10 @@ const fullConfig: AgentConfig = {
   model: "openai:gpt-4o",
   system_prompt: "You are a helpful assistant",
   tools: ["search", "calculator"],
-  middleware: [MiddlewareType.TODO_LIST],
-  backend: { type: BackendType.STATE },
+  backend: {
+    type: BackendType.STORE,
+    checkpoint_backend: "memory",
+  },
   hitl: { rules: { create_file: true } },
   memory: ["/mem/shared"],
   skills: ["web-search"],
@@ -40,6 +42,22 @@ const fullConfig: AgentConfig = {
   debug: false,
 };
 
+const postgresBackendConfig: AgentConfig = {
+  name: "postgres-agent",
+  model: "openai:gpt-4o",
+  tools: [],
+  backend: {
+    type: BackendType.STORE,
+    checkpoint_backend: "postgres",
+  },
+  hitl: { rules: {} },
+  memory: [],
+  skills: [],
+  subagents: [],
+  mcp_servers: [],
+  debug: false,
+};
+
 describe("serializeAgentConfig", () => {
   it("serializes a full config to YAML string", () => {
     const yaml = serializeAgentConfig(fullConfig);
@@ -54,8 +72,10 @@ describe("serializeAgentConfig", () => {
       name: "minimal",
       model: "gpt-4",
       tools: [],
-      middleware: [],
-      backend: { type: BackendType.STATE },
+      backend: {
+        type: BackendType.STORE,
+        checkpoint_backend: "memory",
+      },
       hitl: { rules: {} },
       memory: [],
       skills: [],
@@ -73,6 +93,33 @@ describe("serializeAgentConfig", () => {
     expect(yaml).toContain("transport: stdio");
     expect(yaml).toContain("name: researcher");
   });
+
+  it("does NOT include a middleware key in serialized YAML", () => {
+    // Act
+    const yaml = serializeAgentConfig(fullConfig);
+
+    // Assert — the serialized YAML must not contain a middleware key
+    expect(yaml).not.toMatch(/^middleware:/m);
+    expect(yaml).not.toContain("middleware:");
+  });
+
+  it("does NOT include root_dir in serialized YAML", () => {
+    // Act
+    const yaml = serializeAgentConfig(fullConfig);
+
+    // Assert — root_dir must not appear in the serialized output
+    expect(yaml).not.toContain("root_dir");
+  });
+
+  it("includes checkpoint_backend when set to postgres", () => {
+    // Arrange — postgresBackendConfig sets checkpoint_backend to "postgres"
+
+    // Act
+    const yaml = serializeAgentConfig(postgresBackendConfig);
+
+    // Assert
+    expect(yaml).toContain("checkpoint_backend: postgres");
+  });
 });
 
 describe("parseAgentConfig", () => {
@@ -84,10 +131,9 @@ system_prompt: You are helpful
 tools:
   - search
   - calculator
-middleware:
-  - todo_list
 backend:
-  type: state
+  type: store
+  checkpoint_backend: memory
 hitl:
   rules:
     create_file: true
@@ -109,10 +155,9 @@ debug: true
 name: nested-agent
 model: gpt-4
 tools: []
-middleware: []
 backend:
-  type: filesystem
-  root_dir: /data
+  type: store
+  checkpoint_backend: memory
 hitl:
   rules:
     delete_file:
@@ -137,14 +182,96 @@ mcp_servers:
 debug: false
 `;
     const config = parseAgentConfig(yaml);
-    expect(config.backend.type).toBe(BackendType.FILESYSTEM);
-    expect(config.backend.root_dir).toBe("/data");
+    expect(config.backend.type).toBe(BackendType.STORE);
+    expect(config.backend).toHaveProperty("checkpoint_backend", "memory");
+    expect(config.backend).not.toHaveProperty("root_dir");
     expect(config.hitl.rules.delete_file).toEqual({
       before: true,
       after: false,
     });
     expect(config.subagents).toHaveLength(1);
     expect(config.mcp_servers[0].url).toBe("http://localhost:8080/mcp");
+  });
+
+  it("rejects YAML containing a middleware key", () => {
+    // Arrange — middleware must no longer be a valid field
+    const yaml = `
+name: bad-agent
+model: gpt-4
+tools: []
+middleware:
+  - todo_list
+backend:
+  type: store
+  checkpoint_backend: memory
+hitl:
+  rules: {}
+memory: []
+skills: []
+subagents: []
+mcp_servers: []
+debug: false
+`;
+    // Act & Assert
+    expect(() => parseAgentConfig(yaml)).toThrow();
+  });
+
+  it("rejects YAML with filesystem backend type", () => {
+    const yaml = `
+name: fs-agent
+model: gpt-4
+tools: []
+backend:
+  type: filesystem
+  root_dir: /data
+hitl:
+  rules: {}
+memory: []
+skills: []
+subagents: []
+mcp_servers: []
+debug: false
+`;
+    expect(() => parseAgentConfig(yaml)).toThrow();
+  });
+
+  it("rejects YAML with composite backend type", () => {
+    const yaml = `
+name: comp-agent
+model: gpt-4
+tools: []
+backend:
+  type: composite
+  root_dir: /data
+hitl:
+  rules: {}
+memory: []
+skills: []
+subagents: []
+mcp_servers: []
+debug: false
+`;
+    expect(() => parseAgentConfig(yaml)).toThrow();
+  });
+
+  it("rejects YAML with root_dir in backend", () => {
+    const yaml = `
+name: root-agent
+model: gpt-4
+tools: []
+backend:
+  type: store
+  checkpoint_backend: memory
+  root_dir: /data
+hitl:
+  rules: {}
+memory: []
+skills: []
+subagents: []
+mcp_servers: []
+debug: false
+`;
+    expect(() => parseAgentConfig(yaml)).toThrow();
   });
 
   it("throws on invalid YAML", () => {
