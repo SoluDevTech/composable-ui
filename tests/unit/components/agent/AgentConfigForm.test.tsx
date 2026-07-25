@@ -6,19 +6,36 @@ import AgentConfigForm from "@/application/components/agent/AgentConfigForm";
 import type { AgentConfig } from "@/domain/entities/agent/agentConfig";
 import { BackendType } from "@/domain/entities/agent/agentConfig";
 import type { AgentConfigMetadata } from "@/domain/entities/agent/agentConfigMetadata";
+import { McpTransportType } from "@/domain/entities/agent/mcpServerConfig";
+import type { RegisteredMcpServer } from "@/domain/entities/mcpServer/registeredMcpServer";
 
 const mockSubmit = vi.fn();
 const mockCancel = vi.fn();
 
-const { mockAgentsData } = vi.hoisted(() => ({
+const { mockAgentsData, registryState, revealMock } = vi.hoisted(() => ({
   mockAgentsData: {
     data: [] as AgentConfigMetadata[] | undefined,
     isLoading: false,
   },
+  registryState: {
+    data: undefined as RegisteredMcpServer[] | undefined,
+    isLoading: false,
+  },
+  revealMock: vi.fn(),
 }));
 
 vi.mock("@/application/hooks/agent/useAgents", () => ({
   useAgents: () => mockAgentsData,
+}));
+
+vi.mock("@/application/hooks/mcpServer/useMcpRegistry", () => ({
+  useMcpRegistry: () => registryState,
+}));
+
+vi.mock("@/infrastructure/api/mcpServer/mcpRegistryApi", () => ({
+  mcpRegistryApi: {
+    reveal: (name: string) => revealMock(name),
+  },
 }));
 
 describe("AgentConfigForm", () => {
@@ -305,6 +322,232 @@ describe("AgentConfigForm", () => {
       await waitFor(() => {
         expect(screen.getByText(/ref:\s*researcher/i)).toBeInTheDocument();
       });
+    });
+  });
+
+  describe("MCP servers pills", () => {
+    const registryServers: RegisteredMcpServer[] = [
+      {
+        name: "weather",
+        transport: McpTransportType.HTTP,
+        url: "https://example.com/mcp",
+        headers: { Authorization: "Bearer secret" },
+        env: {},
+        auth_token: "tok",
+        tool_count: 5,
+        created_at: "2026-01-01T00:00:00Z",
+        updated_at: "2026-01-01T00:00:00Z",
+        source_type: "external",
+        openapi_url: null,
+      },
+      {
+        name: "github",
+        transport: McpTransportType.HTTP,
+        url: "https://api.github.com/mcp",
+        headers: {},
+        env: {},
+        auth_token: null,
+        tool_count: 12,
+        created_at: "2026-01-01T00:00:00Z",
+        updated_at: "2026-01-01T00:00:00Z",
+        source_type: "external",
+        openapi_url: null,
+      },
+    ];
+
+    beforeEach(() => {
+      mockAgentsData.data = [];
+      mockAgentsData.isLoading = false;
+      registryState.data = registryServers;
+      registryState.isLoading = false;
+      revealMock.mockReset();
+    });
+
+    async function expandMcpServers(user: ReturnType<typeof userEvent.setup>) {
+      await user.click(screen.getByRole("button", { name: "MCP Servers" }));
+    }
+
+    it("renders registry servers as toggle pills", async () => {
+      const user = userEvent.setup();
+      renderWithProviders(
+        <AgentConfigForm mode="create" onSubmit={mockSubmit} onCancel={mockCancel} />,
+      );
+
+      await expandMcpServers(user);
+
+      await waitFor(() => {
+        expect(screen.getByText("weather")).toBeInTheDocument();
+        expect(screen.getByText("github")).toBeInTheDocument();
+      });
+    });
+
+    it("does NOT render the old 'Add from registry' dropdown, editor cards or 'Add MCP Server' button", async () => {
+      const user = userEvent.setup();
+      renderWithProviders(
+        <AgentConfigForm mode="create" onSubmit={mockSubmit} onCancel={mockCancel} />,
+      );
+
+      await expandMcpServers(user);
+
+      // Dropdown + custom-server button are gone.
+      expect(screen.queryByText(/add from registry/i)).not.toBeInTheDocument();
+      expect(screen.queryByText(/add mcp server/i)).not.toBeInTheDocument();
+      expect(screen.queryByText(/select a registered server/i)).not.toBeInTheDocument();
+      // No combobox in the MCP section (the backend/subagent comboboxes live
+      // in other sections that are closed, so none should be present at all).
+      expect(screen.queryByRole("combobox")).not.toBeInTheDocument();
+    });
+
+    it("clicking a registry pill reveals and embeds the server (pill becomes active)", async () => {
+      revealMock.mockResolvedValue(registryServers[0]);
+      const user = userEvent.setup();
+      renderWithProviders(
+        <AgentConfigForm mode="create" onSubmit={mockSubmit} onCancel={mockCancel} />,
+      );
+
+      await expandMcpServers(user);
+
+      const pill = await screen.findByRole("button", { name: "weather" });
+      expect(pill).toHaveAttribute("aria-pressed", "false");
+
+      await user.click(pill);
+
+      await waitFor(() => {
+        expect(pill).toHaveAttribute("aria-pressed", "true");
+      });
+      expect(revealMock).toHaveBeenCalledWith("weather");
+    });
+
+    it("clicking an active pill removes the embedded entry", async () => {
+      revealMock.mockResolvedValue(registryServers[0]);
+      const user = userEvent.setup();
+      renderWithProviders(
+        <AgentConfigForm mode="create" onSubmit={mockSubmit} onCancel={mockCancel} />,
+      );
+
+      await expandMcpServers(user);
+
+      const pill = await screen.findByRole("button", { name: "weather" });
+      await user.click(pill);
+      await waitFor(() => {
+        expect(pill).toHaveAttribute("aria-pressed", "true");
+      });
+
+      await user.click(pill);
+
+      await waitFor(() => {
+        expect(pill).toHaveAttribute("aria-pressed", "false");
+      });
+    });
+
+    it("shows the empty message when the registry is empty", async () => {
+      registryState.data = [];
+      const user = userEvent.setup();
+      renderWithProviders(
+        <AgentConfigForm mode="create" onSubmit={mockSubmit} onCancel={mockCancel} />,
+      );
+
+      await expandMcpServers(user);
+
+      await waitFor(() => {
+        expect(
+          screen.getByText(/add servers in the mcp registry page first/i),
+        ).toBeInTheDocument();
+      });
+    });
+
+    it("edit mode: an existing registry server shows as an active pill with no editor card", async () => {
+      const config: AgentConfig = {
+        name: "existing-agent",
+        model: "openai:gpt-4o",
+        system_prompt: "You are helpful",
+        tools: ["search"],
+        backend: { type: BackendType.STORE, checkpoint_backend: "memory" },
+        hitl: { rules: {} },
+        memory: [],
+        skills: [],
+        subagents: [],
+        mcp_servers: [
+          {
+            name: "weather",
+            transport: McpTransportType.HTTP,
+            command: undefined,
+            args: [],
+            url: "https://example.com/mcp",
+            headers: {},
+            env: {},
+            auth_token: undefined,
+          },
+        ],
+        debug: false,
+      };
+      const user = userEvent.setup();
+
+      renderWithProviders(
+        <AgentConfigForm
+          mode="edit"
+          initialData={config}
+          onSubmit={mockSubmit}
+          onCancel={mockCancel}
+        />,
+      );
+
+      await expandMcpServers(user);
+
+      const pill = await screen.findByRole("button", { name: "weather" });
+      expect(pill).toHaveAttribute("aria-pressed", "true");
+      // No editor card rendered.
+      expect(screen.queryByText(/add mcp server/i)).not.toBeInTheDocument();
+    });
+
+    it("edit mode: a legacy custom (non-registry) server shows as a removable pill", async () => {
+      const config: AgentConfig = {
+        name: "existing-agent",
+        model: "openai:gpt-4o",
+        system_prompt: "You are helpful",
+        tools: ["search"],
+        backend: { type: BackendType.STORE, checkpoint_backend: "memory" },
+        hitl: { rules: {} },
+        memory: [],
+        skills: [],
+        subagents: [],
+        mcp_servers: [
+          {
+            name: "legacy-local",
+            transport: McpTransportType.STDIO,
+            command: "npx",
+            args: [],
+            headers: {},
+            env: {},
+            auth_token: undefined,
+          },
+        ],
+        debug: false,
+      };
+      const user = userEvent.setup();
+
+      renderWithProviders(
+        <AgentConfigForm
+          mode="edit"
+          initialData={config}
+          onSubmit={mockSubmit}
+          onCancel={mockCancel}
+        />,
+      );
+
+      await expandMcpServers(user);
+
+      const pill = await screen.findByRole("button", { name: /legacy-local/i });
+      expect(pill).toHaveAttribute("aria-pressed", "true");
+
+      // Removing a legacy entry should not call reveal (it's not in registry).
+      await user.click(pill);
+      // Legacy entries are not in the registry, so once removed the pill is
+      // gone entirely (it cannot be re-added).
+      await waitFor(() => {
+        expect(screen.queryByRole("button", { name: /legacy-local/i })).not.toBeInTheDocument();
+      });
+      expect(revealMock).not.toHaveBeenCalled();
     });
   });
 });

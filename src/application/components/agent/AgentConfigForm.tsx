@@ -1,7 +1,6 @@
-import { useCallback, memo } from "react";
+import { useCallback, memo, useMemo } from "react";
 import { useForm, useFieldArray, useWatch, type Control } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Plus } from "lucide-react";
 import type { AgentConfig, SubAgentConfig } from "@/domain/entities/agent/agentConfig";
 import { BackendType } from "@/domain/entities/agent/agentConfig";
 import { McpTransportType } from "@/domain/entities/agent/mcpServerConfig";
@@ -28,8 +27,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/application/components/ui/select";
+import PillMultiSelect, {
+  type PillMultiSelectOption,
+} from "@/application/components/shared/PillMultiSelect";
 import { SkillPillMultiSelect, MemoryPillMultiSelect } from "./SkillMemorySelects";
-import McpServerEditor from "./McpServerEditor";
 import SubAgentEditor from "./SubAgentEditor";
 import HITLEditor from "./HITLEditor";
 import ResponseFormatEditor from "./ResponseFormatEditor";
@@ -65,17 +66,6 @@ const BACKEND_STORAGE_OPTIONS: { label: string; value: "memory" | "postgres" }[]
   { value: "memory", label: "memory" },
   { value: "postgres", label: "postgres" },
 ];
-
-const EMPTY_MCP_SERVER: McpServerConfig = {
-  name: "",
-  transport: McpTransportType.STDIO,
-  command: undefined,
-  args: [],
-  url: undefined,
-  headers: {},
-  env: {},
-  auth_token: undefined,
-};
 
 const DEFAULT_FORM_VALUES: AgentConfigFormData = {
   name: "",
@@ -396,25 +386,15 @@ function FormField({ id, label, error, children }: Readonly<FormFieldProps>) {
   );
 }
 
-interface AddButtonProps {
-  onClick: () => void;
-  label: string;
-}
-
-function AddButton({ onClick, label }: Readonly<AddButtonProps>) {
-  return (
-    <Button type="button" variant="outline" size="sm" onClick={onClick} className="w-full">
-      <Plus className="h-4 w-4" aria-hidden="true" />
-      {label}
-    </Button>
-  );
-}
-
-// Isolated MCP servers accordion item: owns its useFieldArray AND the
-// AccordionItem so the parent form's re-renders (triggered by useWatch on
-// unrelated fields) do NOT remount the McpServerEditor instances and steal
-// input focus. The whole AccordionItem is memoized so it only re-renders when
-// the MCP servers array itself changes.
+// Isolated MCP servers accordion item. MCP servers are now managed in their
+// own screen (MCP Registry page), so this section only lets users pick
+// registered servers via toggle pills — exactly like the Skills/Memories
+// sections. Selecting a pill reveals the server's config and embeds a full
+// McpServerConfig (the agent schema still requires the complete object) into
+// the form; deselecting removes the entry by name.
+//
+// The AccordionItem is memoized so parent form re-renders (from useWatch on
+// unrelated fields) do not recompute the registry options.
 const McpServersAccordionItem = memo(function McpServersAccordionItem({
   control,
   defaultValue,
@@ -425,67 +405,74 @@ const McpServersAccordionItem = memo(function McpServersAccordionItem({
   const mcpServersArray = useFieldArray({ control, name: "mcp_servers" });
   const { data: registryServers } = useMcpRegistry();
   const isOpen = defaultValue.includes("mcp-servers");
-  const addMcpServer = useCallback(
-    () => mcpServersArray.append({ ...EMPTY_MCP_SERVER }),
-    [mcpServersArray],
+
+  const fields = mcpServersArray.fields as unknown as McpServerConfig[];
+  const registryNames = useMemo(
+    () => new Set((registryServers ?? []).map((s) => s.name)),
+    [registryServers],
   );
-  const updateMcpServer = useCallback(
-    (index: number, v: McpServerConfig) => mcpServersArray.update(index, v),
-    [mcpServersArray],
-  );
-  const removeMcpServer = useCallback(
-    (index: number) => mcpServersArray.remove(index),
-    [mcpServersArray],
-  );
-  const addFromRegistry = useCallback(
-    async (name: string) => {
-      const revealed = await mcpRegistryApi.reveal(name);
-      const serverConfig: McpServerConfig = {
-        name: revealed.name,
-        transport: McpTransportType.HTTP,
-        command: undefined,
-        args: [],
-        url: revealed.url,
-        headers: revealed.headers,
-        env: revealed.env,
-        auth_token: revealed.auth_token ?? undefined,
-      };
-      mcpServersArray.append(serverConfig);
+  // Names currently embedded in the form: registry-selected + any legacy
+  // custom entry (name not in the registry). Legacy entries are surfaced as
+  // extra active pills so they can be removed — no invisible form data.
+  const selectedNames = fields.map((f) => f.name).filter((n) => n.length > 0);
+
+  const options = useMemo<PillMultiSelectOption[]>(() => {
+    const fromRegistry: PillMultiSelectOption[] = (registryServers ?? []).map((s) => ({
+      value: s.name,
+      label: s.name,
+      description: s.openapi_url ?? s.url ?? undefined,
+    }));
+    const legacy: PillMultiSelectOption[] = fields
+      .map((f) => f.name)
+      .filter((n) => n.length > 0 && !registryNames.has(n))
+      .map((n) => ({ value: n, label: `${n} (custom)` }));
+    return [...fromRegistry, ...legacy];
+  }, [registryServers, fields, registryNames]);
+
+  const handleRegistryChange = useCallback(
+    (next: string[]) => {
+      const prev = selectedNames;
+      // Newly selected names that exist in the registry → reveal + embed.
+      next
+        .filter((name) => !prev.includes(name) && registryNames.has(name))
+        .forEach((name) => {
+          void mcpRegistryApi.reveal(name).then((revealed) => {
+            mcpServersArray.append({
+              name: revealed.name,
+              transport: McpTransportType.HTTP,
+              command: undefined,
+              args: [],
+              url: revealed.url,
+              headers: revealed.headers,
+              env: revealed.env,
+              auth_token: revealed.auth_token ?? undefined,
+            });
+          });
+        });
+      // Deselected names → remove the embedded entry (registry or legacy).
+      prev
+        .filter((name) => !next.includes(name))
+        .forEach((name) => {
+          const idx = fields.findIndex((f) => f.name === name);
+          if (idx >= 0) mcpServersArray.remove(idx);
+        });
     },
-    [mcpServersArray],
+    [selectedNames, registryNames, fields, mcpServersArray],
   );
+
   return (
     <AccordionItem value="mcp-servers">
       <SectionTrigger value="mcp-servers" />
       <AccordionContent className="space-y-4" data-state={isOpen ? "open" : "closed"}>
-        {(registryServers ?? []).length > 0 && (
-          <div className="space-y-2">
-            <Label className="text-xs uppercase tracking-[0.1em] text-muted">
-              Add from registry
-            </Label>
-            <Select value="" onValueChange={(v) => void addFromRegistry(v)}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select a registered server…" />
-              </SelectTrigger>
-              <SelectContent>
-                {(registryServers ?? []).map((server) => (
-                  <SelectItem key={server.name} value={server.name}>
-                    {server.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        )}
-        {mcpServersArray.fields.map((field, index) => (
-          <McpServerEditor
-            key={field.id}
-            value={field as unknown as McpServerConfig}
-            onChange={(v) => updateMcpServer(index, v)}
-            onRemove={() => removeMcpServer(index)}
+        <div className="space-y-2">
+          <Label className="text-xs uppercase tracking-[0.1em] text-muted">From registry</Label>
+          <PillMultiSelect
+            options={options}
+            selected={selectedNames}
+            onChange={handleRegistryChange}
+            emptyMessage="No registered servers. Add servers in the MCP Registry page first."
           />
-        ))}
-        <AddButton onClick={addMcpServer} label="Add MCP Server" />
+        </div>
       </AccordionContent>
     </AccordionItem>
   );
