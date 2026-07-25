@@ -35,11 +35,13 @@ describe("AgentCard", () => {
     expect(onConfigure).toHaveBeenCalledWith("my-agent");
   });
 
-  it("shows status badge", () => {
-    const agent = createAgentConfigMetadata({ is_builtin: true });
+  it("does not render a status badge (Active/Standby)", () => {
+    const agent = createAgentConfigMetadata({ name: "my-agent" });
 
     renderWithProviders(<AgentCard agent={agent} onConfigure={vi.fn()} />);
 
-    expect(screen.getByText("Active")).toBeInTheDocument();
+    // After the fix, the StatusBadge component is removed entirely; no
+    // "Active" or "Standby" text should be rendered anywhere in the card.
+    expect(screen.queryByText(/^(active|standby)$/i)).toBeNull();
   });
 });

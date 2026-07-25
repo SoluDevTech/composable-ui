@@ -210,6 +210,15 @@ tests/
 | `/rag`             | RagPage      | Browse MinIO folders and files with breadcrumb navigation                      |
 | `/settings`        | SettingsPage | Theme, chat, LLM provider, and reset preferences (persisted to `localStorage`) |
 
+## Agent Configuration
+
+The agent creation/edit form (in `CreateAgentDialog`) reflects the current backend schema. The following UI changes have been made:
+
+- **General section** — A new **Description** text input is available alongside the agent name. Tools are no longer managed here; they are configured exclusively via MCP servers (see the MCP servers section of the form).
+- **Debug toggle removed** — The Debug toggle has been removed from the form.
+- **Tools section removed** — Tools are managed via MCP servers only. The dedicated "Tools" section no longer appears in the form.
+- **Subagents section** — A new **"Add from existing agents"** dropdown lets you select an existing agent as a subagent reference (populating `agent_ref`). When a subagent references an existing agent, a **`ref:`** badge is displayed next to its name and the name field becomes read-only (the name is derived from the referenced agent).
+
 ## RAG File Browser
 
 The `/rag` page provides a MinIO-backed file browser with three tabs: Browse, Query, and Classical. The browse tab uses breadcrumb navigation driven by `useFolders` and `useFiles`, and supports the following file/folder management actions alongside read and upload:

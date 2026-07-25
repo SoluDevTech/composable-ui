@@ -32,6 +32,7 @@ export const mcpServerConfigSchema = z.object({
 export const subAgentConfigSchema = z.object({
   name: z.string().min(1, "Subagent name is required"),
   description: z.string().min(1, "Subagent description is required"),
+  agent_ref: z.string().nullable().optional(),
   instructions: z.string().nullable().optional(),
   model: z.string().nullable().optional(),
   tools: z.array(z.string()),
@@ -51,6 +52,7 @@ export const agentConfigSchema = z
         "Agent name must contain only alphanumeric characters, dots, hyphens, and underscores",
       ),
     model: z.string().min(1, "Model is required"),
+    description: z.string().nullable().optional(),
     system_prompt: z.string().nullable().optional(),
     system_prompt_file: z.string().nullable().optional(),
     tools: z.array(z.string()),

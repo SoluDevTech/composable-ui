@@ -123,7 +123,7 @@ export default function CreateAgentDialog({
           </div>
         </div>
 
-        <div className="flex-1 overscroll-contain overflow-y-auto bg-surface px-6 py-6 sm:px-8">
+        <div className="flex-1 overscroll-contain overflow-y-auto overflow-x-hidden bg-surface px-6 py-6 sm:px-8">
           {mode === "form" ? (
             <AgentConfigForm
               mode="create"

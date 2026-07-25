@@ -1,4 +1,4 @@
-import { screen, waitFor } from "@testing-library/react";
+import { screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { renderWithProviders } from "../../../utils/render";
@@ -147,9 +147,8 @@ describe("AgentConfigViewer", () => {
       <AgentConfigViewer agentName="test-agent" open={true} onOpenChange={vi.fn()} />,
     );
 
-    expect(screen.getByText("search")).toBeInTheDocument();
-    expect(screen.getByText("calculator")).toBeInTheDocument();
-    expect(screen.getByText("Tools (2)")).toBeInTheDocument();
+    // After the change, the Tools section is no longer rendered.
+    expect(screen.queryByText("Tools (2)")).not.toBeInTheDocument();
   });
 
   it("renders backend checkpoint_backend", () => {
@@ -178,14 +177,14 @@ describe("AgentConfigViewer", () => {
     expect(screen.getByRole("button", { name: /confirm delete/i })).toBeInTheDocument();
   });
 
-  it("renders debug status badge", () => {
+  it("does NOT render a Debug section", () => {
     mockAgentConfigData.data = fullConfig;
 
     renderWithProviders(
       <AgentConfigViewer agentName="test-agent" open={true} onOpenChange={vi.fn()} />,
     );
 
-    expect(screen.getByText("Off")).toBeInTheDocument();
+    expect(screen.queryByText(/debug/i)).not.toBeInTheDocument();
   });
 
   it("does NOT render a middleware section", () => {
@@ -331,14 +330,14 @@ describe("AgentConfigViewer", () => {
     );
   });
 
-  it("shows Active badge when debug is true", () => {
+  it("does NOT render an Active debug badge when debug is true", () => {
     mockAgentConfigData.data = { ...fullConfig, debug: true };
 
     renderWithProviders(
       <AgentConfigViewer agentName="test-agent" open={true} onOpenChange={vi.fn()} />,
     );
 
-    expect(screen.getByText("Active")).toBeInTheDocument();
+    expect(screen.queryByText("Active")).not.toBeInTheDocument();
   });
 
   it("has an Edit button", () => {
@@ -417,5 +416,58 @@ describe("AgentConfigViewer", () => {
 
     // Assert — no Memories section label is rendered.
     expect(screen.queryByText(/Memories \(/)).not.toBeInTheDocument();
+  });
+
+  it("does NOT render a Tools section (even when config.tools has items)", () => {
+    // Arrange — fullConfig has tools: ["search", "calculator"].
+    mockAgentConfigData.data = fullConfig;
+
+    renderWithProviders(
+      <AgentConfigViewer agentName="test-agent" open={true} onOpenChange={vi.fn()} />,
+    );
+
+    // Assert — the Tools section label must no longer be rendered.
+    expect(screen.queryByText(/^Tools \(\d+\)$/)).not.toBeInTheDocument();
+    expect(screen.queryByText("Tools (2)")).not.toBeInTheDocument();
+  });
+
+  it("renders a Description section when config.description is present", () => {
+    // Arrange — a config carrying a top-level description.
+    mockAgentConfigData.data = {
+      ...fullConfig,
+      description: "An agent that writes tests.",
+    } as AgentConfig;
+
+    renderWithProviders(
+      <AgentConfigViewer agentName="test-agent" open={true} onOpenChange={vi.fn()} />,
+    );
+
+    // Assert — a Description section label and the description text must appear.
+    expect(screen.getByText(/^description$/i)).toBeInTheDocument();
+    expect(screen.getByText("An agent that writes tests.")).toBeInTheDocument();
+  });
+
+  it("renders a ref badge on referenced subagents", () => {
+    // Arrange — a config with a subagent that references another agent.
+    mockAgentConfigData.data = {
+      ...fullConfig,
+      subagents: [
+        {
+          name: "researcher",
+          description: "Research sub-agent",
+          agent_ref: "researcher",
+          tools: [],
+          skills: [],
+          mcp_servers: [],
+        } as AgentConfig["subagents"][number],
+      ],
+    } as AgentConfig;
+
+    renderWithProviders(
+      <AgentConfigViewer agentName="test-agent" open={true} onOpenChange={vi.fn()} />,
+    );
+
+    // Assert — a ref badge "ref: researcher" must be rendered on the subagent.
+    expect(screen.getByText(/ref:\s*researcher/i)).toBeInTheDocument();
   });
 });

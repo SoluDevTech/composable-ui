@@ -22,11 +22,7 @@ interface McpServerEditorProps {
   onRemove: () => void;
 }
 
-function McpServerEditorImpl({
-  value,
-  onChange,
-  onRemove,
-}: Readonly<McpServerEditorProps>) {
+function McpServerEditorImpl({ value, onChange, onRemove }: Readonly<McpServerEditorProps>) {
   // Local draft is the source of truth for inputs. We propagate to the parent
   // ONLY on blur (not on every keystroke) so useFieldArray.update() does not
   // fire mid-typing and remount the AccordionContent, which steals focus.
@@ -63,7 +59,7 @@ function McpServerEditorImpl({
       </div>
 
       <div className="grid grid-cols-2 gap-3">
-        <div>
+        <div className="min-w-0">
           <Label
             htmlFor={`${idBase}-name`}
             className="mb-1.5 block text-xs uppercase tracking-[0.1em]"
@@ -78,7 +74,7 @@ function McpServerEditorImpl({
             placeholder="my-server"
           />
         </div>
-        <div>
+        <div className="min-w-0">
           <Label
             htmlFor={`${idBase}-transport`}
             className="mb-1.5 block text-xs uppercase tracking-[0.1em]"

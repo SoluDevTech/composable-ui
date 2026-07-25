@@ -15,8 +15,8 @@ export function createAgentConfigMetadata(
   return {
     name: "test-agent",
     model: "openai:anthropic/claude-haiku-4.5:nitro",
+    description: null,
     minio_path: "composable-agents/test-agent.yaml",
-    is_builtin: false,
     created_at: "2026-04-06T10:00:00Z",
     updated_at: "2026-04-06T10:00:00Z",
     ...overrides,

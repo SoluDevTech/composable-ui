@@ -51,7 +51,7 @@ export default function StringListEditor({
           onChange={(e) => setInputValue(e.target.value)}
           onKeyDown={handleKeyDown}
           placeholder={placeholder}
-          className="flex-1"
+          className="flex-1 min-w-0"
           name={`${label.toLowerCase().replace(/\s+/g, "-")}-input`}
         />
         <Button type="button" variant="outline" size="sm" onClick={addItem}>

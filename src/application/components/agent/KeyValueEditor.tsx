@@ -52,7 +52,7 @@ export default function KeyValueEditor({
           value={keyInput}
           onChange={(e) => setKeyInput(e.target.value)}
           placeholder={keyPlaceholder}
-          className="flex-1"
+          className="flex-1 min-w-0"
           aria-label={`${label} key`}
         />
         <Input
@@ -60,7 +60,7 @@ export default function KeyValueEditor({
           value={valueInput}
           onChange={(e) => setValueInput(e.target.value)}
           placeholder={valuePlaceholder}
-          className="flex-1"
+          className="flex-1 min-w-0"
           aria-label={`${label} value`}
         />
         <Button type="button" variant="outline" size="sm" onClick={addEntry}>

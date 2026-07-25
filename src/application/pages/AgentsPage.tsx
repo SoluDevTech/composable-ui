@@ -14,7 +14,6 @@ export default function AgentsPage() {
   const { data: agents } = useAgents();
 
   const total = agents?.length ?? 0;
-  const active = agents?.filter((a) => a.is_builtin).length ?? 0;
 
   return (
     <AppShell>
@@ -29,7 +28,7 @@ export default function AgentsPage() {
           </p>
           <div className="flex items-center gap-3">
             <Badge variant="default" data-od-id="agent-count">
-              {total} agents · {active} active
+              {total} agents
             </Badge>
             <Button
               type="button"

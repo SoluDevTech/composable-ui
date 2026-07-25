@@ -1,13 +1,25 @@
 import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect, vi, beforeEach } from "vitest";
 import { renderWithProviders } from "../../../utils/render";
 import AgentConfigForm from "@/application/components/agent/AgentConfigForm";
 import type { AgentConfig } from "@/domain/entities/agent/agentConfig";
 import { BackendType } from "@/domain/entities/agent/agentConfig";
+import type { AgentConfigMetadata } from "@/domain/entities/agent/agentConfigMetadata";
 
 const mockSubmit = vi.fn();
 const mockCancel = vi.fn();
+
+const { mockAgentsData } = vi.hoisted(() => ({
+  mockAgentsData: {
+    data: [] as AgentConfigMetadata[] | undefined,
+    isLoading: false,
+  },
+}));
+
+vi.mock("@/application/hooks/agent/useAgents", () => ({
+  useAgents: () => mockAgentsData,
+}));
 
 describe("AgentConfigForm", () => {
   describe("create mode", () => {
@@ -17,8 +29,6 @@ describe("AgentConfigForm", () => {
       );
 
       expect(screen.getByText("General")).toBeInTheDocument();
-      // After the change the section is renamed to just "Tools".
-      expect(screen.getByText("Tools")).toBeInTheDocument();
       expect(screen.getByText("Backend")).toBeInTheDocument();
     });
 
@@ -40,15 +50,9 @@ describe("AgentConfigForm", () => {
       expect(screen.queryByText("Middleware")).not.toBeInTheDocument();
       // The middleware toggle buttons (todo_list, filesystem, sub_agent) must
       // not appear as toggle buttons.
-      expect(
-        screen.queryByRole("button", { name: /^todo_list$/i }),
-      ).not.toBeInTheDocument();
-      expect(
-        screen.queryByRole("button", { name: /^filesystem$/i }),
-      ).not.toBeInTheDocument();
-      expect(
-        screen.queryByRole("button", { name: /^sub_agent$/i }),
-      ).not.toBeInTheDocument();
+      expect(screen.queryByRole("button", { name: /^todo_list$/i })).not.toBeInTheDocument();
+      expect(screen.queryByRole("button", { name: /^filesystem$/i })).not.toBeInTheDocument();
+      expect(screen.queryByRole("button", { name: /^sub_agent$/i })).not.toBeInTheDocument();
     });
 
     it("does NOT render filesystem in the backend type dropdown", async () => {
@@ -65,9 +69,7 @@ describe("AgentConfigForm", () => {
 
       // Assert — filesystem must not be a selectable option.
       await waitFor(() => {
-        expect(
-          screen.queryByRole("option", { name: "filesystem" }),
-        ).not.toBeInTheDocument();
+        expect(screen.queryByRole("option", { name: "filesystem" })).not.toBeInTheDocument();
       });
     });
 
@@ -81,9 +83,7 @@ describe("AgentConfigForm", () => {
       await user.click(screen.getByRole("combobox"));
 
       await waitFor(() => {
-        expect(
-          screen.queryByRole("option", { name: "composite" }),
-        ).not.toBeInTheDocument();
+        expect(screen.queryByRole("option", { name: "composite" })).not.toBeInTheDocument();
       });
     });
 
@@ -125,12 +125,20 @@ describe("AgentConfigForm", () => {
       expect(nameInput).not.toBeDisabled();
     });
 
-    it("renders model and debug fields", () => {
+    it("renders model field", () => {
       renderWithProviders(
         <AgentConfigForm mode="create" onSubmit={mockSubmit} onCancel={mockCancel} />,
       );
 
       expect(screen.getByLabelText(/model/i)).toBeInTheDocument();
+    });
+
+    it("does NOT render a Debug switch", () => {
+      renderWithProviders(
+        <AgentConfigForm mode="create" onSubmit={mockSubmit} onCancel={mockCancel} />,
+      );
+
+      expect(screen.queryByLabelText(/debug/i)).not.toBeInTheDocument();
     });
 
     it("renders cancel button", () => {
@@ -222,6 +230,81 @@ describe("AgentConfigForm", () => {
 
       expect(screen.getByRole("button", { name: /update/i })).toBeInTheDocument();
       expect(screen.queryByRole("button", { name: /create/i })).not.toBeInTheDocument();
+    });
+  });
+
+  describe("description & subagent reference feature", () => {
+    beforeEach(() => {
+      mockAgentsData.data = [];
+      mockAgentsData.isLoading = false;
+    });
+
+    it("renders a Description input in the General section", () => {
+      renderWithProviders(
+        <AgentConfigForm mode="create" onSubmit={mockSubmit} onCancel={mockCancel} />,
+      );
+
+      // The General section is open by default; a Description field must be present.
+      expect(screen.getByLabelText(/^description$/i)).toBeInTheDocument();
+    });
+
+    it("does NOT render a Tools accordion section", () => {
+      renderWithProviders(
+        <AgentConfigForm mode="create" onSubmit={mockSubmit} onCancel={mockCancel} />,
+      );
+
+      // After the change, there must be no accordion trigger labelled "Tools".
+      expect(screen.queryByRole("button", { name: /^tools$/i })).not.toBeInTheDocument();
+    });
+
+    it("shows an 'Add from existing agents' control in the Subagents section when useAgents returns agents", async () => {
+      // Arrange — useAgents returns two existing agents.
+      mockAgentsData.data = [
+        { name: "researcher", description: "Research agent" } as AgentConfigMetadata,
+        { name: "writer", description: "Writer agent" } as AgentConfigMetadata,
+      ];
+      const user = userEvent.setup();
+
+      renderWithProviders(
+        <AgentConfigForm mode="create" onSubmit={mockSubmit} onCancel={mockCancel} />,
+      );
+
+      // Act — expand the Subagents accordion.
+      await user.click(screen.getByRole("button", { name: "Subagents" }));
+
+      // Assert — the "Add from existing agents" control must be rendered.
+      await waitFor(() => {
+        expect(screen.getByText(/add from existing agents/i)).toBeInTheDocument();
+      });
+    });
+
+    it("clicking an existing agent in the picker adds a subagent with agent_ref", async () => {
+      // Arrange — useAgents returns a "researcher" agent.
+      mockAgentsData.data = [
+        { name: "researcher", description: "Research agent" } as AgentConfigMetadata,
+      ];
+      const user = userEvent.setup();
+
+      renderWithProviders(
+        <AgentConfigForm mode="create" onSubmit={mockSubmit} onCancel={mockCancel} />,
+      );
+
+      // Act — expand Subagents, open the picker, and select the researcher.
+      await user.click(screen.getByRole("button", { name: "Subagents" }));
+
+      await waitFor(() => {
+        expect(screen.getByText(/add from existing agents/i)).toBeInTheDocument();
+      });
+
+      // The picker is the combobox inside the Subagents section.
+      await user.click(screen.getByRole("combobox"));
+      await user.click(await screen.findByRole("option", { name: /researcher/i }));
+
+      // Assert — a SubAgentEditor in reference mode must appear, showing a
+      // "ref: researcher" badge.
+      await waitFor(() => {
+        expect(screen.getByText(/ref:\s*researcher/i)).toBeInTheDocument();
+      });
     });
   });
 });

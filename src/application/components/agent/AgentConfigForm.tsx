@@ -14,7 +14,6 @@ import {
 import { Button } from "@/application/components/ui/button";
 import { Input } from "@/application/components/ui/input";
 import { Label } from "@/application/components/ui/label";
-import { Switch } from "@/application/components/ui/switch";
 import { Textarea } from "@/application/components/ui/textarea";
 import {
   Accordion,
@@ -29,18 +28,19 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/application/components/ui/select";
-import StringListEditor from "./StringListEditor";
 import { SkillPillMultiSelect, MemoryPillMultiSelect } from "./SkillMemorySelects";
 import McpServerEditor from "./McpServerEditor";
 import SubAgentEditor from "./SubAgentEditor";
 import HITLEditor from "./HITLEditor";
 import ResponseFormatEditor from "./ResponseFormatEditor";
+import { useMcpRegistry } from "@/application/hooks/mcpServer/useMcpRegistry";
+import { useAgents } from "@/application/hooks/agent/useAgents";
+import { mcpRegistryApi } from "@/infrastructure/api/mcpServer/mcpRegistryApi";
 import { AGENT_CONFIG_FORM_ID as FORM_ID } from "./formConstants";
 
 type SectionValue =
   | "general"
   | "system-prompt"
-  | "tools"
   | "backend"
   | "hitl"
   | "memory-skills"
@@ -53,7 +53,6 @@ const DEFAULT_OPEN_SECTIONS: SectionValue[] = ["general", "system-prompt"];
 const SECTION_META: Record<SectionValue, { label: string }> = {
   general: { label: "General" },
   "system-prompt": { label: "System Prompt" },
-  tools: { label: "Tools" },
   backend: { label: "Backend" },
   hitl: { label: "HITL" },
   "memory-skills": { label: "Memory & Skills" },
@@ -76,17 +75,6 @@ const EMPTY_MCP_SERVER: McpServerConfig = {
   headers: {},
   env: {},
   auth_token: undefined,
-};
-
-const EMPTY_SUBAGENT: SubAgentConfig = {
-  name: "",
-  description: "",
-  instructions: undefined,
-  model: undefined,
-  tools: [],
-  skills: [],
-  mcp_servers: [],
-  response_format: undefined,
 };
 
 const DEFAULT_FORM_VALUES: AgentConfigFormData = {
@@ -150,6 +138,8 @@ export default function AgentConfigForm({
   const subagentsArray = useFieldArray({ control, name: "subagents" });
 
   const checkpointBackend = useWatch({ control, name: "backend.checkpoint_backend" });
+  const currentAgentName = useWatch({ control, name: "name" });
+  const { data: existingAgents } = useAgents();
 
   function handleFormSubmit(data: AgentConfigFormData) {
     const cleaned: AgentConfigFormData = {
@@ -161,8 +151,20 @@ export default function AgentConfigForm({
     onSubmit(cleaned);
   }
 
-  function addSubagent() {
-    subagentsArray.append({ ...EMPTY_SUBAGENT });
+  function addFromExistingAgent(agentName: string) {
+    const existing = (existingAgents ?? []).find((a) => a.name === agentName);
+    if (!existing) return;
+    subagentsArray.append({
+      name: agentName,
+      agent_ref: agentName,
+      description: existing.description ?? "",
+      instructions: undefined,
+      model: undefined,
+      tools: [],
+      skills: [],
+      mcp_servers: [],
+      response_format: undefined,
+    });
   }
 
   return (
@@ -185,6 +187,14 @@ export default function AgentConfigForm({
                 aria-invalid={!!errors.name}
               />
             </FormField>
+            <FormField id="description" label="Description">
+              <Input
+                id="description"
+                {...register("description")}
+                placeholder="Describe what this agent does…"
+                autoComplete="off"
+              />
+            </FormField>
             <FormField id="model" label="Model" error={errors.model?.message}>
               <Input
                 id="model"
@@ -195,16 +205,6 @@ export default function AgentConfigForm({
                 aria-invalid={!!errors.model}
               />
             </FormField>
-            <div className="flex items-center gap-3">
-              <Label htmlFor="debug" className="text-xs uppercase tracking-[0.1em]">
-                Debug
-              </Label>
-              <Switch
-                id="debug"
-                checked={useWatch({ control, name: "debug" })}
-                onCheckedChange={(v) => setValue("debug", v)}
-              />
-            </div>
           </AccordionContent>
         </AccordionItem>
 
@@ -229,18 +229,6 @@ export default function AgentConfigForm({
                 spellCheck={false}
               />
             </FormField>
-          </AccordionContent>
-        </AccordionItem>
-
-        <AccordionItem value="tools">
-          <SectionTrigger value="tools" />
-          <AccordionContent className="space-y-4">
-            <StringListEditor
-              label="Tools"
-              value={useWatch({ control, name: "tools" })}
-              onChange={(tools) => setValue("tools", tools)}
-              placeholder="Add tool…"
-            />
           </AccordionContent>
         </AccordionItem>
 
@@ -309,6 +297,33 @@ export default function AgentConfigForm({
         <AccordionItem value="subagents">
           <SectionTrigger value="subagents" />
           <AccordionContent className="space-y-4">
+            {(existingAgents ?? []).length > 0 && (
+              <div className="space-y-2">
+                <Label className="text-xs uppercase tracking-[0.1em] text-muted">
+                  Add from existing agents
+                </Label>
+                <Select value="" onValueChange={(v) => addFromExistingAgent(v)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select an existing agent…" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {(existingAgents ?? [])
+                      .filter(
+                        (agent) =>
+                          agent.name !== currentAgentName &&
+                          !subagentsArray.fields.some(
+                            (s) => (s as unknown as SubAgentConfig).agent_ref === agent.name,
+                          ),
+                      )
+                      .map((agent) => (
+                        <SelectItem key={agent.name} value={agent.name}>
+                          {agent.name}
+                        </SelectItem>
+                      ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
             {subagentsArray.fields.map((field, index) => (
               <SubAgentEditor
                 key={field.id}
@@ -318,7 +333,6 @@ export default function AgentConfigForm({
                 onRemove={() => subagentsArray.remove(index)}
               />
             ))}
-            <AddButton onClick={addSubagent} label="Add Subagent" />
           </AccordionContent>
         </AccordionItem>
 
@@ -409,6 +423,7 @@ const McpServersAccordionItem = memo(function McpServersAccordionItem({
   defaultValue: SectionValue[];
 }>) {
   const mcpServersArray = useFieldArray({ control, name: "mcp_servers" });
+  const { data: registryServers } = useMcpRegistry();
   const isOpen = defaultValue.includes("mcp-servers");
   const addMcpServer = useCallback(
     () => mcpServersArray.append({ ...EMPTY_MCP_SERVER }),
@@ -422,10 +437,46 @@ const McpServersAccordionItem = memo(function McpServersAccordionItem({
     (index: number) => mcpServersArray.remove(index),
     [mcpServersArray],
   );
+  const addFromRegistry = useCallback(
+    async (name: string) => {
+      const revealed = await mcpRegistryApi.reveal(name);
+      const serverConfig: McpServerConfig = {
+        name: revealed.name,
+        transport: McpTransportType.HTTP,
+        command: undefined,
+        args: [],
+        url: revealed.url,
+        headers: revealed.headers,
+        env: revealed.env,
+        auth_token: revealed.auth_token ?? undefined,
+      };
+      mcpServersArray.append(serverConfig);
+    },
+    [mcpServersArray],
+  );
   return (
     <AccordionItem value="mcp-servers">
       <SectionTrigger value="mcp-servers" />
       <AccordionContent className="space-y-4" data-state={isOpen ? "open" : "closed"}>
+        {(registryServers ?? []).length > 0 && (
+          <div className="space-y-2">
+            <Label className="text-xs uppercase tracking-[0.1em] text-muted">
+              Add from registry
+            </Label>
+            <Select value="" onValueChange={(v) => void addFromRegistry(v)}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select a registered server…" />
+              </SelectTrigger>
+              <SelectContent>
+                {(registryServers ?? []).map((server) => (
+                  <SelectItem key={server.name} value={server.name}>
+                    {server.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        )}
         {mcpServersArray.fields.map((field, index) => (
           <McpServerEditor
             key={field.id}

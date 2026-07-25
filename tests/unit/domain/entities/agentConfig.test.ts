@@ -1,6 +1,10 @@
 import { describe, it, expect } from "vitest";
 import { BackendType } from "@/domain/entities/agent/agentConfig";
-import { backendConfigSchema, agentConfigSchema } from "@/domain/entities/agent/agentConfigSchema";
+import {
+  backendConfigSchema,
+  agentConfigSchema,
+  subAgentConfigSchema,
+} from "@/domain/entities/agent/agentConfigSchema";
 import { McpTransportType } from "@/domain/entities/agent/mcpServerConfig";
 
 describe("BackendType", () => {
@@ -119,5 +123,82 @@ describe("McpTransportType", () => {
   it("has the correct values", () => {
     expect(McpTransportType.STDIO).toBe("stdio");
     expect(McpTransportType.HTTP).toBe("http");
+  });
+});
+
+describe("AgentConfig.description (optional)", () => {
+  it("accepts optional description on AgentConfig via schema", () => {
+    // Arrange — a valid base config that additionally provides a description.
+    const config = {
+      name: "described-agent",
+      model: "openai:gpt-4o",
+      description: "An agent that writes tests.",
+      tools: [],
+      backend: { type: BackendType.STORE, checkpoint_backend: "memory" },
+      hitl: { rules: {} },
+      memory: [],
+      skills: [],
+      subagents: [],
+      mcp_servers: [],
+      debug: false,
+    };
+
+    // Act
+    const parsed = agentConfigSchema.parse(config);
+
+    // Assert — the description must round-trip through the schema.
+    expect(parsed).toHaveProperty("description", "An agent that writes tests.");
+  });
+
+  it("accepts a null description on AgentConfig via schema", () => {
+    const config = {
+      name: "null-desc-agent",
+      model: "openai:gpt-4o",
+      description: null,
+      tools: [],
+      backend: { type: BackendType.STORE, checkpoint_backend: "memory" },
+      hitl: { rules: {} },
+      memory: [],
+      skills: [],
+      subagents: [],
+      mcp_servers: [],
+      debug: false,
+    };
+
+    const parsed = agentConfigSchema.parse(config);
+    expect(parsed).toHaveProperty("description", null);
+  });
+});
+
+describe("SubAgentConfig.agent_ref (optional)", () => {
+  it("accepts an agent_ref on a subagent via schema", () => {
+    // Arrange — a subagent that references another agent by name.
+    const sub = {
+      name: "researcher",
+      description: "Research sub-agent",
+      agent_ref: "researcher",
+      tools: [],
+      skills: [],
+      mcp_servers: [],
+    };
+
+    // Act
+    const parsed = subAgentConfigSchema.parse(sub);
+
+    // Assert — agent_ref must round-trip.
+    expect(parsed).toHaveProperty("agent_ref", "researcher");
+  });
+
+  it("defaults agent_ref to undefined when omitted", () => {
+    const sub = {
+      name: "researcher",
+      description: "Research sub-agent",
+      tools: [],
+      skills: [],
+      mcp_servers: [],
+    };
+
+    const parsed = subAgentConfigSchema.parse(sub);
+    expect(parsed).not.toHaveProperty("agent_ref");
   });
 });
