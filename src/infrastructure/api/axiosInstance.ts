@@ -24,7 +24,9 @@ apiClient.interceptors.response.use(
   (error) => {
     if (error.response) {
       const detail = error.response.data?.detail || error.message;
-      return Promise.reject(new Error(detail));
+      const wrapped = new Error(detail) as Error & { status?: number };
+      wrapped.status = error.response.status;
+      return Promise.reject(wrapped);
     }
     return Promise.reject(error);
   },

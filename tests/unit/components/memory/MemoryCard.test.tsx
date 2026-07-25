@@ -7,11 +7,7 @@ import { MemoryCard } from "@/application/components/memory/MemoryCard";
 describe("MemoryCard", () => {
   it("renders memory name", () => {
     renderWithProviders(
-      <MemoryCard
-        name="AGENTS.md"
-        preview="# Project rules..."
-        onConfigure={vi.fn()}
-      />,
+      <MemoryCard name="AGENTS.md" preview="# Project rules..." onConfigure={vi.fn()} />,
     );
 
     expect(screen.getByText("AGENTS.md")).toBeInTheDocument();
@@ -19,11 +15,7 @@ describe("MemoryCard", () => {
 
   it("renders content preview", () => {
     renderWithProviders(
-      <MemoryCard
-        name="AGENTS.md"
-        preview="# Project rules..."
-        onConfigure={vi.fn()}
-      />,
+      <MemoryCard name="AGENTS.md" preview="# Project rules..." onConfigure={vi.fn()} />,
     );
 
     expect(screen.getByText("# Project rules...")).toBeInTheDocument();
@@ -34,11 +26,7 @@ describe("MemoryCard", () => {
     const onConfigure = vi.fn();
 
     renderWithProviders(
-      <MemoryCard
-        name="AGENTS.md"
-        preview="# Project rules..."
-        onConfigure={onConfigure}
-      />,
+      <MemoryCard name="AGENTS.md" preview="# Project rules..." onConfigure={onConfigure} />,
     );
 
     await user.click(screen.getByRole("button", { name: /configure/i }));

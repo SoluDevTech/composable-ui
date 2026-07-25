@@ -13,6 +13,7 @@ function cleanSubagent(sub: AgentConfig["subagents"][number]): PlainRecord {
     mcp_servers: sub.mcp_servers,
   };
 
+  if (sub.agent_ref) result.agent_ref = sub.agent_ref;
   if (sub.instructions) result.instructions = sub.instructions;
   if (sub.model) result.model = sub.model;
   if (sub.response_format && Object.keys(sub.response_format).length > 0) {
@@ -54,6 +55,9 @@ export function serializeAgentConfig(config: AgentConfig): string {
 
   if (config.system_prompt) {
     clean.system_prompt = config.system_prompt;
+  }
+  if (config.description) {
+    clean.description = config.description;
   }
   if (config.system_prompt_file) {
     clean.system_prompt_file = config.system_prompt_file;

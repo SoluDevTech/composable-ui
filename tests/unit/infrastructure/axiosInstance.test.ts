@@ -90,6 +90,30 @@ describe("axiosInstance", () => {
     }
   });
 
+  it("error interceptor preserves HTTP status on the rejected Error", async () => {
+    const { apiClient } = await import("@/infrastructure/api/axiosInstance");
+
+    const axiosError = {
+      response: {
+        status: 404,
+        data: { detail: "File not found: /skills/ghost/SKILL.md" },
+      },
+      message: "Request failed with status code 404",
+    };
+
+    const interceptors = (apiClient.interceptors.response as any).handlers;
+    const errorHandler = interceptors[0]?.rejected;
+
+    try {
+      await errorHandler(axiosError);
+      expect.fail("should have thrown");
+    } catch (error: any) {
+      expect(error).toBeInstanceOf(Error);
+      expect(error.message).toBe("File not found: /skills/ghost/SKILL.md");
+      expect(error.status).toBe(404);
+    }
+  });
+
   it("error interceptor passes through errors without response", async () => {
     const { apiClient } = await import("@/infrastructure/api/axiosInstance");
 

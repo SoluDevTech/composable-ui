@@ -21,6 +21,7 @@ export interface HITLConfig {
 export interface SubAgentConfig {
   name: string;
   description: string;
+  agent_ref?: string;
   instructions?: string;
   model?: string;
   tools: string[];
@@ -31,6 +32,7 @@ export interface SubAgentConfig {
 
 export interface AgentConfig {
   name: string;
+  description?: string;
   model: string;
   system_prompt?: string;
   system_prompt_file?: string;

@@ -8,8 +8,9 @@ import type { SubAgentConfig } from "@/domain/entities/agent/agentConfig";
 const minimalSubAgent: SubAgentConfig = {
   name: "researcher",
   description: "Research sub-agent",
-  tools: ["search"],
-  skills: ["web-search"],
+  agent_ref: "researcher",
+  tools: [],
+  skills: [],
   mcp_servers: [],
 };
 
@@ -35,25 +36,56 @@ describe("SubAgentEditor", () => {
     expect(onRemove).toHaveBeenCalled();
   });
 
-  it("renders tools and skills sections", () => {
+  it("does NOT render tools, skills, or instructions sections", () => {
     renderWithProviders(
       <SubAgentEditor value={minimalSubAgent} onChange={vi.fn()} onRemove={vi.fn()} />,
     );
 
-    expect(screen.getByText("Tools")).toBeInTheDocument();
-    expect(screen.getByText("Skills")).toBeInTheDocument();
+    expect(screen.queryByText(/^tools$/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/^skills$/i)).not.toBeInTheDocument();
+    expect(screen.queryByLabelText(/^instructions$/i)).not.toBeInTheDocument();
   });
 
-  it("renders instructions field when present", () => {
-    const withInstructions: SubAgentConfig = {
-      ...minimalSubAgent,
-      instructions: "Do deep research",
-    };
+  describe("reference mode (always on)", () => {
+    it("renders a reference badge when agent_ref is set", () => {
+      renderWithProviders(
+        <SubAgentEditor value={minimalSubAgent} onChange={vi.fn()} onRemove={vi.fn()} index={0} />,
+      );
 
-    renderWithProviders(
-      <SubAgentEditor value={withInstructions} onChange={vi.fn()} onRemove={vi.fn()} />,
-    );
+      expect(screen.getByText(/ref:\s*researcher/i)).toBeInTheDocument();
+    });
 
-    expect(screen.getByLabelText(/instructions/i)).toBeInTheDocument();
+    it("name is read-only", () => {
+      renderWithProviders(
+        <SubAgentEditor value={minimalSubAgent} onChange={vi.fn()} onRemove={vi.fn()} index={0} />,
+      );
+
+      const nameInput = screen.getByLabelText(/^name$/i) as HTMLInputElement;
+      expect(nameInput).toBeDisabled();
+    });
+
+    it("hides instructions/model/skills editors", () => {
+      const refSub: SubAgentConfig = {
+        ...minimalSubAgent,
+        instructions: "should be hidden",
+        model: "openai:gpt-4o",
+      } as SubAgentConfig;
+
+      renderWithProviders(
+        <SubAgentEditor value={refSub} onChange={vi.fn()} onRemove={vi.fn()} index={0} />,
+      );
+
+      expect(screen.queryByLabelText(/^instructions$/i)).not.toBeInTheDocument();
+      expect(screen.queryByLabelText(/^model$/i)).not.toBeInTheDocument();
+      expect(screen.queryByText(/^skills$/i)).not.toBeInTheDocument();
+    });
+
+    it("does NOT render a Tools editor", () => {
+      renderWithProviders(
+        <SubAgentEditor value={minimalSubAgent} onChange={vi.fn()} onRemove={vi.fn()} index={0} />,
+      );
+
+      expect(screen.queryByText(/^tools$/i)).not.toBeInTheDocument();
+    });
   });
 });

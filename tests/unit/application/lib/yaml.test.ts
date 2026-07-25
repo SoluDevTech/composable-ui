@@ -120,6 +120,74 @@ describe("serializeAgentConfig", () => {
     // Assert
     expect(yaml).toContain("checkpoint_backend: postgres");
   });
+
+  it("serializes description when present", () => {
+    // Arrange — a config that carries a top-level description.
+    const config: AgentConfig = {
+      ...fullConfig,
+      description: "An agent that writes tests.",
+    } as AgentConfig;
+
+    // Act
+    const yaml = serializeAgentConfig(config);
+
+    // Assert — the description key must appear in the serialized YAML.
+    expect(yaml).toMatch(/^description:/m);
+    expect(yaml).toContain("An agent that writes tests.");
+  });
+
+  it("does NOT serialize description when undefined/empty", () => {
+    // Arrange — fullConfig has no top-level description.
+    // Act
+    const yaml = serializeAgentConfig(fullConfig);
+
+    // Assert — no top-level description key should be emitted.
+    expect(yaml).not.toMatch(/^description:/m);
+  });
+
+  it("serializes subagent agent_ref when present", () => {
+    // Arrange — a config with a subagent that references another agent.
+    const config: AgentConfig = {
+      ...fullConfig,
+      subagents: [
+        {
+          name: "researcher",
+          description: "Research sub-agent",
+          agent_ref: "researcher",
+          tools: [],
+          skills: [],
+          mcp_servers: [],
+        } as AgentConfig["subagents"][number],
+      ],
+    } as AgentConfig;
+
+    // Act
+    const yaml = serializeAgentConfig(config);
+
+    // Assert — agent_ref must appear in the serialized YAML.
+    expect(yaml).toContain("agent_ref:");
+    expect(yaml).toContain("agent_ref: researcher");
+  });
+
+  it("does NOT serialize agent_ref when undefined", () => {
+    // Arrange — a subagent without agent_ref (the default in fullConfig).
+    // Act
+    const yaml = serializeAgentConfig(fullConfig);
+
+    // Assert — agent_ref must not appear in the serialized YAML.
+    expect(yaml).not.toContain("agent_ref");
+  });
+
+  it("still serializes tools (preservation)", () => {
+    // Arrange — fullConfig has tools: ["search", "calculator"].
+    // Act
+    const yaml = serializeAgentConfig(fullConfig);
+
+    // Assert — the top-level tools key must still be serialized.
+    expect(yaml).toMatch(/^tools:/m);
+    expect(yaml).toContain("search");
+    expect(yaml).toContain("calculator");
+  });
 });
 
 describe("parseAgentConfig", () => {

@@ -1,5 +1,9 @@
-import { describe, it, expect, beforeEach } from "vitest";
-import { useSettingsStore } from "@/application/stores/useSettingsStore";
+import { describe, it, expect, beforeEach, vi } from "vitest";
+import {
+  useSettingsStore,
+  FONT_DEFAULT,
+  FONT_MONO,
+} from "@/application/stores/useSettingsStore";
 
 const STORAGE_KEY = "composable-ui-settings";
 
@@ -17,7 +21,7 @@ describe("useSettingsStore", () => {
     expect(state.accent).toBe("#ff00ff");
     expect(state.surface).toBe("#10162a");
     expect(state.chatFontSize).toBe(10);
-    expect(state.chatFontFamily).toBe("var(--font-body)");
+    expect(state.chatFontFamily).toBe(FONT_DEFAULT);
     expect(state.llmProvider).toBe("anthropic");
     expect(state.apiKey).toBe("");
     expect(state.theme).toBe("dark");
@@ -124,7 +128,7 @@ describe("useSettingsStore", () => {
     expect(state.accent).toBe("#ff00ff");
     expect(state.surface).toBe("#10162a");
     expect(state.chatFontSize).toBe(10);
-    expect(state.chatFontFamily).toBe("var(--font-body)");
+    expect(state.chatFontFamily).toBe(FONT_DEFAULT);
     expect(state.llmProvider).toBe("anthropic");
     expect(state.apiKey).toBe("");
     expect(state.theme).toBe("dark");
@@ -141,5 +145,60 @@ describe("useSettingsStore", () => {
     expect(stored).not.toBeNull();
     const parsed = JSON.parse(stored as string);
     expect(parsed.state.accent).toBe("#00ff00");
+  });
+
+  it("setChatFontSize applies --app-font-scale and --chat-font-size on documentElement", () => {
+    useSettingsStore.getState().setChatFontSize(16);
+
+    expect(document.documentElement.style.getPropertyValue("--app-font-scale")).toBe(
+      (16 / 12).toFixed(3),
+    );
+    expect(document.documentElement.style.getPropertyValue("--chat-font-size")).toBe("16px");
+  });
+
+  it("setChatFontFamily applies --app-font-family on documentElement", () => {
+    useSettingsStore.getState().setChatFontFamily("Georgia, serif");
+
+    expect(document.documentElement.style.getPropertyValue("--app-font-family")).toBe(
+      "Georgia, serif",
+    );
+  });
+
+  it("migrates a legacy persisted chatFontFamily='var(--font-body)' to the concrete default", () => {
+    // Simulate a returning user with the old var() value in localStorage.
+    localStorage.setItem(
+      STORAGE_KEY,
+      JSON.stringify({
+        state: { ...useSettingsStore.getState(), chatFontFamily: "var(--font-body)" },
+      }),
+    );
+
+    // Re-import side effects run at module load; to exercise readStoredSettings
+    // we reset and re-create the store by reading persisted then applying.
+    // Easiest: call resetToDefaults then re-load by re-reading via a fresh
+    // module import is not possible here. Instead, verify the migration
+    // mapping directly by simulating a store re-init through getInitialState.
+    const persisted = JSON.parse(localStorage.getItem(STORAGE_KEY) as string);
+    expect(persisted.state.chatFontFamily).toBe("var(--font-body)");
+
+    // Reload the module to trigger readStoredSettings() migration.
+    vi.resetModules();
+    return import("@/application/stores/useSettingsStore").then(({ useSettingsStore: reloaded }) => {
+      expect(reloaded.getState().chatFontFamily).toBe(FONT_DEFAULT);
+    });
+  });
+
+  it("migrates a legacy persisted chatFontFamily='var(--font-mono)' to the concrete mono stack", () => {
+    localStorage.setItem(
+      STORAGE_KEY,
+      JSON.stringify({
+        state: { ...useSettingsStore.getState(), chatFontFamily: "var(--font-mono)" },
+      }),
+    );
+
+    vi.resetModules();
+    return import("@/application/stores/useSettingsStore").then(({ useSettingsStore: reloaded }) => {
+      expect(reloaded.getState().chatFontFamily).toBe(FONT_MONO);
+    });
   });
 });

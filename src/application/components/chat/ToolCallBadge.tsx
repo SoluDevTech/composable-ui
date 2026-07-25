@@ -46,7 +46,7 @@ export default function ToolCallBadge({ name, args, source }: Readonly<ToolCallB
       {isExpanded && args && (
         <pre
           id={panelId}
-          className="overflow-x-auto whitespace-pre-wrap border-t border-border bg-bg px-3 py-2 text-[10px] text-fg-2"
+          className="overflow-x-auto whitespace-pre-wrap border-t border-border bg-bg px-3 py-2 text-xs text-fg-2"
         >
           {args}
         </pre>

@@ -1,6 +1,5 @@
 import { Bot, Settings, Trash2 } from "lucide-react";
 import type { AgentConfigMetadata } from "@/domain/entities/agent/agentConfigMetadata";
-import StatusBadge from "@/application/components/shared/StatusBadge";
 import { Button } from "@/application/components/ui/button";
 
 interface AgentCardProps {
@@ -22,7 +21,6 @@ export default function AgentCard({ agent, onConfigure, onDelete }: Readonly<Age
         >
           <Bot className="h-6 w-6" />
         </div>
-        <StatusBadge status={agent.is_builtin ? "Active" : "Standby"} />
       </div>
 
       <h3 className="min-w-0 truncate font-display text-lg uppercase tracking-[0.06em] text-fg">

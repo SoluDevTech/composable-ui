@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { NavLink } from "react-router-dom";
-import { BookOpen, Bot, Database, MessagesSquare, Settings, Sparkles, X } from "lucide-react";
+import { BookOpen, Bot, Database, MessagesSquare, Server, Settings, Sparkles, X } from "lucide-react";
 import { cn } from "@/application/lib/utils";
 import { useSidebarStore } from "@/application/stores/useSidebarStore";
 
@@ -17,6 +17,7 @@ const NAV_ITEMS: readonly NavItem[] = [
   { to: "/skills", label: "Skills", icon: Sparkles, odId: "nav-skills" },
   { to: "/memories", label: "Memories", icon: BookOpen, odId: "nav-memories" },
   { to: "/rag", label: "RAG Storage", icon: Database, odId: "nav-rag" },
+  { to: "/mcp-registry", label: "MCP Registry", icon: Server, odId: "nav-mcp-registry" },
 ] as const;
 
 const SYSTEM_ITEMS: readonly NavItem[] = [
@@ -27,13 +28,7 @@ const NAV_LINK_BASE =
   "flex w-full items-center gap-3 border border-transparent border-l-[3px] border-l-transparent px-4 py-3 text-left font-body text-base font-medium text-fg-2 transition-[background-color,border-color,color] duration-fast ease-standard hover:bg-surface-warm hover:border-l-border hover:text-fg focus-visible:outline-none focus-visible:shadow-focus";
 const NAV_LINK_ACTIVE = "border-l-accent bg-surface-warm text-accent";
 
-function SidebarLink({
-  to,
-  label,
-  icon: Icon,
-  odId,
-  onClick,
-}: NavItem & { onClick: () => void }) {
+function SidebarLink({ to, label, icon: Icon, odId, onClick }: NavItem & { onClick: () => void }) {
   return (
     <NavLink
       key={to}

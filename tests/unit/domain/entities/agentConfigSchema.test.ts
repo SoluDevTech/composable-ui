@@ -79,17 +79,13 @@ describe("backendConfigSchema", () => {
   it("rejects filesystem backend type", () => {
     // Arrange — filesystem must no longer be a valid backend type
     // Act & Assert — parsing should throw
-    expect(() =>
-      backendConfigSchema.parse({ type: "filesystem" }),
-    ).toThrow();
+    expect(() => backendConfigSchema.parse({ type: "filesystem" })).toThrow();
   });
 
   it("rejects composite backend type", () => {
     // Arrange — composite must no longer be a valid backend type
     // Act & Assert — parsing should throw
-    expect(() =>
-      backendConfigSchema.parse({ type: "composite" }),
-    ).toThrow();
+    expect(() => backendConfigSchema.parse({ type: "composite" })).toThrow();
   });
 
   it("rejects root_dir field", () => {
@@ -194,6 +190,50 @@ describe("subAgentConfigSchema", () => {
     expect(() =>
       subAgentConfigSchema.parse({
         name: "researcher",
+        tools: [],
+        skills: [],
+        mcp_servers: [],
+      }),
+    ).toThrow();
+  });
+
+  it("accepts agent_ref", () => {
+    // Arrange — a subagent referencing another agent.
+    const sub = {
+      name: "researcher",
+      description: "Research agent",
+      agent_ref: "researcher",
+      tools: [],
+      skills: [],
+      mcp_servers: [],
+    };
+
+    // Act
+    const result = subAgentConfigSchema.parse(sub);
+
+    // Assert — agent_ref must round-trip through the schema.
+    expect(result).toHaveProperty("agent_ref", "researcher");
+  });
+
+  it("accepts null agent_ref", () => {
+    const result = subAgentConfigSchema.parse({
+      name: "researcher",
+      description: "Research agent",
+      agent_ref: null,
+      tools: [],
+      skills: [],
+      mcp_servers: [],
+    });
+    expect(result.agent_ref).toBeNull();
+  });
+
+  it("still rejects missing description when agent_ref present", () => {
+    // Arrange — a subagent with agent_ref but no description.
+    // Assert — description is still required even when agent_ref is set.
+    expect(() =>
+      subAgentConfigSchema.parse({
+        name: "researcher",
+        agent_ref: "researcher",
         tools: [],
         skills: [],
         mcp_servers: [],
@@ -361,5 +401,32 @@ describe("agentConfigSchema", () => {
       system_prompt_file: "/prompts/system.txt",
     });
     expect(result.system_prompt_file).toBe("/prompts/system.txt");
+  });
+
+  it("accepts optional description", () => {
+    // Arrange — a config with a description field.
+    const config = {
+      ...baseConfig,
+      description: "An agent that helps with testing.",
+    };
+
+    // Act
+    const result = agentConfigSchema.parse(config);
+
+    // Assert — description must be present on the parsed result.
+    expect(result.description).toBe("An agent that helps with testing.");
+  });
+
+  it("accepts null description", () => {
+    const result = agentConfigSchema.parse({
+      ...baseConfig,
+      description: null,
+    });
+    expect(result.description).toBeNull();
+  });
+
+  it("does not require description (omitted is valid)", () => {
+    const result = agentConfigSchema.parse(baseConfig);
+    expect(result).not.toHaveProperty("description");
   });
 });

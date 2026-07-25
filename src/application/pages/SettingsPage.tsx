@@ -192,9 +192,11 @@ export default function SettingsPage() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="var(--font-body)">Press Start 2P (default)</SelectItem>
+                  <SelectItem value='"Press Start 2P", "Arial Black", system-ui, sans-serif'>
+                    Press Start 2P (default)
+                  </SelectItem>
                   <SelectItem value="ui-monospace, monospace">Monospace</SelectItem>
-                  <SelectItem value="var(--font-mono)">Mono</SelectItem>
+                  <SelectItem value='"Press Start 2P", ui-monospace, monospace'>Mono</SelectItem>
                   <SelectItem value="Georgia, serif">Georgia</SelectItem>
                 </SelectContent>
               </Select>
@@ -232,7 +234,7 @@ export default function SettingsPage() {
                 value={apiKey}
                 onChange={(e) => setApiKey(e.target.value)}
               />
-              <p className="font-mono text-[10px] text-muted">
+              <p className="font-mono text-xs text-muted">
                 Stored locally in this browser session only.
               </p>
             </div>

@@ -6,17 +6,13 @@ import { SkillCard } from "@/application/components/skill/SkillCard";
 
 describe("SkillCard", () => {
   it("renders skill name", () => {
-    renderWithProviders(
-      <SkillCard name="rag" description="RAG queries" onConfigure={vi.fn()} />,
-    );
+    renderWithProviders(<SkillCard name="rag" description="RAG queries" onConfigure={vi.fn()} />);
 
     expect(screen.getByText("rag")).toBeInTheDocument();
   });
 
   it("renders skill description", () => {
-    renderWithProviders(
-      <SkillCard name="rag" description="RAG queries" onConfigure={vi.fn()} />,
-    );
+    renderWithProviders(<SkillCard name="rag" description="RAG queries" onConfigure={vi.fn()} />);
 
     expect(screen.getByText("RAG queries")).toBeInTheDocument();
   });

@@ -13,6 +13,7 @@ export function usePutStoreFile() {
       storeApi.putFile(path, content),
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: ["store-files"] });
+      queryClient.invalidateQueries({ queryKey: ["store-file-previews"] });
       queryClient.invalidateQueries({ queryKey: ["store-file", variables.path] });
     },
   });

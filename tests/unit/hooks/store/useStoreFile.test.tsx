@@ -38,10 +38,9 @@ describe("useStoreFile", () => {
     vi.mocked(storeApi.getFile).mockResolvedValue(file);
 
     // Act
-    const { result } = renderHook(
-      () => useStoreFile("skills/rag/SKILL.md"),
-      { wrapper: createWrapper() },
-    );
+    const { result } = renderHook(() => useStoreFile("skills/rag/SKILL.md"), {
+      wrapper: createWrapper(),
+    });
 
     // Assert
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
@@ -54,10 +53,9 @@ describe("useStoreFile", () => {
     vi.mocked(storeApi.getFile).mockResolvedValue(null);
 
     // Act
-    const { result } = renderHook(
-      () => useStoreFile("skills/missing/SKILL.md"),
-      { wrapper: createWrapper() },
-    );
+    const { result } = renderHook(() => useStoreFile("skills/missing/SKILL.md"), {
+      wrapper: createWrapper(),
+    });
 
     // Assert
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
@@ -79,18 +77,12 @@ describe("useStoreFile", () => {
     );
 
     // Act
-    const { result } = renderHook(
-      () => useStoreFile("skills/rag/SKILL.md"),
-      { wrapper },
-    );
+    const { result } = renderHook(() => useStoreFile("skills/rag/SKILL.md"), { wrapper });
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
     // Assert — the cached data must be retrievable under the exact query key
-    const cached = queryClient.getQueryData<StoreFile>([
-      "store-file",
-      "skills/rag/SKILL.md",
-    ]);
+    const cached = queryClient.getQueryData<StoreFile>(["store-file", "skills/rag/SKILL.md"]);
     expect(cached).toEqual(file);
   });
 });

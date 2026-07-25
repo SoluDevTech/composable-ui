@@ -12,6 +12,7 @@ export function useDeleteStoreFile() {
     mutationFn: (path: string) => storeApi.deleteFile(path),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["store-files"] });
+      queryClient.invalidateQueries({ queryKey: ["store-file-previews"] });
     },
   });
 }

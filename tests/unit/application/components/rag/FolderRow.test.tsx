@@ -9,12 +9,7 @@ describe("FolderRow", () => {
   };
 
   it("renders_delete_button_when_onDelete_provided", () => {
-    render(
-      <FolderRow
-        {...baseProps}
-        onDelete={() => {}}
-      />,
-    );
+    render(<FolderRow {...baseProps} onDelete={() => {}} />);
 
     expect(screen.getByRole("button", { name: /delete docs/i })).toBeInTheDocument();
   });

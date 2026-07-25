@@ -50,9 +50,12 @@ export const storeApi: IStorePort = {
 };
 
 function isNotFound(error: unknown): boolean {
-  if (error && typeof error === "object" && "response" in error) {
-    const status = (error as { response?: { status?: number } }).response?.status;
-    return status === 404;
+  if (error && typeof error === "object") {
+    if ("status" in error && (error as { status?: number }).status === 404) return true;
+    if ("response" in error) {
+      const status = (error as { response?: { status?: number } }).response?.status;
+      return status === 404;
+    }
   }
   return false;
 }

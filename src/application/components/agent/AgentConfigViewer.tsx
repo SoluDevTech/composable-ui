@@ -7,7 +7,7 @@ import { useDeleteAgent } from "@/application/hooks/agent/useDeleteAgent";
 import { serializeAgentConfig, agentConfigToYamlFile } from "@/application/lib/yaml";
 import type { AgentConfig } from "@/domain/entities/agent/agentConfig";
 import type { AgentConfigFormData } from "@/domain/entities/agent/agentConfigSchema";
-import StatusBadge from "@/application/components/shared/StatusBadge";
+import { Badge } from "@/application/components/ui/badge";
 import ToolTag from "@/application/components/shared/ToolTag";
 import { SkillPillMultiSelect, MemoryPillMultiSelect } from "./SkillMemorySelects";
 import {
@@ -122,7 +122,7 @@ export default function AgentConfigViewer({
           </DialogHeader>
         </div>
 
-        <div className="flex-1 overscroll-contain overflow-y-auto bg-surface px-6 py-6 sm:px-8">
+        <div className="flex-1 overscroll-contain overflow-y-auto overflow-x-hidden bg-surface px-6 py-6 sm:px-8">
           {mode === "edit" && config ? (
             <>
               <AgentConfigForm
@@ -164,11 +164,14 @@ export default function AgentConfigViewer({
                       <SectionLabel>Model</SectionLabel>
                       <p className="break-all font-mono text-sm text-fg">{config.model}</p>
                     </div>
-                    <div>
-                      <SectionLabel>Debug</SectionLabel>
-                      <StatusBadge status={config.debug ? "Active" : "Off"} />
-                    </div>
                   </div>
+
+                  {config.description && (
+                    <div>
+                      <SectionLabel>Description</SectionLabel>
+                      <p className="break-all font-mono text-sm text-fg-2">{config.description}</p>
+                    </div>
+                  )}
 
                   {config.system_prompt && (
                     <div>
@@ -186,17 +189,6 @@ export default function AgentConfigViewer({
                             {promptExpanded ? "Show less" : "Show more"}
                           </button>
                         )}
-                      </div>
-                    </div>
-                  )}
-
-                  {config.tools.length > 0 && (
-                    <div>
-                      <SectionLabel>Tools ({config.tools.length})</SectionLabel>
-                      <div className="flex flex-wrap gap-1.5">
-                        {config.tools.map((tool) => (
-                          <ToolTag key={tool} label={tool} />
-                        ))}
                       </div>
                     </div>
                   )}
@@ -274,7 +266,12 @@ export default function AgentConfigViewer({
                             key={sub.name}
                             className="border border-border-soft bg-surface-warm p-3"
                           >
-                            <p className="font-mono text-sm text-fg">{sub.name}</p>
+                            <div className="flex items-center gap-2">
+                              <p className="font-mono text-sm text-fg">{sub.name}</p>
+                              {sub.agent_ref && (
+                                <Badge variant="outline">ref: {sub.agent_ref}</Badge>
+                              )}
+                            </div>
                             <p className="mt-1 font-mono text-xs text-muted">{sub.description}</p>
                           </div>
                         ))}

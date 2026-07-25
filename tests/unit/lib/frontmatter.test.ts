@@ -45,8 +45,7 @@ describe("parseFrontmatter", () => {
 
   it("handles special characters in description", () => {
     // Arrange — description with punctuation and accents
-    const input =
-      "---\nname: rag\ndescription: RAG: \"queries & accents\" — éàç\n---\n# Body";
+    const input = '---\nname: rag\ndescription: RAG: "queries & accents" — éàç\n---\n# Body';
 
     // Act
     const result = parseFrontmatter(input);

@@ -8,6 +8,7 @@ const AgentsPage = lazy(() => import("@/application/pages/AgentsPage"));
 const RagPage = lazy(() => import("@/application/pages/RagPage"));
 const SkillsPage = lazy(() => import("@/application/pages/SkillsPage"));
 const MemoriesPage = lazy(() => import("@/application/pages/MemoriesPage"));
+const McpRegistryPage = lazy(() => import("@/application/pages/McpRegistryPage"));
 
 function PageFallback() {
   return (
@@ -28,6 +29,7 @@ function App() {
       <Route path="/rag" element={<RagPage />} />
       <Route path="/skills" element={<SkillsPage />} />
       <Route path="/memories" element={<MemoriesPage />} />
+      <Route path="/mcp-registry" element={<McpRegistryPage />} />
       <Route path="/settings" element={<SettingsPage />} />
     </Routes>
   );

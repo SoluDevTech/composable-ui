@@ -35,6 +35,7 @@ export function useCreateMemory() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["store-files"] });
+      queryClient.invalidateQueries({ queryKey: ["store-file-previews"] });
     },
   });
 }
