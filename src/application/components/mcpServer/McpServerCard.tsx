@@ -44,7 +44,7 @@ export function McpServerCard({ server, onEdit, onDelete }: Readonly<McpServerCa
       </p>
 
       <p className="font-mono text-xs text-fg-2">{server.tool_count} tools</p>
-      <p className="font-mono text-[10px] text-muted">Created {server.created_at.slice(0, 10)}</p>
+      <p className="font-mono text-xs text-muted">Created {server.created_at.slice(0, 10)}</p>
 
       <div className="mt-auto flex items-center gap-2 border-t border-border-soft pt-2">
         <Button

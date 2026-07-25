@@ -3,7 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { describe, it, expect, beforeEach } from "vitest";
 import { renderWithProviders } from "../../utils/render";
 import SettingsPage from "@/application/pages/SettingsPage";
-import { useSettingsStore } from "@/application/stores/useSettingsStore";
+import { useSettingsStore, FONT_DEFAULT } from "@/application/stores/useSettingsStore";
 
 describe("SettingsPage", () => {
   beforeEach(() => {
@@ -191,7 +191,7 @@ describe("SettingsPage", () => {
     expect(state.accent).toBe("#ff00ff");
     expect(state.surface).toBe("#10162a");
     expect(state.chatFontSize).toBe(10);
-    expect(state.chatFontFamily).toBe("var(--font-body)");
+    expect(state.chatFontFamily).toBe(FONT_DEFAULT);
     expect(state.llmProvider).toBe("anthropic");
     expect(state.apiKey).toBe("");
     expect(state.theme).toBe("dark");

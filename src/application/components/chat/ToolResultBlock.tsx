@@ -42,7 +42,7 @@ export default function ToolResultBlock({ name, content, source }: Readonly<Tool
       {isExpanded && content && (
         <pre
           id={panelId}
-          className="max-h-48 overflow-y-auto whitespace-pre-wrap border-t border-border bg-bg px-3 py-2 text-[10px] text-fg-2"
+          className="max-h-48 overflow-y-auto whitespace-pre-wrap border-t border-border bg-bg px-3 py-2 text-xs text-fg-2"
         >
           {content}
         </pre>

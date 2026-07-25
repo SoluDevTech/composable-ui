@@ -25,16 +25,19 @@
   --warn: #b45309;
   --danger: #b91c1c;
 
-  --font-display: "Press Start 2P", "Arial Black", system-ui, sans-serif;
-  --font-body: "Press Start 2P", "Arial Black", system-ui, sans-serif;
-  --font-mono: "Press Start 2P", ui-monospace, monospace;
+  /* Default font stack — the source of truth for the app's base family.
+     All --font-* tokens derive from --app-font-family (set by the Settings
+     page slider) so every font-display/font-body/font-mono utility follows
+     the user-selected family, including the sidebar and code blocks. */
+  --font-app-default: "Press Start 2P", "Arial Black", system-ui, sans-serif;
 
-  /* App-wide typography scale (driven by Settings page font-size slider).
-     Default scale = 1 (12px baseline). --app-font-family overrides body font.
-     --chat-font-size is consumed by chat bubbles. */
   --app-font-scale: 1;
-  --app-font-family: var(--font-body);
+  --app-font-family: var(--font-app-default);
   --chat-font-size: 12px;
+
+  --font-display: var(--app-font-family);
+  --font-body: var(--app-font-family);
+  --font-mono: var(--app-font-family);
 
   /* Text scale tokens are scaled by --app-font-scale so every Tailwind
      text-* utility (text-xs, text-sm, text-base, …) follows the slider. */

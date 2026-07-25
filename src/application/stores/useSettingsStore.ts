@@ -6,15 +6,31 @@ export type Theme = "dark" | "light";
 const STORAGE_KEY = "composable-ui-settings";
 const THEME_SYNC_KEY = "composable-ui-theme";
 
+// Concrete font stacks — the value stored in the store/UI. We no longer use
+// CSS var() references here because --font-body/--font-mono now derive from
+// --app-font-family, so storing `var(--font-body)` would create a circular
+// reference. Old persisted values are migrated on load (see migrateFontFamily).
+export const FONT_DEFAULT = '"Press Start 2P", "Arial Black", system-ui, sans-serif';
+export const FONT_MONO = '"Press Start 2P", ui-monospace, monospace';
+
 const DEFAULTS = {
   accent: "#ff00ff",
   surface: "#10162a",
   chatFontSize: 10,
-  chatFontFamily: "var(--font-body)",
+  chatFontFamily: FONT_DEFAULT,
   llmProvider: "anthropic",
   apiKey: "",
   theme: "dark" as Theme,
 };
+
+// Map legacy persisted values (pre-concrete-stacks) to the new concrete stacks.
+// Without this, returning users would get `var(--font-body)` applied as the
+// literal family string, which no longer resolves correctly.
+function migrateFontFamily(value: string | undefined): string | undefined {
+  if (value === "var(--font-body)") return FONT_DEFAULT;
+  if (value === "var(--font-mono)") return FONT_MONO;
+  return value;
+}
 
 interface SettingsState {
   accent: string;
@@ -40,7 +56,12 @@ function readStoredSettings(): Partial<SettingsState> {
     const stored = localStorage.getItem(STORAGE_KEY);
     if (stored) {
       const parsed = JSON.parse(stored) as { state?: Partial<SettingsState> };
-      if (parsed.state) return parsed.state;
+      if (parsed.state) {
+        const migrated = { ...parsed.state };
+        const migratedFont = migrateFontFamily(migrated.chatFontFamily);
+        if (migratedFont !== undefined) migrated.chatFontFamily = migratedFont;
+        return migrated;
+      }
     }
   } catch {
     // localStorage may be unavailable (private mode, SSR, jsdom edge cases)
