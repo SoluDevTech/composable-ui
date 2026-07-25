@@ -4,9 +4,7 @@ import CreateFolderDialog from "@/application/components/rag/CreateFolderDialog"
 
 describe("CreateFolderDialog", () => {
   it("renders_input_and_create_button", () => {
-    render(
-      <CreateFolderDialog open={true} onClose={() => {}} onCreate={() => {}} />,
-    );
+    render(<CreateFolderDialog open={true} onClose={() => {}} onCreate={() => {}} />);
 
     expect(screen.getByRole("textbox", { name: /folder/i })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /create/i })).toBeInTheDocument();
@@ -16,9 +14,7 @@ describe("CreateFolderDialog", () => {
     const onCreate = vi.fn();
     const onClose = vi.fn();
 
-    render(
-      <CreateFolderDialog open={true} onClose={onClose} onCreate={onCreate} />,
-    );
+    render(<CreateFolderDialog open={true} onClose={onClose} onCreate={onCreate} />);
 
     fireEvent.change(screen.getByRole("textbox", { name: /folder/i }), {
       target: { value: "myfolder" },
@@ -31,9 +27,7 @@ describe("CreateFolderDialog", () => {
   it("cancel_calls_onClose", () => {
     const onClose = vi.fn();
 
-    render(
-      <CreateFolderDialog open={true} onClose={onClose} onCreate={() => {}} />,
-    );
+    render(<CreateFolderDialog open={true} onClose={onClose} onCreate={() => {}} />);
 
     fireEvent.click(screen.getByRole("button", { name: /cancel/i }));
 
@@ -43,9 +37,7 @@ describe("CreateFolderDialog", () => {
   it("does_not_call_onCreate_when_folder_name_is_empty", () => {
     const onCreate = vi.fn();
 
-    render(
-      <CreateFolderDialog open={true} onClose={() => {}} onCreate={onCreate} />,
-    );
+    render(<CreateFolderDialog open={true} onClose={() => {}} onCreate={onCreate} />);
 
     fireEvent.click(screen.getByRole("button", { name: /create/i }));
 

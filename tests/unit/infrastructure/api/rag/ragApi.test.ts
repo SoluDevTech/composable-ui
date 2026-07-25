@@ -169,9 +169,7 @@ describe("ragApi", () => {
 
       const result = await ragApi.deleteFolder("docs");
 
-      expect(ragApiClient.delete).toHaveBeenCalledWith(
-        "/api/v1/files/folders?prefix=docs",
-      );
+      expect(ragApiClient.delete).toHaveBeenCalledWith("/api/v1/files/folders?prefix=docs");
       expect(result).toEqual({ message: "Folder deleted" });
     });
   });

@@ -81,10 +81,7 @@ describe("useStoreFiles", () => {
     // Assert — the query key registered for this prefix must include "store-files" and the prefix
     getQueryDataSpy.mockRestore();
     // The presence of data under the exact key is verified by fetching it back
-    const cached = queryClient.getQueryData<StoreFileMetadata[]>([
-      "store-files",
-      "memories/",
-    ]);
+    const cached = queryClient.getQueryData<StoreFileMetadata[]>(["store-files", "memories/"]);
     expect(cached).toEqual([]);
   });
 });

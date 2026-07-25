@@ -10,12 +10,7 @@ describe("FileRow", () => {
   };
 
   it("renders_delete_button_when_onDelete_provided", () => {
-    render(
-      <FileRow
-        {...baseProps}
-        onDelete={() => {}}
-      />,
-    );
+    render(<FileRow {...baseProps} onDelete={() => {}} />);
 
     expect(screen.getByRole("button", { name: /delete report\.pdf/i })).toBeInTheDocument();
   });
@@ -43,9 +38,7 @@ describe("FileRow", () => {
   });
 
   it("delete_button_is_disabled_when_indexing", () => {
-    render(
-      <FileRow {...baseProps} onDelete={() => {}} isIndexing={true} />,
-    );
+    render(<FileRow {...baseProps} onDelete={() => {}} isIndexing={true} />);
 
     expect(screen.getByRole("button", { name: /delete report\.pdf/i })).toBeDisabled();
   });

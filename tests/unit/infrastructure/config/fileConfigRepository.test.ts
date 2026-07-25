@@ -24,6 +24,7 @@ describe("FileConfigRepository", () => {
         apiBaseUrl: "http://api.test.com",
         wsBaseUrl: "ws://api.test.com",
         ragApiBaseUrl: "",
+        mcpApiBaseUrl: "",
       };
 
       vi.mocked(fetch).mockResolvedValue({
@@ -107,6 +108,7 @@ describe("FileConfigRepository", () => {
         apiBaseUrl: "http://api.test.com",
         wsBaseUrl: "ws://api.test.com",
         ragApiBaseUrl: "",
+        mcpApiBaseUrl: "",
       };
       vi.mocked(fetch).mockResolvedValue({
         ok: true,

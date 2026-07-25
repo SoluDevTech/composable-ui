@@ -27,13 +27,7 @@ const NAV_LINK_BASE =
   "flex w-full items-center gap-3 border border-transparent border-l-[3px] border-l-transparent px-4 py-3 text-left font-body text-base font-medium text-fg-2 transition-[background-color,border-color,color] duration-fast ease-standard hover:bg-surface-warm hover:border-l-border hover:text-fg focus-visible:outline-none focus-visible:shadow-focus";
 const NAV_LINK_ACTIVE = "border-l-accent bg-surface-warm text-accent";
 
-function SidebarLink({
-  to,
-  label,
-  icon: Icon,
-  odId,
-  onClick,
-}: NavItem & { onClick: () => void }) {
+function SidebarLink({ to, label, icon: Icon, odId, onClick }: NavItem & { onClick: () => void }) {
   return (
     <NavLink
       key={to}
