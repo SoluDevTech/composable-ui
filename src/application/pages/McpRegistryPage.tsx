@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Plus } from "lucide-react";
 import { toast } from "sonner";
 import AppShell from "@/application/components/layout/AppShell";
-import McpServerCard from "@/application/components/mcpServer/McpServerCard";
+import McpServerGrid from "@/application/components/mcpServer/McpServerGrid";
 import { CreateMcpServerDialog } from "@/application/components/mcpServer/CreateMcpServerDialog";
 import { useMcpRegistry } from "@/application/hooks/mcpServer/useMcpRegistry";
 import { useDeleteMcpServer } from "@/application/hooks/mcpServer/useDeleteMcpServer";
@@ -15,7 +15,7 @@ import { Button } from "@/application/components/ui/button";
 export default function McpRegistryPage() {
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [editServer, setEditServer] = useState<RegisteredMcpServer | undefined>(undefined);
-  const { data: servers, isLoading, error } = useMcpRegistry();
+  const { data: servers } = useMcpRegistry();
   const deleteServer = useDeleteMcpServer();
 
   const total = (servers ?? []).length;
@@ -74,40 +74,11 @@ export default function McpRegistryPage() {
           </div>
         </div>
 
-        {isLoading ? (
-          <div className="flex items-center justify-center py-24">
-            <span
-              className="spin mr-3 inline-block h-4 w-4 border-2 border-border border-t-accent"
-              aria-hidden="true"
-            />
-            <p className="font-mono text-sm text-muted">Loading MCP servers...</p>
-          </div>
-        ) : error ? (
-          <div className="flex items-center justify-center py-24">
-            <p className="font-mono text-sm text-danger">
-              Failed to load MCP servers: {error.message}
-            </p>
-          </div>
-        ) : total === 0 ? (
-          <div className="flex flex-col items-center justify-center gap-3 py-24">
-            <p className="font-mono text-sm text-muted">No MCP servers registered yet.</p>
-            <Button type="button" variant="outline" onClick={openCreate}>
-              <Plus className="h-4 w-4" aria-hidden="true" />
-              Add MCP Server
-            </Button>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {(servers ?? []).map((server) => (
-              <McpServerCard
-                key={server.name}
-                server={server}
-                onEdit={openEdit}
-                onDelete={handleDelete}
-              />
-            ))}
-          </div>
-        )}
+        <McpServerGrid
+          onCreateNew={openCreate}
+          onEdit={openEdit}
+          onDelete={handleDelete}
+        />
       </div>
 
       {createDialogOpen && (

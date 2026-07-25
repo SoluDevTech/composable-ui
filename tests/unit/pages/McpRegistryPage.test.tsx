@@ -163,10 +163,15 @@ describe("McpRegistryPage", () => {
     expect(externalBadge?.textContent).toMatch(/external/i);
   });
 
-  it("shows the empty state when the registry is empty", () => {
+  it("renders the New MCP Server create card when the registry is empty", () => {
     registryState.data = [];
     renderWithProviders(<McpRegistryPage />, { initialEntries: ["/mcp-registry"] });
 
-    expect(screen.getByText(/no mcp servers/i)).toBeInTheDocument();
+    // Empty state now mirrors the other grids: a dashed create card is rendered
+    // instead of a centered message + middle button.
+    const createCard = document.querySelector('[data-od-id="mcp-server-card-new"]');
+    expect(createCard).not.toBeNull();
+    expect(createCard).toBeInTheDocument();
+    expect(screen.getByText("New MCP Server")).toBeInTheDocument();
   });
 });
