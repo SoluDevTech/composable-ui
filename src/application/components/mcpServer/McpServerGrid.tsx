@@ -47,7 +47,7 @@ export default function McpServerGrid({
       className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3"
       data-od-id="mcp-server-grid"
     >
-      {(servers ?? []).map((server) => (
+      {(Array.isArray(servers) ? servers : []).map((server) => (
         <McpServerCard key={server.name} server={server} onEdit={onEdit} onDelete={onDelete} />
       ))}
       <McpServerCreateButton onClick={onCreateNew} />
