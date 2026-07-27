@@ -74,11 +74,7 @@ export default function McpRegistryPage() {
           </div>
         </div>
 
-        <McpServerGrid
-          onCreateNew={openCreate}
-          onEdit={openEdit}
-          onDelete={handleDelete}
-        />
+        <McpServerGrid onCreateNew={openCreate} onEdit={openEdit} onDelete={handleDelete} />
       </div>
 
       {createDialogOpen && (

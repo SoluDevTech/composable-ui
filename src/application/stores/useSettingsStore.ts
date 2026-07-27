@@ -18,8 +18,6 @@ const DEFAULTS = {
   surface: "#10162a",
   chatFontSize: 10,
   chatFontFamily: FONT_DEFAULT,
-  llmProvider: "anthropic",
-  apiKey: "",
   theme: "dark" as Theme,
 };
 
@@ -37,30 +35,41 @@ interface SettingsState {
   surface: string;
   chatFontSize: number;
   chatFontFamily: string;
-  llmProvider: string;
-  apiKey: string;
   theme: Theme;
   setAccent: (hex: string) => void;
   setSurface: (hex: string) => void;
   setChatFontSize: (n: number) => void;
   setChatFontFamily: (s: string) => void;
-  setLlmProvider: (s: string) => void;
-  setApiKey: (s: string) => void;
   setTheme: (t: Theme) => void;
   toggleTheme: () => void;
   resetToDefaults: () => void;
+}
+
+/**
+ * Migrates a legacy persisted settings blob to the current shape.
+ *
+ * The LLM `provider` and `apiKey` previously lived in localStorage and are
+ * now persisted on the backend (`PUT /api/v1/settings/llm`). Any leftover
+ * fields are stripped here so the persisted store stays in sync with the
+ * SettingsState interface.
+ */
+function migratePersisted(
+  state: Partial<SettingsState> & Record<string, unknown>,
+): Partial<SettingsState> {
+  const { llmProvider: _llm, apiKey: _key, ...rest } = state;
+  return rest as Partial<SettingsState>;
 }
 
 function readStoredSettings(): Partial<SettingsState> {
   try {
     const stored = localStorage.getItem(STORAGE_KEY);
     if (stored) {
-      const parsed = JSON.parse(stored) as { state?: Partial<SettingsState> };
+      const parsed = JSON.parse(stored) as { state?: Record<string, unknown> };
       if (parsed.state) {
         const migrated = { ...parsed.state };
-        const migratedFont = migrateFontFamily(migrated.chatFontFamily);
+        const migratedFont = migrateFontFamily(migrated.chatFontFamily as string | undefined);
         if (migratedFont !== undefined) migrated.chatFontFamily = migratedFont;
-        return migrated;
+        return migratePersisted(migrated);
       }
     }
   } catch {
@@ -135,14 +144,6 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
   setChatFontFamily: (chatFontFamily) => {
     set({ chatFontFamily });
     applyChatTypography(get().chatFontSize, get().chatFontFamily);
-    persist(get());
-  },
-  setLlmProvider: (llmProvider) => {
-    set({ llmProvider });
-    persist(get());
-  },
-  setApiKey: (apiKey) => {
-    set({ apiKey });
     persist(get());
   },
   setTheme: (theme) => {

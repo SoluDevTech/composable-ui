@@ -1,9 +1,28 @@
 import { screen } from "@testing-library/react";
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi, beforeEach } from "vitest";
 import { renderWithProviders } from "../../../utils/render";
 import Sidebar from "@/application/components/layout/Sidebar";
 
+vi.mock("@/application/hooks/auth/useCurrentUser", () => ({
+  useCurrentUser: vi.fn(),
+}));
+
+import { useCurrentUser } from "@/application/hooks/auth/useCurrentUser";
+
 describe("Sidebar", () => {
+  beforeEach(() => {
+    vi.mocked(useCurrentUser).mockReturnValue({
+      profile: {
+        userId: "user-123",
+        email: "jane@example.com",
+        name: "Jane Doe",
+        username: "jane",
+      },
+      isLoading: false,
+      isError: false,
+      error: null,
+    });
+  });
   it("renders the brand wordmark 'Composable' with 'UI' accent", () => {
     renderWithProviders(<Sidebar />, { initialEntries: ["/chat"] });
 
@@ -62,14 +81,14 @@ describe("Sidebar", () => {
   it("renders the footer operator name and role", () => {
     renderWithProviders(<Sidebar />, { initialEntries: ["/chat"] });
 
-    expect(screen.getByText("Yohan")).toBeInTheDocument();
+    expect(screen.getByText("Jane Doe")).toBeInTheDocument();
     expect(screen.getByText("Operator")).toBeInTheDocument();
   });
 
-  it("renders the user avatar initials YH", () => {
+  it("renders the user avatar initials derived from the profile name", () => {
     renderWithProviders(<Sidebar />, { initialEntries: ["/chat"] });
 
-    expect(screen.getByText("YH")).toBeInTheDocument();
+    expect(screen.getByText("JD")).toBeInTheDocument();
   });
 
   it("renders the brand icon letter C", () => {

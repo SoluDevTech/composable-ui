@@ -450,9 +450,7 @@ describe("AgentConfigForm", () => {
       await expandMcpServers(user);
 
       await waitFor(() => {
-        expect(
-          screen.getByText(/add servers in the mcp registry page first/i),
-        ).toBeInTheDocument();
+        expect(screen.getByText(/add servers in the mcp registry page first/i)).toBeInTheDocument();
       });
     });
 

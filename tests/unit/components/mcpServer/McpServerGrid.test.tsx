@@ -135,9 +135,7 @@ describe("McpServerGrid", () => {
     } as ReturnType<typeof useMcpRegistry>);
     const onEdit = vi.fn();
 
-    renderWithProviders(
-      <McpServerGrid onCreateNew={vi.fn()} onEdit={onEdit} onDelete={vi.fn()} />,
-    );
+    renderWithProviders(<McpServerGrid onCreateNew={vi.fn()} onEdit={onEdit} onDelete={vi.fn()} />);
 
     await user.click(screen.getByRole("button", { name: /edit/i }));
 

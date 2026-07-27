@@ -24,10 +24,7 @@ export default function McpServerGrid({
 
   if (isLoading) {
     return (
-      <div
-        className="flex items-center justify-center py-24"
-        data-od-id="mcp-server-grid"
-      >
+      <div className="flex items-center justify-center py-24" data-od-id="mcp-server-grid">
         <span
           className="spin mr-3 inline-block h-4 w-4 border-2 border-border border-t-accent"
           aria-hidden="true"
@@ -39,13 +36,8 @@ export default function McpServerGrid({
 
   if (error) {
     return (
-      <div
-        className="flex items-center justify-center py-24"
-        data-od-id="mcp-server-grid"
-      >
-        <p className="font-mono text-sm text-danger">
-          Failed to load MCP servers: {error.message}
-        </p>
+      <div className="flex items-center justify-center py-24" data-od-id="mcp-server-grid">
+        <p className="font-mono text-sm text-danger">Failed to load MCP servers: {error.message}</p>
       </div>
     );
   }
@@ -55,13 +47,8 @@ export default function McpServerGrid({
       className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3"
       data-od-id="mcp-server-grid"
     >
-      {(servers ?? []).map((server) => (
-        <McpServerCard
-          key={server.name}
-          server={server}
-          onEdit={onEdit}
-          onDelete={onDelete}
-        />
+      {(Array.isArray(servers) ? servers : []).map((server) => (
+        <McpServerCard key={server.name} server={server} onEdit={onEdit} onDelete={onDelete} />
       ))}
       <McpServerCreateButton onClick={onCreateNew} />
     </div>

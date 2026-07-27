@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import { LogOut } from "lucide-react";
 import { Button } from "@/application/components/ui/button";
 import { Input } from "@/application/components/ui/input";
 import { Label } from "@/application/components/ui/label";
@@ -12,8 +13,11 @@ import {
 } from "@/application/components/ui/select";
 import { Switch } from "@/application/components/ui/switch";
 import AppShell from "@/application/components/layout/AppShell";
+import LlmSettingsCard from "@/application/components/settings/LlmSettingsCard";
+import ApiKeysCard from "@/application/components/settings/ApiKeysCard";
 import { useSettingsStore } from "@/application/stores/useSettingsStore";
 import { hexToHue, hueToHex, isValidHex } from "@/application/lib/color";
+import { redirectToSignOut } from "@/infrastructure/auth/oauth2Redirect";
 
 function SettingsCard({
   odId,
@@ -55,15 +59,11 @@ export default function SettingsPage() {
   const surface = useSettingsStore((s) => s.surface);
   const chatFontSize = useSettingsStore((s) => s.chatFontSize);
   const chatFontFamily = useSettingsStore((s) => s.chatFontFamily);
-  const llmProvider = useSettingsStore((s) => s.llmProvider);
-  const apiKey = useSettingsStore((s) => s.apiKey);
   const theme = useSettingsStore((s) => s.theme);
   const setAccent = useSettingsStore((s) => s.setAccent);
   const setSurface = useSettingsStore((s) => s.setSurface);
   const setChatFontSize = useSettingsStore((s) => s.setChatFontSize);
   const setChatFontFamily = useSettingsStore((s) => s.setChatFontFamily);
-  const setLlmProvider = useSettingsStore((s) => s.setLlmProvider);
-  const setApiKey = useSettingsStore((s) => s.setApiKey);
   const toggleTheme = useSettingsStore((s) => s.toggleTheme);
   const resetToDefaults = useSettingsStore((s) => s.resetToDefaults);
 
@@ -77,10 +77,19 @@ export default function SettingsPage() {
   return (
     <AppShell>
       <div className="flex flex-1 flex-col overflow-y-auto p-6 md:p-8" data-od-id="view-settings">
-        <header className="mb-6">
+        <header className="mb-6 flex flex-wrap items-start justify-between gap-4">
           <p className="max-w-[48ch] font-body text-sm text-muted">
-            Customize the console appearance, chat readability, and LLM provider.
+            Customize the console appearance, chat readability, per-user LLM provider and personal
+            API keys. Credentials are managed by oauth2-proxy.
           </p>
+          <Button
+            type="button"
+            variant="outline"
+            data-od-id="settings-sign-out"
+            onClick={redirectToSignOut}
+          >
+            <LogOut aria-hidden="true" /> Sign out
+          </Button>
         </header>
 
         <div className="grid gap-6 md:grid-cols-2">
@@ -203,46 +212,14 @@ export default function SettingsPage() {
             </div>
           </SettingsCard>
 
-          <SettingsCard odId="settings-llm" title="LLM Provider">
-            <div className="flex flex-col gap-2">
-              <FieldLabel htmlFor="settings-llm-provider">Provider</FieldLabel>
-              <Select value={llmProvider} onValueChange={setLlmProvider}>
-                <SelectTrigger
-                  id="settings-llm-provider"
-                  data-od-id="settings-llm-provider"
-                  aria-label="LLM provider"
-                >
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="anthropic">Anthropic</SelectItem>
-                  <SelectItem value="openai">OpenAI</SelectItem>
-                  <SelectItem value="google">Google</SelectItem>
-                  <SelectItem value="mistral">Mistral</SelectItem>
-                  <SelectItem value="local">Local / Ollama</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="flex flex-col gap-2">
-              <FieldLabel htmlFor="settings-api-key">API Key</FieldLabel>
-              <Input
-                id="settings-api-key"
-                type="password"
-                data-od-id="settings-api-key"
-                placeholder="sk-..."
-                autoComplete="off"
-                value={apiKey}
-                onChange={(e) => setApiKey(e.target.value)}
-              />
-              <p className="font-mono text-xs text-muted">
-                Stored locally in this browser session only.
-              </p>
-            </div>
-          </SettingsCard>
+          <LlmSettingsCard />
+
+          <ApiKeysCard />
 
           <SettingsCard odId="settings-reset" title="Reset">
             <p className="font-body text-sm text-muted">
-              Restore the default appearance and provider settings.
+              Restore the default appearance settings. This does not affect your backend-stored LLM
+              settings or API keys.
             </p>
             <Button
               type="button"

@@ -12,6 +12,8 @@ import ToolResultBlock from "@/application/components/chat/ToolResultBlock";
 import SubagentPanel from "@/application/components/chat/SubagentPanel";
 import StructuredResponseCard from "@/application/components/chat/StructuredResponseCard";
 import { MARKDOWN_PROSE_CLASSES } from "@/application/components/chat/markdownStyles";
+import { useCurrentUser } from "@/application/hooks/auth/useCurrentUser";
+import { getDisplayName } from "@/domain/entities/auth/currentUser";
 
 interface ChatMessageProps {
   message: Message;
@@ -92,6 +94,8 @@ function ChatMessageImpl({ message, agentName, threadId, events }: Readonly<Chat
   const isAi = message.role === MessageRole.AI;
   const isAwaitingHitl = message.status === MessageStatus.AWAITING_HITL;
   const avatarLetter = agentName.charAt(0).toUpperCase();
+  const { profile } = useCurrentUser();
+  const userInitial = getDisplayName(profile).charAt(0).toUpperCase() || "Y";
 
   const subagentTimelines = useMemo(() => (events ? buildSubagentTimelines(events) : []), [events]);
   const parentThinkingText = useMemo(() => (events ? parentThinking(events) : ""), [events]);
@@ -107,7 +111,7 @@ function ChatMessageImpl({ message, agentName, threadId, events }: Readonly<Chat
           className="flex h-9 w-9 shrink-0 items-center justify-center border border-border bg-surface-warm font-display text-xs uppercase text-fg"
           aria-hidden="true"
         >
-          Y
+          {userInitial}
         </div>
         <article className="flex min-w-0 max-w-[80%] flex-col items-end gap-1">
           <div className="flex flex-row-reverse flex-wrap items-center gap-2">
