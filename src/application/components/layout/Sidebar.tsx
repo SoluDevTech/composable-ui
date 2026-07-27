@@ -12,6 +12,8 @@ import {
 } from "lucide-react";
 import { cn } from "@/application/lib/utils";
 import { useSidebarStore } from "@/application/stores/useSidebarStore";
+import { useCurrentUser } from "@/application/hooks/auth/useCurrentUser";
+import { getDisplayName, getInitials } from "@/domain/entities/auth/currentUser";
 
 interface NavItem {
   to: string;
@@ -91,13 +93,18 @@ function SidebarNav() {
 }
 
 function SidebarFooter() {
+  const { profile, isLoading } = useCurrentUser();
+  const displayName = getDisplayName(profile);
+  const initials = isLoading ? "…" : getInitials(displayName);
+  const label = isLoading ? "Loading…" : displayName;
+
   return (
     <div className="flex items-center gap-3 border-t border-border px-5 py-4">
       <div className="flex h-10 w-10 items-center justify-center border border-border bg-surface-warm font-mono text-xs text-accent">
-        YH
+        {initials}
       </div>
       <div className="min-w-0 flex-1">
-        <div className="truncate text-sm font-semibold text-fg">Yohan</div>
+        <div className="truncate text-sm font-semibold text-fg">{label}</div>
         <div className="font-mono text-xs text-muted">Operator</div>
       </div>
     </div>
