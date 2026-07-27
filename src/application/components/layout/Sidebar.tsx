@@ -1,6 +1,15 @@
 import { useEffect } from "react";
 import { NavLink } from "react-router-dom";
-import { BookOpen, Bot, Database, MessagesSquare, Server, Settings, Sparkles, X } from "lucide-react";
+import {
+  BookOpen,
+  Bot,
+  Database,
+  MessagesSquare,
+  Server,
+  Settings,
+  Sparkles,
+  X,
+} from "lucide-react";
 import { cn } from "@/application/lib/utils";
 import { useSidebarStore } from "@/application/stores/useSidebarStore";
 

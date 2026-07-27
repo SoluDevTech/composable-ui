@@ -1,9 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import {
-  useSettingsStore,
-  FONT_DEFAULT,
-  FONT_MONO,
-} from "@/application/stores/useSettingsStore";
+import { useSettingsStore, FONT_DEFAULT, FONT_MONO } from "@/application/stores/useSettingsStore";
 
 const STORAGE_KEY = "composable-ui-settings";
 
@@ -16,15 +12,17 @@ describe("useSettingsStore", () => {
     useSettingsStore.getState().resetToDefaults();
   });
 
-  it("exposes the expected default values", () => {
+  it("exposes the expected default values (LLM provider/apiKey removed — now backend-persisted)", () => {
     const state = useSettingsStore.getState();
     expect(state.accent).toBe("#ff00ff");
     expect(state.surface).toBe("#10162a");
     expect(state.chatFontSize).toBe(10);
     expect(state.chatFontFamily).toBe(FONT_DEFAULT);
-    expect(state.llmProvider).toBe("anthropic");
-    expect(state.apiKey).toBe("");
     expect(state.theme).toBe("dark");
+    // llmProvider/apiKey were migrated to the backend (PUT /api/v1/settings/llm)
+    // and are no longer part of the localStorage settings store.
+    expect((state as any).llmProvider).toBeUndefined();
+    expect((state as any).apiKey).toBeUndefined();
   });
 
   it("setAccent updates state and applies the --accent CSS variable on documentElement", () => {
@@ -52,16 +50,15 @@ describe("useSettingsStore", () => {
     expect(useSettingsStore.getState().chatFontFamily).toBe("Monospace");
   });
 
-  it("setLlmProvider updates state", () => {
-    useSettingsStore.getState().setLlmProvider("openai");
-
-    expect(useSettingsStore.getState().llmProvider).toBe("openai");
+  it("setLlmProvider was removed — LLM provider is now backend-persisted (skipped)", () => {
+    // No-op: setLlmProvider was removed when LLM settings moved to the backend.
+    // The hook useLlmSettings now owns provider persistence.
+    expect((useSettingsStore.getState() as any).setLlmProvider).toBeUndefined();
   });
 
-  it("setApiKey updates state", () => {
-    useSettingsStore.getState().setApiKey("sk-test-123");
-
-    expect(useSettingsStore.getState().apiKey).toBe("sk-test-123");
+  it("setApiKey was removed — API key is now backend-persisted (skipped)", () => {
+    // No-op: setApiKey was removed when LLM settings moved to the backend.
+    expect((useSettingsStore.getState() as any).setApiKey).toBeUndefined();
   });
 
   it("setTheme('light') updates state, removes 'dark' class, and persists to localStorage", () => {
@@ -112,14 +109,12 @@ describe("useSettingsStore", () => {
     expect(document.documentElement.classList.contains("dark")).toBe(true);
   });
 
-  it("resetToDefaults restores all fields to defaults and re-applies theme class + accent CSS var", () => {
+  it("resetToDefaults restores all appearance fields and re-applies theme class + accent CSS var (LLM fields removed)", () => {
     // Mutate away from defaults first.
     useSettingsStore.getState().setAccent("#123456");
     useSettingsStore.getState().setSurface("#abcdef");
     useSettingsStore.getState().setChatFontSize(18);
     useSettingsStore.getState().setChatFontFamily("Georgia");
-    useSettingsStore.getState().setLlmProvider("openai");
-    useSettingsStore.getState().setApiKey("sk-mutated");
     useSettingsStore.getState().setTheme("light");
 
     useSettingsStore.getState().resetToDefaults();
@@ -129,9 +124,10 @@ describe("useSettingsStore", () => {
     expect(state.surface).toBe("#10162a");
     expect(state.chatFontSize).toBe(10);
     expect(state.chatFontFamily).toBe(FONT_DEFAULT);
-    expect(state.llmProvider).toBe("anthropic");
-    expect(state.apiKey).toBe("");
     expect(state.theme).toBe("dark");
+    // llmProvider/apiKey no longer in the store (backend-persisted).
+    expect((state as any).llmProvider).toBeUndefined();
+    expect((state as any).apiKey).toBeUndefined();
 
     // Side effects re-applied.
     expect(document.documentElement.classList.contains("dark")).toBe(true);
@@ -183,9 +179,11 @@ describe("useSettingsStore", () => {
 
     // Reload the module to trigger readStoredSettings() migration.
     vi.resetModules();
-    return import("@/application/stores/useSettingsStore").then(({ useSettingsStore: reloaded }) => {
-      expect(reloaded.getState().chatFontFamily).toBe(FONT_DEFAULT);
-    });
+    return import("@/application/stores/useSettingsStore").then(
+      ({ useSettingsStore: reloaded }) => {
+        expect(reloaded.getState().chatFontFamily).toBe(FONT_DEFAULT);
+      },
+    );
   });
 
   it("migrates a legacy persisted chatFontFamily='var(--font-mono)' to the concrete mono stack", () => {
@@ -197,8 +195,10 @@ describe("useSettingsStore", () => {
     );
 
     vi.resetModules();
-    return import("@/application/stores/useSettingsStore").then(({ useSettingsStore: reloaded }) => {
-      expect(reloaded.getState().chatFontFamily).toBe(FONT_MONO);
-    });
+    return import("@/application/stores/useSettingsStore").then(
+      ({ useSettingsStore: reloaded }) => {
+        expect(reloaded.getState().chatFontFamily).toBe(FONT_MONO);
+      },
+    );
   });
 });

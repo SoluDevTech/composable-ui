@@ -1,10 +1,12 @@
 import axios from "axios";
 import { configRepository } from "@/infrastructure/config/configRepositoryInstance";
+import { redirectToSignIn } from "@/infrastructure/auth/oauth2Redirect";
 
 let cachedMcpBaseURL: string | null = null;
 
 export const mcpApiClient = axios.create({
   timeout: 30000,
+  withCredentials: true,
 });
 
 mcpApiClient.interceptors.request.use(async (config) => {
@@ -19,9 +21,14 @@ mcpApiClient.interceptors.request.use(async (config) => {
 mcpApiClient.interceptors.response.use(
   (response) => response,
   (error) => {
+    if (error.response?.status === 401) {
+      redirectToSignIn();
+    }
     if (error.response) {
       const detail = error.response.data?.detail || error.message;
-      return Promise.reject(new Error(detail));
+      const wrapped = new Error(detail) as Error & { status?: number };
+      wrapped.status = error.response.status;
+      return Promise.reject(wrapped);
     }
     return Promise.reject(error);
   },

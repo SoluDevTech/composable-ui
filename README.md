@@ -10,7 +10,7 @@ React frontend for interacting with the [composable-agents](https://github.com/s
 - **Thread history** -- Conversation threads grouped by agent in a sidebar
 - **RAG file browser** -- Browse MinIO folders and files with breadcrumb navigation and file metadata display. Create new folders (`CreateFolderDialog` triggered by the "New folder" button in the RAG browse tab) and delete files or folders via a trash-icon row action confirmed through a `ConfirmDeleteDialog`. Folder deletion is recursive and targets the MinIO prefix; file deletion targets a single object. Both calls hit the `POST /api/v1/files/folders` and `DELETE /api/v1/files` / `DELETE /api/v1/files/folders` endpoints exposed by `mcp-raganything`. Multi-file upload with drag-and-drop and folder upload support (see [File upload](#file-upload)).
 - **Tetris design system** -- Dark arcade visual language aligned with the Open Design `composable` maquette: magenta accent, Press Start 2P applied to all text (display, body, labels, buttons, nav, chat), block shadows, and `steps(2, end)` easing. Light theme toggle available from the Settings page.
-- **Settings** -- A dedicated `/settings` page (4 cards: Theme, Chat, LLM Provider, Reset) backed by a persisted Zustand store and aligned to the Open Design maquette via `data-od-id` QA attributes.
+- **Settings** -- A dedicated `/settings` page (5 cards: Theme, Typography, LLM Provider, API Keys, Reset) backed by a persisted Zustand store for appearance and the composable-agents backend for per-user credentials, aligned to the Open Design maquette via `data-od-id` QA attributes. A "Sign out" button in the page header clears the oauth2-proxy cookie session.
 
 ## Tech Stack
 
@@ -50,6 +50,7 @@ The app shell faithfully reproduces the maquette: a 220px left `Sidebar` (brand,
 - [Bun](https://bun.sh/) >= 1.0
 - [composable-agents](https://github.com/soludev/bricks/composable-agents) API running on port 8010
 - [mcp-raganything](https://github.com/soludev/bricks/mcp-raganything) API running on port 8020
+- [oauth2-proxy](https://oauth2-proxy.github.io/) fronting the backend(s), issuing a cookie session shared across the `.soludev.tech` subdomain (see [Authentication](#authentication))
 
 ## Installation
 
@@ -67,26 +68,58 @@ cp public/config.example.json public/config.json
 
 **`public/config.json`** - Application configuration:
 
-| Field           | Type                | Description                                                                                               |
-| --------------- | ------------------- | --------------------------------------------------------------------------------------------------------- |
-| `apiBaseUrl`    | `string`            | composable-agents API URL (e.g., `http://localhost:8010`)                                                 |
-| `ragApiBaseUrl` | `string` (optional) | RAG API URL for MinIO file browsing (e.g., `http://localhost:8020`). Defaults to `apiBaseUrl` if not set. |
-| `wsBaseUrl`     | `string`            | WebSocket URL for streaming (e.g., `ws://localhost:8010`)                                                 |
+| Field             | Type                | Description                                                                                                             |
+| ----------------- | ------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| `apiBaseUrl`      | `string`            | composable-agents API URL (e.g., `http://localhost:8010`)                                                               |
+| `ragApiBaseUrl`   | `string` (optional) | RAG API URL for MinIO file browsing (e.g., `http://localhost:8020`). Defaults to `apiBaseUrl` if not set.               |
+| `wsBaseUrl`       | `string`            | WebSocket URL for streaming (e.g., `ws://localhost:8010`)                                                               |
+| `mcpApiBaseUrl`   | `string` (optional) | MCP API base URL (e.g., `http://localhost:8030`). Defaults to empty string when no MCP registry is deployed.            |
 
 The config is validated with Zod on startup. Invalid configuration will show an error toast.
 
 **Note:** `config.json` is gitignored. Use `config.example.json` as a template.
 
+## Authentication
+
+Authentication is delegated to **[oauth2-proxy](https://oauth2-proxy.github.io/)** using a cookie session shared across the `.soludev.tech` subdomain. There is no client-side SDK or token in `localStorage`; the browser sends the cookie with every request and oauth2-proxy validates it server-side before forwarding to the backend.
+
+### Cookie-based credentials (`withCredentials`)
+
+All axios instances — `apiClient` (composable-agents), `ragApiClient` (mcp-raganything), and `mcpApiClient` (MCP registry) — are configured with `withCredentials: true`, so the oauth2-proxy session cookie travels with every cross-subdomain request. The SSE stream (`fetchEventSource` in `chatApi.ts`) opens with `credentials: "include"` for the same reason.
+
+### 401 → sign-in redirect
+
+Each axios instance has a response interceptor that, on a `401 Unauthorized`, calls `redirectToSignIn()` from `src/infrastructure/auth/oauth2Redirect.ts`. This navigates the browser to:
+
+```
+/oauth2/start?rd=<encodeURIComponent(currentUrl)>
+```
+
+The `rd` parameter bounces the user back to the page they were on once oauth2-proxy has re-established the session. A guard (`isOnAuthPage()`) prevents infinite redirect loops: if the current path is already `/oauth2/start` or `/oauth2/sign_out`, the redirect is a no-op. The SSE handler in `chatApi.ts` performs the same check when the event source returns a `401`.
+
+### Sign out
+
+The "Sign out" button in the `/settings` page header calls `redirectToSignOut()`, which navigates to `/oauth2/sign_out` and clears the cookie session. There is no client-side logout logic — the backend/oauth2-proxy owns session termination.
+
 ## Settings
 
-The `/settings` page groups user preferences into four cards, all wired to the persisted `useSettingsStore` (Zustand, `localStorage["composable-ui-settings"]`). The page and its controls carry `data-od-id` attributes for QA parity with the Open Design `composable` maquette.
+The `/settings` page groups user preferences into five cards. Appearance settings (Theme, Typography, Reset) are wired to the persisted `useSettingsStore` (Zustand, `localStorage["composable-ui-settings"]`); credential cards (LLM Provider, API Keys) persist to the composable-agents backend via per-user endpoints. The page and its controls carry `data-od-id` attributes for QA parity with the Open Design `composable` maquette.
 
 - **Theme** -- Accent color picker (hex input that live-updates the `--accent` CSS variable), surface shade select, and the dark/light mode switch (the toggle previously in the header now lives here).
-- **Chat** -- Message font size (range slider, 10-18px) and message font family (`Press Start 2P` / Monospace / Mono / Georgia).
-- **LLM Provider** -- Provider select (`anthropic` / `openai` / `google` / `mistral` / `local` / `ollama`) and an API key field (password type, stored in `localStorage` only — never sent to the backend).
-- **Reset** -- "Reset to Defaults" button that restores all settings to their initial values.
+- **Typography** -- Message font size (range slider, 10-18px) and message font family (`Press Start 2P` / Monospace / Mono / Georgia).
+- **LLM Provider** -- Provider select (`anthropic` / `openai` / `google` / `mistral` / `local` / `ollama`), base URL, and API key. Persisted to the backend (replaces the legacy `localStorage`-only `apiKey`/`llmProvider`):
+  - `GET /api/v1/settings/llm` — fetch the current user's settings; the API key is returned **masked** (e.g. `sk-***1234`), never in plaintext.
+  - `PUT /api/v1/settings/llm` — upsert `{ provider, base_url, api_key }`; the plaintext key is sent once over HTTPS and the backend stores only a hash.
+  - `DELETE /api/v1/settings/llm` — remove the current user's LLM settings.
+  - Implemented by `LlmSettingsCard` → `useLlmSettings` hook → `settingsApi` adapter (`ISettingsPort`). The `LlmSettings` entity lives in `src/domain/entities/settings/llmSettings.ts`.
+- **API Keys** -- Per-user personal access tokens (used as the secondary `X-API-Key` authentication mechanism alongside the oauth2-proxy cookie). A new "API Keys" card lists existing keys, lets you create a new one, and revoke any key:
+  - `GET /api/v1/api-keys` — list the current user's keys (`id`, `name`, `key_prefix`, `created_at`, `last_used_at`, `revoked_at`).
+  - `POST /api/v1/api-keys` with `{ name }` — create a key. The **plaintext is returned exactly once** in the response; `ApiKeysCard` shows it with a copy button and a "you won't see this again" warning. It is never persisted client-side.
+  - `DELETE /api/v1/api-keys/{id}` — revoke a key (confirmed via an `AlertDialog`).
+  - Implemented by `ApiKeysCard` → `useApiKeys` hook → `apiKeyApi` adapter (`IApiKeyPort`). The `ApiKeyView` / `CreatedApiKey` / `CreateApiKeyInput` entities live in `src/domain/entities/auth/apiKey.ts`.
+- **Reset** -- "Reset to Defaults" button that restores the appearance settings (Theme + Typography) to their initial values. This does **not** touch backend-stored LLM settings or API keys.
 
-The theme toggle is now owned by `useSettingsStore`; the legacy `useThemeStore` (`composable-ui-theme` key) is still present for boot-time anti-FOUC but is no longer driven by the UI and is slated for removal in a future refactor.
+The theme toggle is owned by `useSettingsStore`; the legacy `useThemeStore` (`composable-ui-theme` key) is still present for boot-time anti-FOUC but is no longer driven by the UI and is slated for removal in a future refactor. The legacy `apiKey`/`llmProvider` keys previously written to `localStorage` by `useSettingsStore` have been superseded by the backend-persisted LLM settings and are no longer used.
 
 ## Running
 
@@ -104,11 +137,32 @@ bun run preview
 ## Testing
 
 ```bash
-bun run test            # Run all tests
+bun run test            # Run all tests (119 files, 780 tests passing)
 bun run test:watch      # Watch mode
 bun run test:ui         # Vitest UI
 bun run test:coverage   # With coverage report
 ```
+
+The credential/auth flow is covered by:
+
+- `tests/unit/infrastructure/api/axiosInstances.test.ts` — `withCredentials: true` and 401 → `redirectToSignIn` on all three axios instances.
+- `tests/unit/infrastructure/api/auth/` — `apiKeyApi` adapter (list / create / revoke).
+- `tests/unit/infrastructure/api/settings/` — `settingsApi` adapter (get / upsert / delete LLM settings).
+- `tests/unit/application/hooks/auth/` — `useApiKeys` hook.
+- `tests/unit/application/hooks/settings/` — `useLlmSettings` hook.
+- `tests/unit/pages/SettingsPage.test.tsx` and `SettingsPage.apiKeys.test.tsx` — page-level coverage of the LLM Provider and API Keys cards.
+
+### Build verification
+
+```bash
+bun run build            # Vite production build (must succeed with no type errors)
+```
+
+### QA via the Docker stack
+
+The full stack (composable-agents + mcp-raganything + composable-ui + oauth2-proxy) can be brought up with the Docker Compose setup in `soludev-compose-apps/bricks`. The UI is served on **port 8030**.
+
+> **oauth2-proxy e2e limitation:** In local QA without a real upstream IdP and the `.soludev.tech` cookie domain, the cookie session cannot be fully exercised. The 401 → `/oauth2/start` redirect and `/oauth2/sign_out` flow are therefore validated against a deployed environment where oauth2-proxy is reachable; locally, hitting a protected endpoint will simply bounce to `/oauth2/start` (expected). The per-user LLM settings and API keys endpoints can be exercised directly against the backend when running outside the proxy.
 
 ## Linting and Formatting
 
@@ -149,21 +203,30 @@ src/
   domain/                  # Business entities and port interfaces
     entities/
       agent/               # AgentConfig, AgentConfigMetadata, McpServerConfig
+      auth/                # ApiKeyView, CreatedApiKey, CreateApiKeyInput (per-user API keys)
       chat/                # Message, Thread, ChatRequest, TraceEvent (6 types: human_message, ai_message, thinking, content, tool_call, tool_result), ThreadHistory
       config/              # AppConfig (Zod-validated)
       rag/                 # FileEntry, FolderEntry
+      settings/            # LlmSettings, UpsertLlmSettingsInput (per-user LLM provider settings)
     ports/
       agent/agentPort.ts   # Agent repository interface
+      auth/apiKeyPort.ts   # API key repository interface (IApiKeyPort)
       chat/chatPort.ts     # Chat repository interface
       config/configRepository.ts  # Config repository interface
       rag/ragFilePort.ts   # RAG file port interface
-  infrastructure/          # External adapters (API clients, config)
+      settings/settingsPort.ts    # LLM settings repository interface (ISettingsPort)
+  infrastructure/          # External adapters (API clients, config, auth helpers)
     api/
       agent/agentApi.ts    # Agent API adapter (axios)
-      chat/chatApi.ts      # Chat API adapter (axios + SSE, emits TraceEvent)
+      auth/apiKeyApi.ts    # API key adapter (IApiKeyPort → /api/v1/api-keys)
+      chat/chatApi.ts      # Chat API adapter (axios + SSE, credentials: "include", emits TraceEvent)
       rag/ragApi.ts        # RAG API adapter (axios)
-      axiosInstance.ts     # Shared axios instance
-      ragAxiosInstance.ts  # Separate axios client for RAG API
+      axiosInstance.ts     # Shared axios instance (withCredentials + 401 → /oauth2/start)
+      ragAxiosInstance.ts  # RAG axios client (withCredentials + 401 redirect)
+      mcpAxiosInstance.ts  # MCP axios client (withCredentials + 401 redirect)
+      settings/settingsApi.ts  # LLM settings adapter (ISettingsPort → /api/v1/settings/llm)
+    auth/
+      oauth2Redirect.ts    # redirectToSignIn / redirectToSignOut helpers (loop-guarded)
     config/
       configRepositoryInstance.ts  # Singleton config repository
       fileConfigRepository.ts       # File-based config implementation
@@ -173,22 +236,24 @@ src/
       chat/                # ChatInput, ChatMessage, MessageList, HITLReviewPanel, ThinkingBlock, ToolCallBadge, ToolResultBlock, SubagentPanel
       layout/              # AppShell, Sidebar (System section + Settings nav), MainHeader (mobile menu + title only), ThreadSidebar
       rag/                 # BreadcrumbBar, FileList, FileRow, FolderRow, CreateFolderDialog, ConfirmDeleteDialog, FileContentPanel, IndexActionMenu, QueryPanel, QueryResults, QueryOptions, RagTabBar, UploadButton, WorkspaceSelector
-      settings/            # SettingsPage cards (Theme, Chat, LLMProvider, Reset)
+      settings/            # LlmSettingsCard, ApiKeysCard (backend-persisted credential cards)
       shared/              # SegmentedToggle, StatusBadge, ToolTag
-      ui/                  # shadcn/ui primitives (Tetris-themed)
+      ui/                  # shadcn/ui primitives (Tetris-themed) incl. alert-dialog for revoke confirm
     hooks/
       agent/               # useAgents, useCreateAgent, useDeleteAgent, useUpdateAgent, useAgentConfig
+      auth/                # useApiKeys (list / create / revoke)
       chat/                # useThreads, useCreateThread, useDeleteThread, useThreadHistory, useSendMessage, useStreamChat
-      config/               # useConfig
+      config/              # useConfig
       rag/                 # useFolders, useFiles, useReadFile, useUploadFile, useCreateFolder, useDeleteFile, useDeleteFolder, useClassicalIndexFile, useClassicalIndexFolder, useClassicalQuery
+      settings/            # useLlmSettings (get / upsert / delete)
     pages/
       AgentsPage.tsx       # /agents route
       ChatPage.tsx         # /chat/:threadId? route
       RagPage.tsx          # /rag route
-      SettingsPage.tsx     # /settings route (Theme, Chat, LLM Provider, Reset cards)
+      SettingsPage.tsx     # /settings route (Theme, Typography, LLM Provider, API Keys, Reset cards + Sign out button)
     stores/
       useChatStore.ts      # Zustand store for chat state
-      useSettingsStore.ts  # Zustand store for Settings page (theme, accent, chat, LLM, persisted to "composable-ui-settings")
+      useSettingsStore.ts  # Zustand store for Settings page (theme, accent, typography — appearance only; credentials now backend-persisted)
       useThemeStore.ts     # Legacy Zustand store for theme (dark/light) + persistence (still used for boot-time anti-FOUC)
       useSidebarStore.ts   # Zustand store for mobile sidebar open/close
 public/
@@ -208,7 +273,7 @@ tests/
 | `/agents`          | AgentsPage   | List, create, view, and delete agents                                          |
 | `/chat/:threadId?` | ChatPage     | Chat with agents, streaming responses, HITL validation                         |
 | `/rag`             | RagPage      | Browse MinIO folders and files with breadcrumb navigation                      |
-| `/settings`        | SettingsPage | Theme, chat, LLM provider, and reset preferences (persisted to `localStorage`) |
+| `/settings`        | SettingsPage | Theme, typography, LLM provider (backend-persisted), API keys (backend-persisted), reset, and Sign out |
 
 ## Agent Configuration
 

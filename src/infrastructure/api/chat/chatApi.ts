@@ -6,6 +6,7 @@ import { TraceEventType } from "@/domain/entities/chat/traceEvent";
 import type { IChatPort } from "@/domain/ports/chat/chatPort";
 import { apiClient } from "@/infrastructure/api/axiosInstance";
 import { configRepository } from "@/infrastructure/config/configRepositoryInstance";
+import { redirectToSignIn } from "@/infrastructure/auth/oauth2Redirect";
 import { fetchEventSource } from "@microsoft/fetch-event-source";
 
 const VALID_EVENT_TYPES: ReadonlySet<string> = new Set(Object.values(TraceEventType));
@@ -87,6 +88,7 @@ export const chatApi: IChatPort = {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(request),
         signal: ctrl.signal,
+        credentials: "include",
         openWhenHidden: true,
         onmessage(ev) {
           if (ev.data === "[DONE]") return;
@@ -110,6 +112,9 @@ export const chatApi: IChatPort = {
           onComplete();
         },
         onerror(err) {
+          if (err && typeof err === "object" && "status" in err && err.status === 401) {
+            redirectToSignIn();
+          }
           onError(err instanceof Error ? err : new Error(String(err)));
           throw err;
         },

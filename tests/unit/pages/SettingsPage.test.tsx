@@ -1,9 +1,45 @@
 import { screen, within, fireEvent } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, it, expect, beforeEach } from "vitest";
+import { vi, describe, it, expect, beforeEach } from "vitest";
 import { renderWithProviders } from "../../utils/render";
 import SettingsPage from "@/application/pages/SettingsPage";
 import { useSettingsStore, FONT_DEFAULT } from "@/application/stores/useSettingsStore";
+
+// Mock the LLM settings hook so the LLM card renders synchronously with no
+// network call. The LLM provider/api_key are now backend-persisted.
+vi.mock("@/application/hooks/settings/useLlmSettings", () => ({
+  useLlmSettings: () => ({
+    settings: {
+      user_id: "u1",
+      provider: "openai",
+      base_url: "https://api.openai.com/v1",
+      api_key_masked: "sk-***test",
+      created_at: "2025-01-01T00:00:00Z",
+      updated_at: "2025-01-02T00:00:00Z",
+    },
+    isLoading: false,
+    isError: false,
+    error: null,
+    upsert: vi.fn().mockResolvedValue(undefined),
+    remove: vi.fn().mockResolvedValue(undefined),
+    isUpserting: false,
+    isRemoving: false,
+  }),
+}));
+
+// Mock the API keys hook so the API Keys card renders with no network call.
+vi.mock("@/application/hooks/auth/useApiKeys", () => ({
+  useApiKeys: () => ({
+    keys: [],
+    isLoading: false,
+    isError: false,
+    error: null,
+    create: vi.fn(),
+    revoke: vi.fn().mockResolvedValue(undefined),
+    isCreating: false,
+    isRevoking: false,
+  }),
+}));
 
 describe("SettingsPage", () => {
   beforeEach(() => {
@@ -13,12 +49,13 @@ describe("SettingsPage", () => {
     useSettingsStore.getState().resetToDefaults();
   });
 
-  it("renders all four card headings: Theme, Typography, LLM Provider, Reset", () => {
+  it("renders all card headings: Theme, Typography, LLM Provider, API Keys, Reset", () => {
     renderWithProviders(<SettingsPage />, { initialEntries: ["/settings"] });
 
     expect(screen.getByRole("heading", { name: /^theme$/i })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: /^typography$/i })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: /llm provider/i })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: /^api keys$/i })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: /^reset$/i })).toBeInTheDocument();
   });
 
@@ -47,15 +84,17 @@ describe("SettingsPage", () => {
     expect(within(typoCard as HTMLElement).getByText(/^font family$/i)).toBeInTheDocument();
   });
 
-  it("LLM Provider card has data-od-id=settings-llm and contains Provider and API Key labels", () => {
+  it("LLM Provider card has data-od-id=settings-llm and contains Provider and Base URL labels", () => {
     renderWithProviders(<SettingsPage />, { initialEntries: ["/settings"] });
 
     const llmCard = document.querySelector('[data-od-id="settings-llm"]');
     expect(llmCard).not.toBeNull();
     expect(llmCard).toBeInTheDocument();
 
-    expect(within(llmCard as HTMLElement).getByText(/provider/i)).toBeInTheDocument();
-    expect(within(llmCard as HTMLElement).getByText(/api key/i)).toBeInTheDocument();
+    // Use exact-match label queries to avoid the "LLM Provider" heading
+    // also matching /provider/i.
+    expect(within(llmCard as HTMLElement).getByText(/^provider$/i)).toBeInTheDocument();
+    expect(within(llmCard as HTMLElement).getByText(/base url/i)).toBeInTheDocument();
   });
 
   it("Reset card has data-od-id=settings-reset and contains a Reset to Defaults button", () => {
@@ -154,11 +193,11 @@ describe("SettingsPage", () => {
     expect(provider).toBeInTheDocument();
   });
 
-  it("renders the API key password input with data-od-id=settings-api-key, autoComplete=off and placeholder sk-...", () => {
+  it("renders the LLM API key password input with data-od-id=settings-llm-api-key, autoComplete=off and placeholder sk-...", () => {
     renderWithProviders(<SettingsPage />, { initialEntries: ["/settings"] });
 
     const apiKey = document.querySelector(
-      '[data-od-id="settings-api-key"]',
+      '[data-od-id="settings-llm-api-key"]',
     ) as HTMLInputElement | null;
     expect(apiKey).not.toBeNull();
     expect(apiKey).toBeInTheDocument();
@@ -175,13 +214,12 @@ describe("SettingsPage", () => {
     expect(resetBtn).toBeInTheDocument();
   });
 
-  it("clicking Reset to Defaults restores the store to default values", async () => {
+  it("clicking Reset to Defaults restores the appearance store to default values (LLM fields now backend-persisted)", async () => {
     const user = userEvent.setup();
 
-    // Mutate away from defaults first.
+    // Mutate appearance away from defaults first. LLM provider/apiKey were
+    // migrated to the backend and are no longer in the localStorage store.
     useSettingsStore.getState().setAccent("#abcdef");
-    useSettingsStore.getState().setLlmProvider("openai");
-    useSettingsStore.getState().setApiKey("sk-mutated");
 
     renderWithProviders(<SettingsPage />, { initialEntries: ["/settings"] });
 
@@ -192,8 +230,6 @@ describe("SettingsPage", () => {
     expect(state.surface).toBe("#10162a");
     expect(state.chatFontSize).toBe(10);
     expect(state.chatFontFamily).toBe(FONT_DEFAULT);
-    expect(state.llmProvider).toBe("anthropic");
-    expect(state.apiKey).toBe("");
     expect(state.theme).toBe("dark");
   });
 
