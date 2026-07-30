@@ -5,115 +5,164 @@ import { renderWithProviders } from "../../../utils/render";
 import HITLReviewPanel from "@/application/components/chat/HITLReviewPanel";
 import type { ToolCall } from "@/domain/entities/chat/message";
 
-const { mockSendMessageMutate } = vi.hoisted(() => {
+// ─── Mocked useSendMessage (component-level interaction tests) ──────────────
+// The component test mocks useSendMessage to control the mutate fn and to
+// simulate the error state. The invalidate-key contract is validated separately
+// in tests/unit/hooks/chat/useSendMessage.test.tsx against the real hook.
+const { mockSendMessageMutate, mockSendMessageState } = vi.hoisted(() => {
   return {
     mockSendMessageMutate: vi.fn(),
+    mockSendMessageState: {
+      isPending: false,
+      isError: false,
+      error: null as Error | null,
+    },
   };
 });
 
 vi.mock("@/application/hooks/chat/useSendMessage", () => ({
   useSendMessage: () => ({
     mutate: mockSendMessageMutate,
-    isPending: false,
+    isPending: mockSendMessageState.isPending,
+    isError: mockSendMessageState.isError,
+    error: mockSendMessageState.error,
   }),
 }));
 
-const toolCalls: ToolCall[] = [
+// ─── Assumed UI (for the implementer to align) ───────────────────────────────
+// The new multi-tool-call HITLReviewPanel:
+//   - Renders one decision row per tool call, each showing the tool name and
+//     its args, plus per-call Approve / Reject choice controls and (for reject)
+//     an optional reason input.
+//   - Has a single "Submit" button that fires ONE mutation with
+//     `{ decisions: [...] }` covering every tool call.
+//   - For the single-tool-call case the same flow applies (a list of 1); the
+//     Submit button is still used so the payload is always `{ decisions: [...] }`.
+//   - Displays `sendMessage.error` (the error message text) when the mutation
+//     fails, instead of silently swallowing it.
+// The tests below assert the PAYLOAD contract (the `decisions` array shape)
+// rather than precise DOM click sequences; if the implementer chooses slightly
+// different controls (e.g. a per-call select instead of two buttons) the test
+// selectors may need a minor tweak, but the payload assertions are the source
+// of truth.
+
+function resetMockState() {
+  mockSendMessageState.isPending = false;
+  mockSendMessageState.isError = false;
+  mockSendMessageState.error = null;
+}
+
+const singleToolCall: ToolCall[] = [
   {
     id: "tc-1",
-    name: "create_file",
-    args: { path: "/tmp/test.txt", content: "hello" },
+    name: "search",
+    args: { query: "hello" },
   },
+];
+
+const twoToolCalls: ToolCall[] = [
+  { id: "tc-a", name: "delete", args: { path: "/tmp/a.txt" } },
+  { id: "tc-b", name: "write", args: { path: "/tmp/b.txt", content: "x" } },
 ];
 
 describe("HITLReviewPanel", () => {
   beforeEach(() => {
     mockSendMessageMutate.mockClear();
+    resetMockState();
   });
 
-  it("renders tool name in idle state", () => {
-    renderWithProviders(<HITLReviewPanel toolCalls={toolCalls} threadId="thread-123" />);
+  // ─── Multi-tool-call rendering ─────────────────────────────────────────────
+  it("renders a decision row for each tool call", () => {
+    renderWithProviders(<HITLReviewPanel toolCalls={twoToolCalls} threadId="thread-123" />);
 
-    expect(screen.getByText("create_file")).toBeInTheDocument();
-  });
-
-  it("shows 'Review Data' button in idle state", () => {
-    renderWithProviders(<HITLReviewPanel toolCalls={toolCalls} threadId="thread-123" />);
-
-    expect(screen.getByRole("button", { name: /review data/i })).toBeInTheDocument();
+    expect(screen.getByText("delete")).toBeInTheDocument();
+    expect(screen.getByText("write")).toBeInTheDocument();
   });
 
   it("shows validation required text", () => {
-    renderWithProviders(<HITLReviewPanel toolCalls={toolCalls} threadId="thread-123" />);
+    renderWithProviders(<HITLReviewPanel toolCalls={singleToolCall} threadId="thread-123" />);
 
     expect(screen.getByText(/validation required/i)).toBeInTheDocument();
-  });
-
-  it("transitions to reviewing state when Review Data is clicked", async () => {
-    const user = userEvent.setup();
-
-    renderWithProviders(<HITLReviewPanel toolCalls={toolCalls} threadId="thread-123" />);
-
-    await user.click(screen.getByRole("button", { name: /review data/i }));
-
-    // In reviewing state, Approve and Reject buttons should appear
-    expect(screen.getByRole("button", { name: /approve/i })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /reject/i })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /cancel/i })).toBeInTheDocument();
-  });
-
-  it("shows tool args in reviewing state", async () => {
-    const user = userEvent.setup();
-
-    renderWithProviders(<HITLReviewPanel toolCalls={toolCalls} threadId="thread-123" />);
-
-    await user.click(screen.getByRole("button", { name: /review data/i }));
-
-    expect(screen.getByText(/\/tmp\/test\.txt/)).toBeInTheDocument();
-  });
-
-  it("calls sendMessage with approve action when Approve is clicked", async () => {
-    const user = userEvent.setup();
-
-    renderWithProviders(<HITLReviewPanel toolCalls={toolCalls} threadId="thread-123" />);
-
-    await user.click(screen.getByRole("button", { name: /review data/i }));
-    await user.click(screen.getByRole("button", { name: /approve/i }));
-
-    expect(mockSendMessageMutate).toHaveBeenCalledWith({
-      tool_call_id: "tc-1",
-      action: "approve",
-    });
-  });
-
-  it("transitions to rejecting state on first Reject click", async () => {
-    const user = userEvent.setup();
-
-    renderWithProviders(<HITLReviewPanel toolCalls={toolCalls} threadId="thread-123" />);
-
-    await user.click(screen.getByRole("button", { name: /review data/i }));
-    await user.click(screen.getByRole("button", { name: /^reject$/i }));
-
-    // Should now show "Confirm Reject" and a reason input
-    expect(screen.getByRole("button", { name: /confirm reject/i })).toBeInTheDocument();
-    expect(screen.getByPlaceholderText(/reason for rejection/i)).toBeInTheDocument();
-  });
-
-  it("returns to idle state when Cancel is clicked", async () => {
-    const user = userEvent.setup();
-
-    renderWithProviders(<HITLReviewPanel toolCalls={toolCalls} threadId="thread-123" />);
-
-    await user.click(screen.getByRole("button", { name: /review data/i }));
-    await user.click(screen.getByRole("button", { name: /cancel/i }));
-
-    // Should be back to idle with "Review Data" button
-    expect(screen.getByRole("button", { name: /review data/i })).toBeInTheDocument();
   });
 
   it("handles empty tool calls gracefully", () => {
     renderWithProviders(<HITLReviewPanel toolCalls={[]} threadId="thread-123" />);
 
     expect(screen.getByText("Unknown tool")).toBeInTheDocument();
+  });
+
+  // ─── Single tool call: approve ─────────────────────────────────────────────
+  it("single tool call: approve sends a decisions list of 1", async () => {
+    const user = userEvent.setup();
+
+    renderWithProviders(<HITLReviewPanel toolCalls={singleToolCall} threadId="thread-123" />);
+
+    // Open the review surface (existing "Review Data" entry point is kept).
+    await user.click(screen.getByRole("button", { name: /review data/i }));
+
+    // Choose approve for the single call and submit.
+    await user.click(screen.getByRole("button", { name: /approve/i }));
+    await user.click(screen.getByRole("button", { name: /submit/i }));
+
+    expect(mockSendMessageMutate).toHaveBeenCalledWith({
+      decisions: [{ tool_call_id: "tc-1", action: "approve" }],
+    });
+  });
+
+  // ─── Single tool call: reject with reason ──────────────────────────────────
+  it("reject with reason sends decisions with the reason", async () => {
+    const user = userEvent.setup();
+
+    renderWithProviders(<HITLReviewPanel toolCalls={singleToolCall} threadId="thread-123" />);
+
+    await user.click(screen.getByRole("button", { name: /review data/i }));
+    await user.click(screen.getByRole("button", { name: /reject/i }));
+
+    const reasonInput = screen.getByPlaceholderText(/reason for rejection/i);
+    await user.type(reasonInput, "Too risky");
+
+    await user.click(screen.getByRole("button", { name: /confirm reject/i }));
+
+    expect(mockSendMessageMutate).toHaveBeenCalledWith({
+      decisions: [{ tool_call_id: "tc-1", action: "reject", reason: "Too risky" }],
+    });
+  });
+
+  // ─── Multi tool calls: submit sends all decisions ─────────────────────────
+  it("multi tool calls: submit sends all decisions in one mutation", async () => {
+    const user = userEvent.setup();
+
+    renderWithProviders(<HITLReviewPanel toolCalls={twoToolCalls} threadId="thread-123" />);
+
+    await user.click(screen.getByRole("button", { name: /review data/i }));
+
+    // First call: approve.
+    await user.click(screen.getByRole("button", { name: /approve.*delete/i }));
+
+    // Second call: reject with a reason.
+    await user.click(screen.getByRole("button", { name: /reject.*write/i }));
+    const reasonInput = screen.getByPlaceholderText(/reason for rejection/i);
+    await user.type(reasonInput, "Unsafe");
+
+    // Single Submit sends both decisions in one payload.
+    await user.click(screen.getByRole("button", { name: /submit/i }));
+
+    expect(mockSendMessageMutate).toHaveBeenCalledWith({
+      decisions: [
+        { tool_call_id: "tc-a", action: "approve" },
+        { tool_call_id: "tc-b", action: "reject", reason: "Unsafe" },
+      ],
+    });
+  });
+
+  // ─── Error display (no longer silent) ─────────────────────────────────────
+  it("displays the mutation error when send fails", () => {
+    mockSendMessageState.isError = true;
+    mockSendMessageState.error = new Error("boom");
+
+    renderWithProviders(<HITLReviewPanel toolCalls={singleToolCall} threadId="thread-123" />);
+
+    // The error message must be visible somewhere in the panel (not swallowed).
+    expect(screen.getByText(/boom/i)).toBeInTheDocument();
   });
 });

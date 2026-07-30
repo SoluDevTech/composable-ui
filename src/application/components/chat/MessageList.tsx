@@ -162,6 +162,7 @@ export default function MessageList({
           agentName={agentName}
           threadId={threadId}
           events={entry.events}
+          isLast={idx === entries.length - 1}
         />
       ))}
 

@@ -12,7 +12,7 @@ export function useSendMessage(threadId: string | null) {
     },
     onSuccess: () => {
       if (threadId) {
-        queryClient.invalidateQueries({ queryKey: ["messages", threadId] });
+        queryClient.invalidateQueries({ queryKey: ["history", threadId] });
       }
     },
   });

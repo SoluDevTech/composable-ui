@@ -20,6 +20,7 @@ interface ChatMessageProps {
   agentName: string;
   threadId?: string;
   events?: TraceEvent[];
+  isLast?: boolean;
 }
 
 interface SubagentTimeline {
@@ -89,7 +90,13 @@ function formatTimestamp(ts: string): string {
   }).format(date);
 }
 
-function ChatMessageImpl({ message, agentName, threadId, events }: Readonly<ChatMessageProps>) {
+function ChatMessageImpl({
+  message,
+  agentName,
+  threadId,
+  events,
+  isLast,
+}: Readonly<ChatMessageProps>) {
   const isHuman = message.role === MessageRole.HUMAN;
   const isAi = message.role === MessageRole.AI;
   const isAwaitingHitl = message.status === MessageStatus.AWAITING_HITL;
@@ -101,6 +108,10 @@ function ChatMessageImpl({ message, agentName, threadId, events }: Readonly<Chat
   const parentThinkingText = useMemo(() => (events ? parentThinking(events) : ""), [events]);
   const parentTools = useMemo(
     () => (events ? parentToolEvents(events) : { toolCalls: [], toolResults: [] }),
+    [events],
+  );
+  const hitlDecisionEvents = useMemo(
+    () => (events ? events.filter((e) => e.type === TraceEventType.HITL_DECISION) : []),
     [events],
   );
 
@@ -160,6 +171,27 @@ function ChatMessageImpl({ message, agentName, threadId, events }: Readonly<Chat
               <div className="mt-2 flex flex-col gap-2" data-od-id="message-timeline">
                 <ThinkingBlock text={parentThinkingText} source={null} />
 
+                {hitlDecisionEvents.map((ev) => {
+                  const action = ev.name ?? "";
+                  let label = "✎ Edited";
+                  let className = "border-accent text-accent";
+                  if (action === "approve") {
+                    label = "✓ Approved";
+                    className = "border-success text-success";
+                  } else if (action === "reject") {
+                    label = ev.content ? `✗ Rejected: ${ev.content}` : "✗ Rejected";
+                    className = "border-danger text-danger";
+                  }
+                  return (
+                    <span
+                      key={ev.id}
+                      className={`inline-block w-fit border bg-surface px-2 py-1 font-mono text-xs ${className}`}
+                    >
+                      {label}
+                    </span>
+                  );
+                })}
+
                 {parentTools.toolCalls.map((call) => (
                   <ToolCallBadge
                     key={call.id}
@@ -191,7 +223,7 @@ function ChatMessageImpl({ message, agentName, threadId, events }: Readonly<Chat
             )}
           </div>
 
-          {isAwaitingHitl && message.tool_calls?.length && threadId && (
+          {isAwaitingHitl && !!message.tool_calls?.length && !!threadId && isLast && (
             <HITLReviewPanel toolCalls={message.tool_calls} threadId={threadId} />
           )}
         </article>
@@ -213,7 +245,8 @@ const ChatMessage = memo(ChatMessageImpl, (prev, next) => {
     prev.agentName === next.agentName &&
     prev.threadId === next.threadId &&
     prev.message === next.message &&
-    prev.events === next.events
+    prev.events === next.events &&
+    prev.isLast === next.isLast
   );
 });
 
