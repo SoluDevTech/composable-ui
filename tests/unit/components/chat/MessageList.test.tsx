@@ -8,7 +8,7 @@ import {
   createTraceEvent,
   createMessage,
 } from "../../../fixtures/external";
-import { MessageRole } from "@/domain/entities/chat/message";
+import { MessageRole, MessageStatus } from "@/domain/entities/chat/message";
 import { TraceEventType } from "@/domain/entities/chat/traceEvent";
 import { useChatStore } from "@/application/stores/useChatStore";
 
@@ -105,5 +105,72 @@ describe("MessageList", () => {
     renderWithProviders(<MessageList threadId="thread-1" agentName="test-agent" />);
 
     expect(screen.getByText(/Bold streaming/i)).toBeInTheDocument();
+  });
+
+  // ─── HITL refactor: isLast gating (no stale panel on older messages) ──────
+  // Contract: MessageList passes `isLast={idx === entries.length - 1}` to each
+  // ChatMessage rendered from `entries` (NOT for the pending user message or
+  // the streaming message). Combined with ChatMessage's `isLast` gate, an
+  // older awaiting_hitl message must NOT render a HITL panel once the
+  // conversation has continued. We assert via `data-od-id="hitl-panel"`.
+  function hitlPanelCount(container: HTMLElement): number {
+    return container.querySelectorAll('[data-od-id="hitl-panel"]').length;
+  }
+
+  it("renders the HITL panel on the last message when it is awaiting_hitl", () => {
+    mockHistory = createThreadHistory({
+      turns: [
+        createTurn({
+          human_message: createMessage({ role: MessageRole.HUMAN, content: "first" }),
+          ai_message: createMessage({
+            role: MessageRole.AI,
+            content: "needs review",
+            status: MessageStatus.AWAITING_HITL,
+            tool_calls: [{ id: "tc-1", name: "x", args: {} }],
+          }),
+          events: [],
+        }),
+      ],
+    });
+
+    const { container } = renderWithProviders(
+      <MessageList threadId="thread-1" agentName="test-agent" />,
+    );
+
+    expect(hitlPanelCount(container)).toBe(1);
+  });
+
+  it("does NOT render a HITL panel on an earlier awaiting_hitl message when the last is completed", () => {
+    mockHistory = createThreadHistory({
+      turns: [
+        createTurn({
+          human_message: createMessage({ role: MessageRole.HUMAN, content: "first" }),
+          ai_message: createMessage({
+            role: MessageRole.AI,
+            content: "older awaiting",
+            status: MessageStatus.AWAITING_HITL,
+            tool_calls: [{ id: "tc-old", name: "x", args: {} }],
+          }),
+          events: [],
+        }),
+        createTurn({
+          human_message: createMessage({ role: MessageRole.HUMAN, content: "second" }),
+          ai_message: createMessage({
+            role: MessageRole.AI,
+            content: "done",
+            status: MessageStatus.COMPLETED,
+          }),
+          events: [],
+        }),
+      ],
+    });
+
+    const { container } = renderWithProviders(
+      <MessageList threadId="thread-1" agentName="test-agent" />,
+    );
+
+    // The older awaiting_hitl message is NOT the last entry, so its panel must
+    // be suppressed by the isLast gate.
+    expect(hitlPanelCount(container)).toBe(0);
   });
 });

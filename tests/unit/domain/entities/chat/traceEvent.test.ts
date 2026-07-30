@@ -7,7 +7,7 @@ import {
 import { createTraceEvent, createTurn, createThreadHistory } from "../../../../fixtures/external";
 
 describe("TraceEventType", () => {
-  it("exposes the six backend event types", () => {
+  it("exposes the backend event types", () => {
     expect(TraceEventType.HUMAN_MESSAGE).toBe("human_message");
     expect(TraceEventType.AI_MESSAGE).toBe("ai_message");
     expect(TraceEventType.THINKING).toBe("thinking");
@@ -16,8 +16,16 @@ describe("TraceEventType", () => {
     expect(TraceEventType.TOOL_RESULT).toBe("tool_result");
   });
 
-  it("has exactly six enum members", () => {
-    expect(Object.keys(TraceEventType)).toHaveLength(6);
+  // ─── HITL refactor: new HITL_DECISION event type ─────────────────────────
+  // Contract: a new enum member `HITL_DECISION = "hitl_decision"` is added so
+  // that chatApi's `Object.values(TraceEventType)`-driven VALID_EVENT_TYPES
+  // accepts HITL decision trace events streamed from the backend.
+  it("exposes the HITL_DECISION event type", () => {
+    expect(TraceEventType.HITL_DECISION).toBe("hitl_decision");
+  });
+
+  it("has exactly seven enum members", () => {
+    expect(Object.keys(TraceEventType)).toHaveLength(7);
   });
 });
 
@@ -85,6 +93,7 @@ describe("Message turn_id field", () => {
       [TraceEventType.CONTENT]: ev,
       [TraceEventType.TOOL_CALL]: ev,
       [TraceEventType.TOOL_RESULT]: ev,
+      [TraceEventType.HITL_DECISION]: ev,
     };
     expect(byType[TraceEventType.TOOL_CALL]).toBe(ev);
   });
