@@ -28,6 +28,7 @@ describe("FileConfigRepository", () => {
         oauth2ProxyUrl: "",
         logtoUrl: "",
         logtoAppId: "",
+        builtInMcpServers: [],
       };
 
       vi.mocked(fetch).mockResolvedValue({
@@ -115,6 +116,7 @@ describe("FileConfigRepository", () => {
         oauth2ProxyUrl: "",
         logtoUrl: "",
         logtoAppId: "",
+        builtInMcpServers: [],
       };
       vi.mocked(fetch).mockResolvedValue({
         ok: true,

@@ -4,18 +4,19 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { renderWithProviders } from "../../../utils/render";
 import ChatInput from "@/application/components/chat/ChatInput";
 
-const { mockStream, mockStoreState } = vi.hoisted(() => {
+const { mockStream, mockCancel, mockStoreState } = vi.hoisted(() => {
   const mockStream = vi.fn();
+  const mockCancel = vi.fn();
   const mockStoreState = {
     isStreaming: false,
   };
-  return { mockStream, mockStoreState };
+  return { mockStream, mockCancel, mockStoreState };
 });
 
 vi.mock("@/application/hooks/chat/useStreamChat", () => ({
   useStreamChat: () => ({
     stream: mockStream,
-    cancel: vi.fn(),
+    cancel: mockCancel,
   }),
 }));
 
@@ -30,6 +31,7 @@ vi.mock("@/application/stores/useChatStore", () => {
 describe("ChatInput", () => {
   beforeEach(() => {
     mockStream.mockClear();
+    mockCancel.mockClear();
     mockStoreState.isStreaming = false;
   });
 
@@ -92,6 +94,29 @@ describe("ChatInput", () => {
 
     const submitButton = screen.getByRole("button", { name: /send/i });
     expect(submitButton).toBeDisabled();
+  });
+
+  it("interrupts the stream when clicking the Stop button while streaming", async () => {
+    const user = userEvent.setup();
+    mockStoreState.isStreaming = true;
+
+    renderWithProviders(<ChatInput threadId="thread-1" />);
+
+    const stopButton = screen.getByRole("button", { name: /stop streaming/i });
+    expect(stopButton).toBeEnabled();
+    await user.click(stopButton);
+
+    expect(mockCancel).toHaveBeenCalledOnce();
+    expect(mockStream).not.toHaveBeenCalled();
+  });
+
+  it("keeps the Stop button enabled while streaming (no disabled state)", () => {
+    mockStoreState.isStreaming = true;
+
+    renderWithProviders(<ChatInput threadId="thread-1" />);
+
+    const stopButton = screen.getByRole("button", { name: /stop streaming/i });
+    expect(stopButton).toBeEnabled();
   });
 
   it("disables textarea when isStreaming is true", () => {

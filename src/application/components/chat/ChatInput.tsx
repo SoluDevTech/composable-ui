@@ -12,13 +12,20 @@ interface ChatInputProps {
 export default function ChatInput({ threadId }: Readonly<ChatInputProps>) {
   const [input, setInput] = useState("");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const { stream } = useStreamChat(threadId);
+  const { stream, cancel } = useStreamChat(threadId);
   const isStreaming = useChatStore((s) => s.isStreaming);
 
   function handleSubmit(e?: { preventDefault: () => void }) {
     e?.preventDefault();
+    // Pendant le stream, le bouton devient un Stop : abort du flux en cours.
+    // (aucun branchement de cancel avant — le bouton Stop était décoratif)
+    if (isStreaming) {
+      cancel();
+      return;
+    }
+
     const trimmed = input.trim();
-    if (!trimmed || isStreaming) return;
+    if (!trimmed) return;
 
     stream({ message: trimmed });
     setInput("");
@@ -37,8 +44,6 @@ export default function ChatInput({ threadId }: Readonly<ChatInputProps>) {
     el.style.height = "auto";
     el.style.height = `${Math.min(el.scrollHeight, 120)}px`;
   }
-
-  const canSend = input.trim().length > 0 && !isStreaming;
 
   return (
     <div className="shrink-0 border-t border-border bg-surface p-4" data-od-id="chat-input">
@@ -61,8 +66,10 @@ export default function ChatInput({ threadId }: Readonly<ChatInputProps>) {
               type="submit"
               variant="default"
               size="icon"
-              disabled={!canSend}
-              aria-label="Send"
+              // Enabled pendant le stream (clic = Stop), disabled seulement
+              // si input vide hors stream.
+              disabled={!isStreaming && input.trim().length === 0}
+              aria-label={isStreaming ? "Stop streaming" : "Send"}
               className={cn(isStreaming && "btn-pulse")}
             >
               {isStreaming ? (
