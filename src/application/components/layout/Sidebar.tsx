@@ -4,6 +4,7 @@ import {
   BookOpen,
   Bot,
   Database,
+  LogOut,
   MessagesSquare,
   Server,
   Settings,
@@ -13,6 +14,8 @@ import {
 import { cn } from "@/application/lib/utils";
 import { useSidebarStore } from "@/application/stores/useSidebarStore";
 import { useCurrentUser } from "@/application/hooks/auth/useCurrentUser";
+import { useLogout } from "@/application/hooks/config/useConfig";
+import { Button } from "@/application/components/ui/button";
 import { getDisplayName, getInitials } from "@/domain/entities/auth/currentUser";
 
 interface NavItem {
@@ -97,6 +100,7 @@ function SidebarFooter() {
   const displayName = getDisplayName(profile);
   const initials = isLoading ? "…" : getInitials(displayName);
   const label = isLoading ? "Loading…" : displayName;
+  const { logout, canLogout } = useLogout();
 
   return (
     <div className="flex items-center gap-3 border-t border-border px-5 py-4">
@@ -107,6 +111,18 @@ function SidebarFooter() {
         <div className="truncate text-sm font-semibold text-fg">{label}</div>
         <div className="font-mono text-xs text-muted">Operator</div>
       </div>
+      {canLogout && (
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon"
+          onClick={logout}
+          aria-label="Sign out"
+          title="Sign out"
+        >
+          <LogOut className="h-4 w-4" aria-hidden="true" />
+        </Button>
+      )}
     </div>
   );
 }
