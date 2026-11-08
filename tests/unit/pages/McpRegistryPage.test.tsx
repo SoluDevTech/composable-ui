@@ -1,4 +1,5 @@
-import { screen } from "@testing-library/react";
+import { screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { describe, it, expect, vi } from "vitest";
 import { renderWithProviders } from "../../utils/render";
 import McpRegistryPage from "@/application/pages/McpRegistryPage";
@@ -59,6 +60,28 @@ const { registryState } = vi.hoisted(() => ({
 
 vi.mock("@/application/hooks/mcpServer/useMcpRegistry", () => ({
   useMcpRegistry: () => registryState,
+}));
+
+// Hoisted config state: the page reads the built-in MCP servers from the
+// app config (config.json). Mutable per test.
+const { configState } = vi.hoisted(() => ({
+  configState: {
+    data: {
+      apiBaseUrl: "http://api.test.com",
+      wsBaseUrl: "ws://api.test.com",
+      ragApiBaseUrl: "https://ragany.test.com",
+      mcpApiBaseUrl: "",
+      oauth2ProxyUrl: "",
+      logtoUrl: "",
+      logtoAppId: "",
+      builtInMcpServers: [] as { name: string; url: string; transport: string }[],
+    },
+  },
+}));
+
+vi.mock("@/application/hooks/config/useConfig", () => ({
+  useConfig: () => configState,
+  useLogout: () => ({ logout: vi.fn(), canLogout: false }),
 }));
 
 vi.mock("@/application/hooks/mcpServer/useCreateMcpServer", () => ({
@@ -173,5 +196,56 @@ describe("McpRegistryPage", () => {
     expect(createCard).not.toBeNull();
     expect(createCard).toBeInTheDocument();
     expect(screen.getByText("New MCP Server")).toBeInTheDocument();
+  });
+
+  it("hides the built-in section when the config lists no built-in MCP servers", () => {
+    registryState.data = servers;
+    configState.data.builtInMcpServers = [];
+    renderWithProviders(<McpRegistryPage />, { initialEntries: ["/mcp-registry"] });
+
+    expect(document.querySelector('[data-od-id="mcp-built-in-section"]')).toBeNull();
+  });
+
+  it("renders one read-only card per built-in MCP server from the config", () => {
+    registryState.data = [];
+    configState.data.builtInMcpServers = [
+      { name: "raganything-files", url: "https://ragany.test.com/files/mcp", transport: "http" },
+      {
+        name: "raganything-classical",
+        url: "https://ragany.test.com/classical/mcp",
+        transport: "http",
+      },
+    ];
+    renderWithProviders(<McpRegistryPage />, { initialEntries: ["/mcp-registry"] });
+
+    const section = document.querySelector('[data-od-id="mcp-built-in-section"]');
+    expect(section).not.toBeNull();
+    expect(screen.getByText("raganything-files")).toBeInTheDocument();
+    expect(screen.getByText("https://ragany.test.com/files/mcp")).toBeInTheDocument();
+    expect(screen.getByText("raganything-classical")).toBeInTheDocument();
+    expect(screen.getByText("https://ragany.test.com/classical/mcp")).toBeInTheDocument();
+    // One Register button per built-in server.
+    expect(screen.getAllByRole("button", { name: /register/i })).toHaveLength(2);
+  });
+
+  it("opens the create dialog prefilled when clicking Register on a built-in card", async () => {
+    const user = userEvent.setup();
+    registryState.data = [];
+    configState.data.builtInMcpServers = [
+      { name: "raganything-files", url: "https://ragany.test.com/files/mcp", transport: "http" },
+    ];
+    renderWithProviders(<McpRegistryPage />, { initialEntries: ["/mcp-registry"] });
+
+    await user.click(screen.getByRole("button", { name: /register/i }));
+
+    const dlg = document.querySelector('[role=dialog]');
+    expect(dlg).not.toBeNull();
+    // Prefilled name + URL, create mode (no "Save" edit label).
+    expect((dlg?.querySelector("#mcp-name") as HTMLInputElement | null)?.value).toBe(
+      "raganything-files",
+    );
+    expect((dlg?.querySelector("#mcp-url") as HTMLInputElement | null)?.value).toBe(
+      "https://ragany.test.com/files/mcp",
+    );
   });
 });

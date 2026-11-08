@@ -32,6 +32,8 @@ interface CreateMcpServerDialogProps {
   readonly open: boolean;
   readonly onOpenChange: (open: boolean) => void;
   readonly editServer?: RegisteredMcpServer;
+  /** Prefills the form in create mode (e.g. a built-in MCP server card). */
+  readonly prefill?: Partial<RegisteredMcpServer>;
 }
 
 const FORM_ID = "mcp-server-form";
@@ -50,17 +52,19 @@ export function CreateMcpServerDialog({
   open,
   onOpenChange,
   editServer,
+  prefill,
 }: Readonly<CreateMcpServerDialogProps>) {
   const isEdit = Boolean(editServer);
+  const base = editServer ?? prefill;
   const [sourceType, setSourceType] = useState<McpSourceType>(
-    editServer?.source_type ?? "external",
+    base?.source_type ?? "external",
   );
-  const [name, setName] = useState(editServer?.name ?? "");
-  const [url, setUrl] = useState(editServer?.url ?? "");
-  const [openapiUrl, setOpenapiUrl] = useState(editServer?.openapi_url ?? "");
-  const [headers, setHeaders] = useState<Record<string, string>>(editServer?.headers ?? {});
-  const [env, setEnv] = useState<Record<string, string>>(editServer?.env ?? {});
-  const [authToken, setAuthToken] = useState(editServer?.auth_token ?? "");
+  const [name, setName] = useState(base?.name ?? "");
+  const [url, setUrl] = useState(base?.url ?? "");
+  const [openapiUrl, setOpenapiUrl] = useState(base?.openapi_url ?? "");
+  const [headers, setHeaders] = useState<Record<string, string>>(base?.headers ?? {});
+  const [env, setEnv] = useState<Record<string, string>>(base?.env ?? {});
+  const [authToken, setAuthToken] = useState(base?.auth_token ?? "");
   const [validationMessage, setValidationMessage] = useState<string | null>(null);
   const [validationError, setValidationError] = useState<string | null>(null);
 
