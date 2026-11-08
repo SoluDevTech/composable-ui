@@ -28,9 +28,9 @@ jobs:
       - name: Run tests with coverage
         run: bun run test --coverage
 
-      - name: Install Trivy (Docker Hub fallback — GitHub releases CDN 503 le 8 nov)
+      - name: Install Trivy (GHCR fallback — GitHub releases CDN 503 le 8 nov)
         run: |
-          cid=$(docker create --name trivy-aux docker.io/aquasecurity/trivy:0.69.3)
+          cid=$(docker create --name trivy-aux ghcr.io/aquasecurity/trivy:0.69.3)
           docker cp trivy-aux:/usr/local/bin/trivy /usr/local/bin/trivy
           docker rm -f trivy-aux
           chmod +x /usr/local/bin/trivy
