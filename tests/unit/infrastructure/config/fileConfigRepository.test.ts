@@ -25,6 +25,9 @@ describe("FileConfigRepository", () => {
         wsBaseUrl: "ws://api.test.com",
         ragApiBaseUrl: "",
         mcpApiBaseUrl: "",
+        oauth2ProxyUrl: "",
+        logtoUrl: "",
+        logtoAppId: "",
       };
 
       vi.mocked(fetch).mockResolvedValue({
@@ -109,6 +112,9 @@ describe("FileConfigRepository", () => {
         wsBaseUrl: "ws://api.test.com",
         ragApiBaseUrl: "",
         mcpApiBaseUrl: "",
+        oauth2ProxyUrl: "",
+        logtoUrl: "",
+        logtoAppId: "",
       };
       vi.mocked(fetch).mockResolvedValue({
         ok: true,

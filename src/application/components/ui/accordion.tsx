@@ -12,7 +12,13 @@ const AccordionItem = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <AccordionPrimitive.Item
     ref={ref}
-    className={cn("border-b border-border", className)}
+    className={cn(
+      "border-b border-border transition-colors duration-fast ease-standard",
+      // Section ouverte : clairement visible (bordure + fond léger), sinon
+      // le highlight ne se distingue pas du texte mute sur thème sombre.
+      "border-l-2 border-l-transparent data-[state=open]:border-l-accent data-[state=open]:bg-surface-warm/40",
+      className,
+    )}
     {...props}
   />
 ));
@@ -22,11 +28,14 @@ const AccordionTrigger = React.forwardRef<
   React.ElementRef<typeof AccordionPrimitive.Trigger>,
   React.ComponentPropsWithoutRef<typeof AccordionPrimitive.Trigger>
 >(({ className, children, ...props }, ref) => (
-  <AccordionPrimitive.Header className="flex">
+  <AccordionPrimitive.Header className="flex rounded-sm">
     <AccordionPrimitive.Trigger
       ref={ref}
       className={cn(
-        "flex flex-1 items-center justify-between py-4 text-fg font-display uppercase tracking-[0.06em] text-sm transition-all hover:bg-surface-warm/60 hover:text-accent focus-visible:outline-none focus-visible:shadow-focus [&[data-state=open]>svg]:rotate-180",
+        // Pleine largeur + padding horizontal : le surlignage hover/open
+        // s'étend au-delà du texte (sinon il paraît « mordu » aux deux bout,
+        // collé aux champs du formulaire sans respiration).
+        "-mx-3 flex flex-1 items-center justify-between rounded-sm px-3 py-4 text-fg font-display uppercase tracking-[0.06em] text-sm transition-all hover:bg-surface-warm/60 hover:text-accent focus-visible:outline-none focus-visible:shadow-focus data-[state=open]:bg-surface-warm/40 [&[data-state=open]>svg]:rotate-180",
         className,
       )}
       {...props}
