@@ -68,6 +68,14 @@ jobs:
           platforms: linux/amd64
           tags: kaiohz/pickpro:composable-ui-scan
 
+      - name: Install Trivy (GHCR fallback — GitHub releases CDN 503 le 8 nov)
+        run: |
+          cid=$(docker create --name trivy-aux ghcr.io/aquasecurity/trivy:0.69.3)
+          docker cp trivy-aux:/usr/local/bin/trivy /usr/local/bin/trivy
+          docker rm -f trivy-aux
+          chmod +x /usr/local/bin/trivy
+          trivy --version
+
       - name: Trivy Image Scan (report)
         uses: aquasecurity/trivy-action@57a97c7e7821a5776cebc9bb87c984fa69cba8f1
         with:
@@ -77,6 +85,7 @@ jobs:
           exit-code: '0'
           trivy-config: trivy.yaml
           trivy-version: 'v0.69.3'
+          skip-setup-trivy: true
 
       - name: Trivy Image Scan (CRITICAL gate)
         uses: aquasecurity/trivy-action@57a97c7e7821a5776cebc9bb87c984fa69cba8f1
@@ -87,6 +96,7 @@ jobs:
           exit-code: '1'
           trivy-config: trivy.yaml
           trivy-version: 'v0.69.3'
+          skip-setup-trivy: true
 
       - name: Build and push Docker image (multi-platform)
         uses: docker/build-push-action@v5
